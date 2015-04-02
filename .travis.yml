@@ -1,0 +1,23 @@
+language: php
+
+php:
+  - 5.3
+  - 5.4
+  - 5.5
+  - 5.6
+  - hhvm
+  - nightly
+
+sudo: false
+
+before_script:
+  - COMPOSER_ROOT_VERSION=dev-master composer --prefer-source --dev install
+
+after_script:
+  - wget https://scrutinizer-ci.com/ocular.phar
+  - php ocular.phar code-coverage:upload --format=php-clover coverage.xml
+
+matrix:
+  allow_failures:
+    - php: 5.3
+    - php: nightly

@@ -1,0 +1,23 @@
+{
+    "name": "thunderer/shortcode",
+    "description": "Framework and library agnostic shortcode engine for PHP",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tomasz Kowalczyk",
+            "email": "tomasz@kowalczyk.cc"
+        }
+    ],
+    "require": {
+        "php": ">=5.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Thunder\\Shortcode\\": "src/",
+            "Thunder\\Shortcode\\Tests\\": "tests/"
+        }
+    }
+}
