@@ -25,38 +25,31 @@ class Shortcode
 
     public function parse($text)
         {
-        $return = preg_replace_callback(self::SHORTCODE_REGEX, function(array $matches) {
-            $name = $matches[2];
-            $args = array();
-            if(isset($matches[3]))
-                {
-                preg_match_all(self::ARGUMENTS_REGEX, $matches[3], $argsMatches);
-                $args = array_reduce($argsMatches[1], function (array $state, $item)
-                    {
-                    $values = explode('=', $item, 2);
-                    $value = isset($values[1]) ? $values[1] : null;
-                    $value = $value && $value[0] == '"' && $value[strlen($value) - 1] == '"'
-                        ? substr($value, 1, -1)
-                        : (isset($value) ? $value : null);
-                    $state[$values[0]] = $value;
-
-                    return $state;
-                    }, array());
-                }
-            $content = isset($matches[4]) ? $matches[4] : null;
-            // closing fragment is checked inside shortcode regex
-
-            return $this->hasCode($name)
-                ? call_user_func_array($this->getCode($name), array($name, $args, $content))
+        return preg_replace_callback(self::SHORTCODE_REGEX, function(array $matches) {
+            return $this->hasCode($matches[2])
+                ? call_user_func_array($this->codes[$matches[2]], array(
+                    $matches[2],
+                    isset($matches[3]) ? $this->parseArgs($matches[3]) : array(),
+                    isset($matches[4]) ? $matches[4] : null,
+                    ))
                 : $matches[0];
             }, $text);
-
-        return $return;
         }
 
-    private function getCode($name)
+    private function parseArgs($text)
         {
-        return $this->codes[$name];
+        preg_match_all(self::ARGUMENTS_REGEX, $text, $argsMatches);
+
+        return array_reduce($argsMatches[1], function(array $state, $item) {
+            $values = explode('=', $item, 2);
+            $value = isset($values[1]) ? $values[1] : null;
+            $value = $value && $value[0] == '"' && $value[strlen($value) - 1] == '"'
+                ? substr($value, 1, -1)
+                : (isset($value) ? $value : null);
+            $state[$values[0]] = $value;
+
+            return $state;
+            }, array());
         }
 
     private function hasCode($name)
