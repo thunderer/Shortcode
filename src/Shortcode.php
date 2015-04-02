@@ -3,7 +3,7 @@ namespace Thunder\Shortcode;
 
 class Shortcode
     {
-    const SHORTCODE_REGEX = '/(\[(\w+)(\s+.+?)?\](?:(.+)\[\/(\w+)\])?)/us';
+    const SHORTCODE_REGEX = '/(\[(\w+)(\s+.+?)?\](?:(.+)\[\/(\2)\])?)/us';
     const ARGUMENTS_REGEX = '/(?:\s+(\w+(?:(?=\s|\]|$)|=\w+|=".+")))/us';
 
     private $codes = array();

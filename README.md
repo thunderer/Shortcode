@@ -1,10 +1,10 @@
 # Shortcode
 
 [![Build Status](https://travis-ci.org/thunderer/Shortcode.png?branch=master)](https://travis-ci.org/thunderer/Shortcode)
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/1cd1abab-c172-4da1-a465-c26794f42eee/mini.png)](https://insight.sensiolabs.com/projects/1cd1abab-c172-4da1-a465-c26794f42eee)
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/5235d5e3-d112-48df-bc07-d4555aef293d/mini.png)](https://insight.sensiolabs.com/projects/5235d5e3-d112-48df-bc07-d4555aef293d)
 [![License](https://poser.pugx.org/thunderer/shortcode/license.svg)](https://packagist.org/packages/thunderer/shortcode)
 [![Latest Stable Version](https://poser.pugx.org/thunderer/shortcode/v/stable.svg)](https://packagist.org/packages/thunderer/shortcode)
-[![Dependency Status](https://www.versioneye.com/user/projects/5463ca0ea345411321000098/badge.svg?style=flat)](https://www.versioneye.com/user/projects/5463ca0ea345411321000098)
+[![Dependency Status](https://www.versioneye.com/user/projects/551d5385971f7847ca000002/badge.svg?style=flat)](https://www.versioneye.com/user/projects/551d5385971f7847ca000002)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/thunderer/Shortcode/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/thunderer/Shortcode/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/thunderer/Shortcode/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/thunderer/Shortcode/?branch=master)
 [![Code Climate](https://codeclimate.com/github/thunderer/Shortcode/badges/gpa.svg)](https://codeclimate.com/github/thunderer/Shortcode)
@@ -66,7 +66,7 @@ $shortcode->addCode('sample', function($name, array $args, $content) {
 echo $shortcode->parse('[sample argument=value]content[/sample]');
 ```
 
-If parsed finds shortcode that is not supported (no registered handler) it will return whole blocks without any modification.
+If parser finds shortcode that is not supported (no registered handler) it will return whole blocks without any modification. When opening and closing shortcode do not match, parser ignores closing fragment and considers it as a self-closing shortcode.
 
 ## License
 
