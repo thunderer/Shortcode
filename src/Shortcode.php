@@ -44,7 +44,7 @@ class Shortcode
                     }, array());
                 }
             $content = isset($matches[4]) ? $matches[4] : null;
-            $closing = isset($matches[5]) ? $matches[5] : null;
+            // closing fragment is checked inside shortcode regex
 
             return $this->hasCode($name)
                 ? call_user_func_array($this->getCode($name), array($name, $args, $content))
