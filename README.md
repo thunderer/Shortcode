@@ -52,20 +52,21 @@ and run `composer install` or `composer update` afterwards. If you're not using 
 Create `Shortcode` class instance, register required shortcodes handlers and pass your strings to be parsed.
 
 ```php
+use Thunder\Shortcode\Parser;
 use Thunder\Shortcode\Shortcode;
 
-$shortcode = new Shortcode();
-$shortcode->addCode('sample', function($name, array $args, $content) {
+$parser = new Parser();
+$parser->addCode('sample', function(Shortcode $s) {
     return json_encode(array(
-        'name' => $name,
-        'args' => $args,
-        'content' => $content,
+        'name' => $s->getName(),
+        'args' => $s->getParameters(),
+        'content' => $s->getContent(),
         ));
     });
     
 // this will produce JSON encoded parsed data of given shortcode, eg.:
 // {"name":"sample","args":{"argument":"value"},"content":"content"}
-echo $shortcode->parse('[sample argument=value]content[/sample]');
+echo $parser->parse('[sample argument=value]content[/sample]');
 ```
 
 If parser finds shortcode that is not supported (no registered handler) it will return whole block without any modification. When opening and closing shortcode do not match, parser ignores closing fragment and considers it as a self-closing shortcode.
