@@ -1,59 +1,67 @@
 <?php
 namespace Thunder\Shortcode;
 
-class Shortcode
+/**
+ * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
+ */
+final class Shortcode
     {
-    const SHORTCODE_REGEX = '/(\[(\w+)(\s+.+?)?\](?:(.+)\[\/(\2)\])?)/us';
-    const ARGUMENTS_REGEX = '/(?:\s+(\w+(?:(?=\s|\]|$)|=\w+|=".+")))/us';
+    private $name;
+    private $parameters;
+    private $content;
+    private $text;
 
-    private $codes = array();
-
-    public function __construct()
+    public function __construct($name, array $arguments, $content)
         {
+        $this->name = $name;
+        $this->parameters = $arguments;
+        $this->content = $content;
         }
 
-    public function addCode($name, callable $handler)
+    public function asText()
         {
-        if($this->hasCode($name))
+        if(null === $this->text)
             {
-            $msg = 'Code %s already exists!';
-            throw new \RuntimeException(sprintf($msg, $name));
+            $this->text = $this->createText();
             }
 
-        $this->codes[$name] = $handler;
+        return $this->text;
         }
 
-    public function parse($text)
+    private function createText()
         {
-        return preg_replace_callback(self::SHORTCODE_REGEX, function(array $matches) {
-            return $this->hasCode($matches[2])
-                ? call_user_func_array($this->codes[$matches[2]], array(
-                    $matches[2],
-                    isset($matches[3]) ? $this->parseArgs($matches[3]) : array(),
-                    isset($matches[4]) ? $matches[4] : null,
-                    ))
-                : $matches[0];
-            }, $text);
+        return
+            '['.$this->name.$this->createParametersText().']'
+            .(null === $this->content ? '' : $this->content.'[/'.$this->name.']');
         }
 
-    private function parseArgs($text)
+    private function createParametersText()
         {
-        preg_match_all(self::ARGUMENTS_REGEX, $text, $argsMatches);
+        $return = '';
+        foreach($this->parameters as $key => $value)
+            {
+            $return .= ' '.$key;
+            if(null !== $value)
+                {
+                $return .= '='.(preg_match('/^\w+$/us', $value) ? $value : '"'.$value.'"');
+                }
+            }
 
-        return array_reduce($argsMatches[1], function(array $state, $item) {
-            $values = explode('=', $item, 2);
-            $value = isset($values[1]) ? $values[1] : null;
-            $value = $value && $value[0] == '"' && $value[strlen($value) - 1] == '"'
-                ? substr($value, 1, -1)
-                : (isset($value) ? $value : null);
-            $state[$values[0]] = $value;
-
-            return $state;
-            }, array());
+        return $return;
         }
 
-    private function hasCode($name)
+    public function getName()
         {
-        return array_key_exists($name, $this->codes);
+        return $this->name;
+        }
+
+    public function getParameters()
+        {
+        return $this->parameters;
+        }
+
+    public function getContent()
+        {
+        return $this->content;
         }
     }

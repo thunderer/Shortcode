@@ -9,7 +9,7 @@
 [![Code Coverage](https://scrutinizer-ci.com/g/thunderer/Shortcode/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/thunderer/Shortcode/?branch=master)
 [![Code Climate](https://codeclimate.com/github/thunderer/Shortcode/badges/gpa.svg)](https://codeclimate.com/github/thunderer/Shortcode)
 
-Shortcode is a framework and library agnostic engine for interpreting and replacing "shortcodes", ie. small script-like text fragments using dynamic callbacks. It can be used to create dynamic content replacement mechanism that is usable even by non-technical people without much training. Usual syntax of shortcodes is as shown in the examples below:
+Shortcode is a framework and library agnostic engine for interpreting and replacing "shortcodes" (small script-like text fragments) using dynamic callbacks. It can be used to create dynamic content replacement mechanism that is usable even by non-technical people without much training. Usual syntax of shortcodes is as shown in the examples below:
 
 ```
 [shortcode]
@@ -19,11 +19,13 @@ Shortcode is a framework and library agnostic engine for interpreting and replac
 [shortcode argument="value"]content[/shortcode]
 ```
 
-All those variants (and many more, see the tests) are supported by this library.
+All those variants (and many more, see the tests) are supported.
 
 ## Requirements
 
-No required dependencies, only PHP >=5.3
+No required dependencies, only PHP >=5.4
+
+> PHP 5.3 is marked as minimal version in Composer, but it won't work because parsing mechanism relies on passing context of $this into closures (calling object methods inside them). This can be fixed, but since PHP 5.3 has already reached its EOL months ago I really advise you to upgrade to latest stable version. There are many performance improvements and new features that are extremely useful.
 
 ## Installation
 
@@ -43,7 +45,7 @@ in your terminal or manually update your `composer.json` with
 (...)
 ```
 
-and run `composer install` or `composer update` afterwards. If you're not using Composer, then... (really, please just use it).
+and run `composer install` or `composer update` afterwards. If you're not using Composer, then you can download sources from GitHub and load them as you wish in your project. But really, please use Composer.
 
 ## Usage
 
@@ -66,7 +68,7 @@ $shortcode->addCode('sample', function($name, array $args, $content) {
 echo $shortcode->parse('[sample argument=value]content[/sample]');
 ```
 
-If parser finds shortcode that is not supported (no registered handler) it will return whole blocks without any modification. When opening and closing shortcode do not match, parser ignores closing fragment and considers it as a self-closing shortcode.
+If parser finds shortcode that is not supported (no registered handler) it will return whole block without any modification. When opening and closing shortcode do not match, parser ignores closing fragment and considers it as a self-closing shortcode.
 
 ## License
 
