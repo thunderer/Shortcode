@@ -4,39 +4,26 @@ namespace Thunder\Shortcode;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class Parser
+final class Parser implements ParserInterface
     {
-    const SHORTCODE_REGEX = '/(\[(\w+)(\s+.+?)?\](?:(.+)\[\/(\2)\])?)/us';
+    const SHORTCODE_REGEX = '/^(\[(\w+)(\s+.+?)?\](?:(.+?)\[\/(\2)\])?)$/us';
     const ARGUMENTS_REGEX = '/(?:\s+(\w+(?:(?=\s|$)|=\w+|=".+")))/us';
-
-    private $codes = array();
-
-    public function __construct()
-        {
-        }
-
-    public function addCode($name, callable $handler)
-        {
-        if($this->hasCode($name))
-            {
-            $msg = 'Code %s already exists!';
-            throw new \RuntimeException(sprintf($msg, $name));
-            }
-
-        $this->codes[$name] = $handler;
-        }
 
     public function parse($text)
         {
-        return preg_replace_callback(self::SHORTCODE_REGEX, function(array $matches) {
-            return $this->hasCode($matches[2])
-                ? call_user_func_array($this->codes[$matches[2]], array(new Shortcode(
-                    $matches[2],
-                    isset($matches[3]) ? $this->parseParameters($matches[3]) : array(),
-                    isset($matches[4]) ? $matches[4] : null
-                    )))
-                : $matches[0];
-            }, $text);
+        $count = preg_match(self::SHORTCODE_REGEX, $text, $matches);
+
+        if(!$count)
+            {
+            $msg = 'Failed to match single shortcode in text "%s"!';
+            throw new \RuntimeException(sprintf($msg, $text));
+            }
+
+        return new Shortcode(
+            $matches[2],
+            isset($matches[3]) ? $this->parseParameters($matches[3]) : array(),
+            isset($matches[4]) ? $matches[4] : null
+            );
         }
 
     private function parseParameters($text)
@@ -53,10 +40,5 @@ final class Parser
 
             return $state;
             }, array());
-        }
-
-    private function hasCode($name)
-        {
-        return array_key_exists($name, $this->codes);
         }
     }

@@ -9,7 +9,6 @@ final class Shortcode
     private $name;
     private $parameters;
     private $content;
-    private $text;
 
     public function __construct($name, array $arguments, $content)
         {
@@ -18,36 +17,9 @@ final class Shortcode
         $this->content = $content;
         }
 
-    public function asText()
+    public function hasContent()
         {
-        if(null === $this->text)
-            {
-            $this->text = $this->createText();
-            }
-
-        return $this->text;
-        }
-
-    private function createText()
-        {
-        return
-            '['.$this->name.$this->createParametersText().']'
-            .(null === $this->content ? '' : $this->content.'[/'.$this->name.']');
-        }
-
-    private function createParametersText()
-        {
-        $return = '';
-        foreach($this->parameters as $key => $value)
-            {
-            $return .= ' '.$key;
-            if(null !== $value)
-                {
-                $return .= '='.(preg_match('/^\w+$/us', $value) ? $value : '"'.$value.'"');
-                }
-            }
-
-        return $return;
+        return $this->content !== null;
         }
 
     public function getName()

@@ -29,7 +29,7 @@ No required dependencies, only PHP >=5.4
 
 ## Installation
 
-This library is registered on Packagist, so you can just execute
+To install it from Packagist execute
 
 ```
 composer require thunderer/shortcode
@@ -69,7 +69,22 @@ $parser->addCode('sample', function(Shortcode $s) {
 echo $parser->parse('[sample argument=value]content[/sample]');
 ```
 
-If parser finds shortcode that is not supported (no registered handler) it will return whole block without any modification. When opening and closing shortcode do not match, parser ignores closing fragment and considers it as a self-closing shortcode.
+Edge cases:
+
+* unsupported shortcodes (no registered handler) will be ignored and left as they are,
+* mismatching closing shortcode (`[code]content[/codex]`) will be ignored, opening will be interpreted as self-closing shortcode,
+* overlapping shortcodes (`[code]content[inner][/code]content[/inner]`) are not supported and will be interpreted as self-closing, ending fragment will be ignored.
+
+## Ideas
+
+Looking for contribution ideas? Here you are:
+
+* shortcode aliases,
+* configurable processor recursion,
+* configurable tokens for extractor and parser,
+* XML serializer,
+* YAML serializer,
+* specialized exceptions classes.
 
 ## License
 
