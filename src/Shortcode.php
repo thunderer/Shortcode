@@ -32,6 +32,26 @@ final class Shortcode
         return $this->parameters;
         }
 
+    public function hasParameter($name)
+        {
+        return array_key_exists($name, $this->parameters);
+        }
+
+    public function getParameter($name, $default = null)
+        {
+        if($this->hasParameter($name))
+            {
+            return $this->parameters[$name];
+            }
+        if(null !== $default)
+            {
+            return $default;
+            }
+
+        $msg = 'Shortcode parameter %s not found and no default value was set!';
+        throw new \RuntimeException(sprintf($msg, $name));
+        }
+
     public function getContent()
         {
         return $this->content;

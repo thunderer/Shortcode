@@ -49,31 +49,61 @@ and run `composer install` or `composer update` afterwards. If you're not using 
 
 ## Usage
 
-Create `Shortcode` class instance, register required shortcodes handlers and pass your strings to be parsed.
+**Replacement**
+
+Create `Processor` class instance, register required shortcodes handlers and use `process()` method to dynamically replace found matches using registered callbacks:
 
 ```php
+use Thunder\Shortcode\Extractor;
 use Thunder\Shortcode\Parser;
+use Thunder\Shortcode\Processor;
 use Thunder\Shortcode\Shortcode;
+use Thunder\Shortcode\Serializer\JsonSerializer;
 
-$parser = new Parser();
-$parser->addCode('sample', function(Shortcode $s) {
-    return json_encode(array(
-        'name' => $s->getName(),
-        'args' => $s->getParameters(),
-        'content' => $s->getContent(),
-        ));
+$processor = new Processor(new Extractor(), new Parser());
+$processor->addHandler('sample', function(Shortcode $s) {    
+    return (new JsonSerializer())->serialize($s);
     });
     
 // this will produce JSON encoded parsed data of given shortcode, eg.:
-// {"name":"sample","args":{"argument":"value"},"content":"content"}
-echo $parser->parse('[sample argument=value]content[/sample]');
+// something {"name":"sample","args":{"argument":"value"},"content":"content"} other
+echo $parser->parse('something [sample argument=value]content[/sample] other');
 ```
 
-Edge cases:
+**Extraction**
+
+Create instance of class `Extractor` and use its `extract()` method to get array of shortcode matches:
+
+```php
+use Thunder\Shortcode\Extractor;
+
+$extractor = new Extractor();
+$matches = $extractor->extract('something [x] other [random]sth[/random] other');
+
+// array will contain two instances of class Match with match offsets and exact 
+// strings, like [10, '[x]'] and [20, '[random]sth[/random]']
+var_dump($matches);
+```
+
+**Parsing**
+
+Create instance of `Parser` class and use its `parse()` method to parse single shortcode string match into `Shortcode` instance with easy access to its name, parameters, and content (null if none present):
+
+```php
+use Thunder\Shortcode\Parser;
+
+$parser = new Parser();
+$shortcode = $parser->parse('[code arg=value]something[/code]');
+
+// will contain name "code", one argument and "something" as content.
+var_dump($shortcode);
+```
+
+## Edge cases
 
 * unsupported shortcodes (no registered handler) will be ignored and left as they are,
-* mismatching closing shortcode (`[code]content[/codex]`) will be ignored, opening will be interpreted as self-closing shortcode,
-* overlapping shortcodes (`[code]content[inner][/code]content[/inner]`) are not supported and will be interpreted as self-closing, ending fragment will be ignored.
+* mismatching closing shortcode (`[code]content[/codex]`) will be ignored, opening tag will be interpreted as self-closing shortcode,
+* overlapping shortcodes (`[code]content[inner][/code]content[/inner]`) are not supported and will be interpreted as self-closing, closing tag will be ignored.
 
 ## Ideas
 

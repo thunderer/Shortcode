@@ -17,7 +17,7 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
      *
      * @dataProvider provideShortcodes
      */
-    public function testObject($expected, $name, array $args, $content)
+    public function testShortcode($expected, $name, array $args, $content)
         {
         $s = new Shortcode($name, $args, $content);
         $textSerializer = new TextSerializer();
@@ -36,5 +36,27 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
             array('[x arg=val]inner[/x]', 'x', array('arg' => 'val'), 'inner'),
             array('[x arg="val val"]inner[/x]', 'x', array('arg' => 'val val'), 'inner'),
             );
+        }
+
+    public function testObject()
+        {
+        $shortcode = new Shortcode('random', array(
+            'arg' => 'value',
+            'none' => null,
+            ), 'something');
+
+        $this->assertTrue($shortcode->hasParameter('arg'));
+        $this->assertFalse($shortcode->hasParameter('invalid'));
+        $this->assertSame(null, $shortcode->getParameter('none'));
+        $this->assertSame('value', $shortcode->getParameter('arg'));
+        $this->assertSame('', $shortcode->getParameter('invalid', ''));
+        $this->assertSame(42, $shortcode->getParameter('invalid', 42));
+        }
+
+    public function testExceptionOnMissingParameterWithNoDefaultValue()
+        {
+        $shortcode = new Shortcode('name', array(), null);
+        $this->setExpectedException('RuntimeException');
+        $shortcode->getParameter('invalid');
         }
     }
