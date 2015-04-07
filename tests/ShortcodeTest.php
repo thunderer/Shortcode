@@ -10,11 +10,6 @@ use Thunder\Shortcode\Shortcode;
 final class ShortcodeTest extends \PHPUnit_Framework_TestCase
     {
     /**
-     * @param string $expected
-     * @param string $name
-     * @param array $args
-     * @param string $content
-     *
      * @dataProvider provideShortcodes
      */
     public function testShortcode($expected, $name, array $args, $content)

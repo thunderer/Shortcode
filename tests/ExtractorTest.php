@@ -3,6 +3,7 @@ namespace Thunder\Shortcode\Tests;
 
 use Thunder\Shortcode\Extractor;
 use Thunder\Shortcode\Match;
+use Thunder\Shortcode\Syntax;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -49,5 +50,17 @@ final class ExtractorTest extends \PHPUnit_Framework_TestCase
                 new Match(27, '[x x y=z a="b c"]a[/x]'),
                 )),
             );
+        }
+
+    public function testWithDifferentSyntax()
+        {
+        $extractor = new Extractor(new Syntax('[[', ']]', '//', '==', '""'));
+
+        $matches = $extractor->extract('so[[m]]ething [[code]] othe[[r]]various[[//r]]');
+        $this->assertCount(3, $matches);
+        $this->assertSame('[[r]]various[[//r]]', $matches[2]->getString());
+
+        $matches = $extractor->extract('x [[code arg==""val oth""]]cont[[//code]] y');
+        $this->assertCount(1, $matches);
         }
     }

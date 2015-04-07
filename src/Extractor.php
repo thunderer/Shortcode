@@ -6,7 +6,13 @@ namespace Thunder\Shortcode;
  */
 final class Extractor implements ExtractorInterface
     {
-    const SHORTCODE_REGEX = '/(\[([\w-]+)(\s+.+?)?\](?:(.+?)\[\/(\2)\])?)/us';
+    /** @var Syntax */
+    private $syntax;
+
+    public function __construct(Syntax $syntax = null)
+        {
+        $this->syntax = $syntax ?: Syntax::createDefaults();
+        }
 
     /**
      * @param string $text
@@ -14,7 +20,7 @@ final class Extractor implements ExtractorInterface
      */
     public function extract($text)
         {
-        preg_match_all(self::SHORTCODE_REGEX, $text, $matches, PREG_OFFSET_CAPTURE);
+        preg_match_all($this->syntax->getShortcodeRegex(), $text, $matches, PREG_OFFSET_CAPTURE);
 
         return array_map(function(array $matches) {
             return new Match($matches[1], $matches[0]);

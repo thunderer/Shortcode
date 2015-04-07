@@ -12,9 +12,6 @@ use Thunder\Shortcode\Shortcode;
 final class ProcessorTest extends \PHPUnit_Framework_TestCase
     {
     /**
-     * @param string $text
-     * @param string $result
-     *
      * @dataProvider provideTexts
      */
     public function testProcessor($text, $result)

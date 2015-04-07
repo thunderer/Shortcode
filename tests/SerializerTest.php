@@ -12,10 +12,6 @@ use Thunder\Shortcode\Shortcode;
 final class SerializerTest extends \PHPUnit_Framework_TestCase
     {
     /**
-     * @param SerializerInterface $serializer
-     * @param $text
-     * @param Shortcode $shortcode
-     *
      * @dataProvider provideShortcodes
      */
     public function testSerializer(SerializerInterface $serializer, $text, Shortcode $shortcode)
