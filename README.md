@@ -67,7 +67,7 @@ $processor->addHandler('sample', function(Shortcode $s) {
     
 // this will produce JSON encoded parsed data of given shortcode, eg.:
 // something {"name":"sample","args":{"argument":"value"},"content":"content"} other
-echo $parser->parse('something [sample argument=value]content[/sample] other');
+echo $processor->process('something [sample argument=value]content[/sample] other');
 ```
 
 **Extraction**

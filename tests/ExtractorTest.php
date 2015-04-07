@@ -32,9 +32,9 @@ final class ExtractorTest extends \PHPUnit_Framework_TestCase
     public function provideTexts()
         {
         return array(
-            array('Lorem [ipsum] random [code arg=val] which is here', array(
+            array('Lorem [ipsum] random [code-code arg=val] which is here', array(
                 new Match(6, '[ipsum]'),
-                new Match(21, '[code arg=val]'),
+                new Match(21, '[code-code arg=val]'),
                 )),
             array('x [aa] x [aa] x', array(
                 new Match(2, '[aa]'),

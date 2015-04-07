@@ -6,7 +6,7 @@ namespace Thunder\Shortcode;
  */
 final class Parser implements ParserInterface
     {
-    const SHORTCODE_REGEX = '/^(\[(\w+)(\s+.+?)?\](?:(.+?)\[\/(\2)\])?)$/us';
+    const SHORTCODE_REGEX = '/^(\[([\w-]+)(\s+.+?)?\](?:(.+?)\[\/(\2)\])?)$/us';
     const ARGUMENTS_REGEX = '/(?:\s+(\w+(?:(?=\s|$)|=\w+|=".+")))/us';
 
     public function parse($text)
