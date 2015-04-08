@@ -2,6 +2,7 @@
 namespace Thunder\Shortcode\Tests;
 
 use Thunder\Shortcode\Parser;
+use Thunder\Shortcode\Syntax;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -9,14 +10,9 @@ use Thunder\Shortcode\Parser;
 final class ParserTest extends \PHPUnit_Framework_TestCase
     {
     /**
-     * @param string $code
-     * @param string $name
-     * @param array $args
-     * @param string $content
-     *
      * @dataProvider provideShortcodes
      */
-    public function testShortcode($code, $name, array $args, $content)
+    public function testParser($code, $name, array $args, $content)
         {
         $parser = new Parser();
         $shortcode = $parser->parse($code);
@@ -45,5 +41,16 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
         $parser = new Parser();
         $this->setExpectedException('RuntimeException');
         $parser->parse('');
+        }
+
+    public function testWithDifferentSyntax()
+        {
+        $parser = new Parser(new Syntax('[[', ']]', '//', '==', '""'));
+
+        $shortcode = $parser->parse('[[code arg==""val oth""]]cont[[//code]]');
+        $this->assertSame('code', $shortcode->getName());
+        $this->assertCount(1, $shortcode->getParameters());
+        $this->assertSame('val oth', $shortcode->getParameter('arg'));
+        $this->assertSame('cont', $shortcode->getContent());
         }
     }

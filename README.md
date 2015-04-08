@@ -98,6 +98,37 @@ $shortcode = $parser->parse('[code arg=value]something[/code]');
 // will contain name "code", one argument and "something" as content.
 var_dump($shortcode);
 ```
+**Syntax**
+
+Both `Parser` and `Extractor` classes provide configurable shortcode syntax capabilities which can be achieved by passing `Syntax` object as their first argument:
+
+```php
+use Thunder\Shortcode\Syntax;
+use Thunder\Shortcode\SyntaxBuilder;
+
+// these two are equivalent, builder is more verbose
+$syntax = (new SyntaxBuilder())
+    ->setOpeningTag('[[')
+    ->setClosingTag(']]')
+    ->setClosingTagMarker('//')
+    ->setParameterValueSeparator('==')
+    ->setParameterValueDelimiter('""')
+    ->getSyntax();
+    
+$syntax = new Syntax('[[', ']]', '//', '==', '""');
+
+// create both objects as usual, if nothing is passed defaults are assumed
+$parser = new Parser($syntax);
+$extractor = new Extractor($syntax);
+
+// will contain one matched shortcode string 
+$matches = $extractor->extract('something [[code arg==""value random""]]content[[//code]] other');
+
+// will contain correctly parsed shortcode inside passed string
+$shortcode = $parser->parse('[[code arg==""value random""]]content[[//code]]');
+```
+
+Different syntaxes can be passed to both objects but that will result in an unpredictable behavior if used for example inside `Processor` class or passing extracted matches into parser manually. Do that only when researching and on your own risk.
 
 ## Edge cases
 
@@ -111,10 +142,13 @@ Looking for contribution ideas? Here you are:
 
 * shortcode aliases,
 * configurable processor recursion,
-* configurable tokens for extractor and parser,
 * XML serializer,
 * YAML serializer,
-* specialized exceptions classes.
+* specialized exceptions classes,
+* library facade for easier usage,
+* example handlers for common shortcodes ([b], [i], [url]),
+* specialized parameter values (array=value,value, map=key:value,key:value),
+* shortcode validators and strict mode.
 
 ## License
 

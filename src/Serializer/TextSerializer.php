@@ -4,29 +4,32 @@ namespace Thunder\Shortcode\Serializer;
 use Thunder\Shortcode\Parser;
 use Thunder\Shortcode\SerializerInterface;
 use Thunder\Shortcode\Shortcode;
+use Thunder\Shortcode\Syntax;
 
 final class TextSerializer implements SerializerInterface
     {
-    private $open;
-    private $close;
-    private $slash;
-    private $equals;
-    private $string;
+    private $syntax;
 
-    public function __construct($open = '[', $close = ']', $slash = '/', $equals = '=', $string = '"')
+    public function __construct(Syntax $syntax = null)
         {
-        $this->open = $open;
-        $this->close = $close;
-        $this->slash = $slash;
-        $this->equals = $equals;
-        $this->string = $string;
+        $this->syntax = $syntax ?: new Syntax();
         }
 
     public function serialize(Shortcode $s)
         {
-        return
-            $this->open.$s->getName().$this->serializeParameters($s->getParameters()).$this->close
-            .(null === $s->getContent() ? '' : $s->getContent().$this->open.$this->slash.$s->getName().$this->close);
+        $open = $this->syntax->getOpeningTag();
+        $close = $this->syntax->getClosingTag();
+        $marker = $this->syntax->getClosingTagMarker();
+
+        $parameters = $this->serializeParameters($s->getParameters());
+        $return = $open.$s->getName().$parameters.$close;
+
+        if(null !== $s->getContent())
+            {
+            $return .= $s->getContent().$open.$marker.$s->getName().$close;
+            }
+
+        return $return;
         }
 
     private function serializeParameters(array $parameters)
@@ -37,9 +40,12 @@ final class TextSerializer implements SerializerInterface
             $return .= ' '.$key;
             if(null !== $value)
                 {
-                $return .= $this->equals.(preg_match('/^\w+$/us', $value)
+                $delimiter = $this->syntax->getParameterValueDelimiter();
+                $separator = $this->syntax->getParameterValueSeparator();
+
+                $return .= $separator.(preg_match('/^\w+$/us', $value)
                     ? $value
-                    : $this->string.$value.$this->string);
+                    : $delimiter.$value.$delimiter);
                 }
             }
 
