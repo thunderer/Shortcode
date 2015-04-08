@@ -145,7 +145,10 @@ Looking for contribution ideas? Here you are:
 * XML serializer,
 * YAML serializer,
 * specialized exceptions classes,
-* library facade for easier usage.
+* library facade for easier usage,
+* example handlers for common shortcodes ([b], [i], [url]),
+* specialized parameter values (array=value,value, map=key:value,key:value),
+* shortcode validators and strict mode.
 
 ## License
 
