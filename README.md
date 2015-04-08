@@ -104,9 +104,10 @@ Both `Parser` and `Extractor` classes provide configurable shortcode syntax capa
 
 ```php
 use Thunder\Shortcode\Syntax;
+use Thunder\Shortcode\SyntaxBuilder;
 
 // these two are equivalent, builder is more verbose
-$syntax = SyntaxBuilder::create()
+$syntax = (new SyntaxBuilder())
     ->setOpeningTag('[[')
     ->setClosingTag(']]')
     ->setClosingTagMarker('//')
