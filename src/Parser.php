@@ -36,7 +36,7 @@ final class Parser implements ParserInterface
         preg_match_all($this->syntax->getArgumentsRegex(), $text, $argsMatches);
 
         return array_reduce($argsMatches[1], function(array $state, $item) {
-            $parts = explode($this->syntax->getEquals(), $item, 2);
+            $parts = explode($this->syntax->getParameterValueSeparator(), $item, 2);
             $value = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
 
             return array_merge($state, array($parts[0] => $value));
@@ -52,14 +52,14 @@ final class Parser implements ParserInterface
 
     private function extractStringValue($value)
         {
-        $length = strlen($this->syntax->getString());
+        $length = strlen($this->syntax->getParameterValueDelimiter());
 
         return substr($value, $length, -1 * $length);
         }
 
     private function isStringValue($value)
         {
-        return preg_match('/^'.$this->syntax->getString().'/us', $value)
-            && preg_match('/'.$this->syntax->getString().'$/us', $value);
+        return preg_match('/^'.$this->syntax->getParameterValueDelimiter().'/us', $value)
+            && preg_match('/'.$this->syntax->getParameterValueDelimiter().'$/us', $value);
         }
     }

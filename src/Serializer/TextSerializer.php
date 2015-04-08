@@ -18,10 +18,10 @@ final class TextSerializer implements SerializerInterface
     public function serialize(Shortcode $s)
         {
         return
-            $this->syntax->getOpen()
+            $this->syntax->getOpeningTag()
             .$s->getName().$this->serializeParameters($s->getParameters())
-            .$this->syntax->getClose()
-            .(null === $s->getContent() ? '' : $s->getContent().$this->syntax->getOpen().$this->syntax->getSlash().$s->getName().$this->syntax->getClose());
+            .$this->syntax->getClosingTag()
+            .(null === $s->getContent() ? '' : $s->getContent().$this->syntax->getOpeningTag().$this->syntax->getClosingTagMarker().$s->getName().$this->syntax->getClosingTag());
         }
 
     private function serializeParameters(array $parameters)
@@ -32,9 +32,9 @@ final class TextSerializer implements SerializerInterface
             $return .= ' '.$key;
             if(null !== $value)
                 {
-                $return .= $this->syntax->getEquals().(preg_match('/^\w+$/us', $value)
+                $return .= $this->syntax->getParameterValueSeparator().(preg_match('/^\w+$/us', $value)
                     ? $value
-                    : $this->syntax->getString().$value.$this->syntax->getString());
+                    : $this->syntax->getParameterValueDelimiter().$value.$this->syntax->getParameterValueDelimiter());
                 }
             }
 

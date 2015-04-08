@@ -6,19 +6,20 @@ namespace Thunder\Shortcode;
  */
 final class Syntax
     {
-    private $open;
-    private $close;
-    private $slash;
-    private $equals;
-    private $string;
+    private $openingTag;
+    private $closingTag;
+    private $closingTagMarker;
+    private $parameterValueSeparator;
+    private $parameterValueDelimiter;
 
-    public function __construct($open = '[', $close = ']', $slash = '/', $equals = '=', $string = '"')
+    public function __construct($openingTag = '[', $closingTag = ']', $closingTagMarker = '/',
+                                $parameterValueSeparator = '=', $parameterValueDelimiter = '"')
         {
-        $this->open = $open;
-        $this->close = $close;
-        $this->slash = $slash;
-        $this->equals = $equals;
-        $this->string = $string;
+        $this->openingTag = $openingTag;
+        $this->closingTag = $closingTag;
+        $this->closingTagMarker = $closingTagMarker;
+        $this->parameterValueSeparator = $parameterValueSeparator;
+        $this->parameterValueDelimiter = $parameterValueDelimiter;
         }
 
     public static function createDefaults()
@@ -28,26 +29,26 @@ final class Syntax
 
     public function getShortcodeRegex()
         {
-        $open = $this->quote($this->getOpen());
-        $slash = $this->quote($this->getSlash());
-        $close = $this->quote($this->getClose());
+        $open = $this->quote($this->getOpeningTag());
+        $slash = $this->quote($this->getClosingTagMarker());
+        $close = $this->quote($this->getClosingTag());
 
         return '~('.$open.'([\w-]+)(\s+.+?)?'.$close.'(?:(.+?)'.$open.$slash.'(\2)'.$close.')?)~us';
         }
 
     public function getSingleShortcodeRegex()
         {
-        $open = $this->quote($this->getOpen());
-        $slash = $this->quote($this->getSlash());
-        $close = $this->quote($this->getClose());
+        $open = $this->quote($this->getOpeningTag());
+        $slash = $this->quote($this->getClosingTagMarker());
+        $close = $this->quote($this->getClosingTag());
 
         return '~^('.$open.'([\w-]+)(\s+.+?)?'.$close.'(?:(.+?)'.$open.$slash.'(\2)'.$close.')?)$~us';
         }
 
     public function getArgumentsRegex()
         {
-        $equals = $this->quote($this->getEquals());
-        $string = $this->quote($this->getString());
+        $equals = $this->quote($this->getParameterValueSeparator());
+        $string = $this->quote($this->getParameterValueDelimiter());
 
         return '~(?:\s+(\w+(?:(?=\s|$)|'.$equals.'\w+|'.$equals.$string.'.+'.$string.')))~us';
         }
@@ -57,28 +58,28 @@ final class Syntax
         return preg_replace('/(.)/us', '\\\\$0', $text);
         }
 
-    public function getOpen()
+    public function getOpeningTag()
         {
-        return $this->open;
+        return $this->openingTag;
         }
 
-    public function getClose()
+    public function getClosingTag()
         {
-        return $this->close;
+        return $this->closingTag;
         }
 
-    public function getSlash()
+    public function getClosingTagMarker()
         {
-        return $this->slash;
+        return $this->closingTagMarker;
         }
 
-    public function getEquals()
+    public function getParameterValueSeparator()
         {
-        return $this->equals;
+        return $this->parameterValueSeparator;
         }
 
-    public function getString()
+    public function getParameterValueDelimiter()
         {
-        return $this->string;
+        return $this->parameterValueDelimiter;
         }
     }
