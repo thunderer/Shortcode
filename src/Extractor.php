@@ -11,7 +11,7 @@ final class Extractor implements ExtractorInterface
 
     public function __construct(Syntax $syntax = null)
         {
-        $this->syntax = $syntax ?: Syntax::createDefaults();
+        $this->syntax = $syntax ?: new Syntax();
         }
 
     /**

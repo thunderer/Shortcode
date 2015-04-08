@@ -12,19 +12,14 @@ final class Syntax
     private $parameterValueSeparator;
     private $parameterValueDelimiter;
 
-    public function __construct($openingTag = '[', $closingTag = ']', $closingTagMarker = '/',
-                                $parameterValueSeparator = '=', $parameterValueDelimiter = '"')
+    public function __construct($openingTag = null, $closingTag = null, $closingTagMarker = null,
+                                $parameterValueSeparator = null, $parameterValueDelimiter = null)
         {
-        $this->openingTag = $openingTag;
-        $this->closingTag = $closingTag;
-        $this->closingTagMarker = $closingTagMarker;
-        $this->parameterValueSeparator = $parameterValueSeparator;
-        $this->parameterValueDelimiter = $parameterValueDelimiter;
-        }
-
-    public static function createDefaults()
-        {
-        return new self('[', ']', '/', '=', '"');
+        $this->openingTag = $openingTag ?: '[';
+        $this->closingTag = $closingTag ?: ']';
+        $this->closingTagMarker = $closingTagMarker ?: '/';
+        $this->parameterValueSeparator = $parameterValueSeparator ?: '=';
+        $this->parameterValueDelimiter = $parameterValueDelimiter ?: '"';
         }
 
     public function getShortcodeRegex()

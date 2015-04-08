@@ -12,7 +12,7 @@ final class TextSerializer implements SerializerInterface
 
     public function __construct(Syntax $syntax = null)
         {
-        $this->syntax = $syntax ?: Syntax::createDefaults();
+        $this->syntax = $syntax ?: new Syntax();
         }
 
     public function serialize(Shortcode $s)
