@@ -38,7 +38,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             array('random [content]other[/content] various', 'random other various'),
             array('x [content]a-[name]-b[/content] y', 'x a-name-b y'),
             array('x [cnt]a-[n][/n]-b[/cnt] y', 'x a-n-b y'),
-            array('x [cnt]a-[cnt]v[/cnt]-b[/cnt] y', 'x a-v-b y'),
+            array('x [content]a-[cnt]v[/cnt]-b[/content] y', 'x a-v-b y'),
             );
         }
 
