@@ -24,20 +24,12 @@ final class Syntax
 
     public function getShortcodeRegex()
         {
-        $open = $this->quote($this->getOpeningTag());
-        $slash = $this->quote($this->getClosingTagMarker());
-        $close = $this->quote($this->getClosingTag());
-
-        return '~('.$open.'([\w-]+)(\s+.+?)?'.$close.'(?:(.*?)'.$open.$slash.'(\2)'.$close.')?)~us';
+        return '~'.$this->createShortcodeRegex().'~us';
         }
 
     public function getSingleShortcodeRegex()
         {
-        $open = $this->quote($this->getOpeningTag());
-        $slash = $this->quote($this->getClosingTagMarker());
-        $close = $this->quote($this->getClosingTag());
-
-        return '~^('.$open.'([\w-]+)(\s+.+?)?'.$close.'(?:(.*?)'.$open.$slash.'(\2)'.$close.')?)$~us';
+        return '~^'.$this->createShortcodeRegex().'$~us';
         }
 
     public function getArgumentsRegex()
@@ -48,10 +40,21 @@ final class Syntax
         return '~(?:\s+(\w+(?:(?=\s|$)|'.$equals.'\w+|'.$equals.$string.'.+'.$string.')))~us';
         }
 
+    private function createShortcodeRegex()
+        {
+        $open = $this->quote($this->getOpeningTag());
+        $slash = $this->quote($this->getClosingTagMarker());
+        $close = $this->quote($this->getClosingTag());
+
+        return '('.$open.'([\w-]+)(\s+.+?)?'.$close.'(?:(.*?)'.$open.$slash.'(\2)'.$close.')?)';
+        }
+
     private function quote($text)
         {
         return preg_replace('/(.)/us', '\\\\$0', $text);
         }
+
+    /* --- GETTERS --- */
 
     public function getOpeningTag()
         {

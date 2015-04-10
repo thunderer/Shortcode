@@ -11,18 +11,25 @@ use Thunder\Shortcode\Shortcode;
  */
 final class ProcessorTest extends \PHPUnit_Framework_TestCase
     {
-    /**
-     * @dataProvider provideTexts
-     */
-    public function testProcessor($text, $result)
+    private function getProcessor()
         {
         $processor = new Processor(new Extractor(), new Parser());
 
         $processor
             ->addHandler('name', function(Shortcode $s) { return $s->getName(); })
             ->addHandler('content', function(Shortcode $s) { return $s->getContent(); })
-            ->addHandlerAlias('cnt', 'content')
+            ->addHandlerAlias('c', 'content')
             ->addHandlerAlias('n', 'name');
+
+        return $processor;
+        }
+
+    /**
+     * @dataProvider provideTexts
+     */
+    public function testProcessor($text, $result)
+        {
+        $processor = $this->getProcessor();
 
         $this->assertSame($result, $processor->process($text));
         }
@@ -37,16 +44,15 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             array('[content]random-[name]-random[/content]', 'random-name-random'),
             array('random [content]other[/content] various', 'random other various'),
             array('x [content]a-[name]-b[/content] y', 'x a-name-b y'),
-            array('x [cnt]a-[n][/n]-b[/cnt] y', 'x a-n-b y'),
-            array('x [content]a-[cnt]v[/cnt]-b[/content] y', 'x a-v-b y'),
+            array('x [c]a-[n][/n]-b[/c] y', 'x a-n-b y'),
+            array('x [content]a-[c]v[/c]-b[/content] y', 'x a-v-b y'),
             );
         }
 
     public function testProcessorWithoutRecursion()
         {
-        $processor = (new Processor(new Extractor(), new Parser()))
-            ->addHandler('name', function(Shortcode $s) { return $s->getName(); })
-            ->addHandler('content', function(Shortcode $s) { return $s->getContent(); })
+        $processor = $this
+            ->getProcessor()
             ->setRecursion(false);
 
         $result = $processor->process('x [content]a-[name][/name]-b[/content] y');
@@ -55,15 +61,14 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
 
     public function testExceptionOnDuplicateHandler()
         {
-        $processor = new Processor(new Extractor(), new Parser());
-        $processor->addHandler('name', function() {});
+        $processor = $this->getProcessor();
         $this->setExpectedException('RuntimeException');
         $processor->addHandler('name', function() {});
         }
 
     public function testDefaultHandler()
         {
-        $processor = new Processor(new Extractor(), new Parser());
+        $processor = $this->getProcessor();
         $processor->setDefaultHandler(function(Shortcode $s) { return $s->getName(); });
 
         $this->assertSame('namerandom', $processor->process('[name][other][/name][random]'));
