@@ -84,11 +84,13 @@ echo $processor->process('something [spl argument=value]content[/spl] other');
 
 // By default, Processor has enabled recursive processing of nested shortcodes,
 // which means that code below will produce :
-$processor->addHandler('c', function(Shortcode $s) { return $s->getContent() });
-assert("xyz" === $processor->process('[c]x[c]y[/c]z[/c]'));
+$processor
+    ->addHandler('c', function(Shortcode $s) { return $s->getContent() })
+    ->addHandlerAlias('d', 'c');
+assert("xyz" === $processor->process('[c]x[d]y[/d]z[/c]'));
 // this behavior can be controller through setRecursion($status) method:
 $processor->setRecursion(false);
-assert('x[c]yz[/c]' === $processor->process('[c]x[c]y[/c]z[/c]'))
+assert('x[d]y[/d]z' === $processor->process('[c]x[d]y[/d]z[/c]'))
 ```
 
 **Extraction**
@@ -156,7 +158,7 @@ Different syntaxes can be passed to both objects but that will result in an unpr
 * unsupported shortcodes (no registered handler) will be ignored and left as they are,
 * mismatching closing shortcode (`[code]content[/codex]`) will be ignored, opening tag will be interpreted as self-closing shortcode,
 * overlapping shortcodes (`[code]content[inner][/code]content[/inner]`) are not supported and will be interpreted as self-closing, closing tag will be ignored,
-* nested shortcodes of the same name are also considered overlapping, which means that (assume that shortcode [c] returns its content) string "[c]x[c]y[/c]z[/c]" will be interpreted as "xyz[/c]" (first closing tag was matched to first opening tag).
+* nested shortcodes of the same name are also considered overlapping, which means that (assume that shortcode [c] returns its content) string "[c]x[c]y[/c]z[/c]" will be interpreted as "xyz[/c]" (first closing tag was matched to first opening tag). This can be solved by aliasing given shortcode handler name, because for example "[c]x[d]y[/d]z[/c]" will be processed "correctly".
 
 ## Ideas
 
