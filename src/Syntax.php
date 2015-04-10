@@ -28,7 +28,7 @@ final class Syntax
         $slash = $this->quote($this->getClosingTagMarker());
         $close = $this->quote($this->getClosingTag());
 
-        return '~('.$open.'([\w-]+)(\s+.+?)?'.$close.'(?:(.+?)'.$open.$slash.'(\2)'.$close.')?)~us';
+        return '~('.$open.'([\w-]+)(\s+.+?)?'.$close.'(?:(.*?)'.$open.$slash.'(\2)'.$close.')?)~us';
         }
 
     public function getSingleShortcodeRegex()
@@ -37,7 +37,7 @@ final class Syntax
         $slash = $this->quote($this->getClosingTagMarker());
         $close = $this->quote($this->getClosingTag());
 
-        return '~^('.$open.'([\w-]+)(\s+.+?)?'.$close.'(?:(.+?)'.$open.$slash.'(\2)'.$close.')?)$~us';
+        return '~^('.$open.'([\w-]+)(\s+.+?)?'.$close.'(?:(.*?)'.$open.$slash.'(\2)'.$close.')?)$~us';
         }
 
     public function getArgumentsRegex()

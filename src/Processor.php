@@ -30,6 +30,15 @@ final class Processor implements ProcessorInterface
         return $this;
         }
 
+    public function addHandlerAlias($alias, $name)
+        {
+        $this->addHandler($alias, function(Shortcode $shortcode) use($name) {
+            return call_user_func_array($this->getHandler($name), array($shortcode));
+            });
+
+        return $this;
+        }
+
     public function setDefaultHandler(callable $handler)
         {
         $this->defaultHandler = $handler;

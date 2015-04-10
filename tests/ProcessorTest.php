@@ -20,7 +20,9 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
 
         $processor
             ->addHandler('name', function(Shortcode $s) { return $s->getName(); })
-            ->addHandler('content', function(Shortcode $s) { return $s->getContent(); });
+            ->addHandler('content', function(Shortcode $s) { return $s->getContent(); })
+            ->addHandlerAlias('cnt', 'content')
+            ->addHandlerAlias('n', 'name');
 
         $this->assertSame($result, $processor->process($text));
         }
@@ -35,6 +37,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             array('[content]random-[name]-random[/content]', 'random-name-random'),
             array('random [content]other[/content] various', 'random other various'),
             array('x [content]a-[name]-b[/content] y', 'x a-name-b y'),
+            array('x [cnt]a-[n][/n]-b[/cnt] y', 'x a-n-b y'),
             );
         }
 
