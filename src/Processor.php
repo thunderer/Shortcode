@@ -10,6 +10,7 @@ final class Processor implements ProcessorInterface
     private $extractor;
     private $parser;
     private $defaultHandler;
+    private $recursion = true;
 
     public function __construct(ExtractorInterface $extractor, ParserInterface $parser)
         {
@@ -17,6 +18,14 @@ final class Processor implements ProcessorInterface
         $this->parser = $parser;
         }
 
+    /**
+     * Registers handler for given shortcode name.
+     *
+     * @param string $name
+     * @param callable $handler
+     *
+     * @return $this
+     */
     public function addHandler($name, callable $handler)
         {
         if($this->hasHandler($name))
@@ -30,6 +39,15 @@ final class Processor implements ProcessorInterface
         return $this;
         }
 
+    /**
+     * Registers handler alias for given shortcode name, which means that
+     * handler for target name will be called when alias is found.
+     *
+     * @param string $alias Alias shortcode name
+     * @param string $name Aliased shortcode name
+     *
+     * @return $this
+     */
     public function addHandlerAlias($alias, $name)
         {
         $this->addHandler($alias, function(Shortcode $shortcode) use($name) {
@@ -39,6 +57,13 @@ final class Processor implements ProcessorInterface
         return $this;
         }
 
+    /**
+     * Default library behavior is to ignore and return matches of shortcodes
+     * without handler just like they were found. With this callable being set,
+     * all matched shortcodes without registered handler will be passed to it.
+     *
+     * @param callable $handler Handler for shortcodes without registered name handler
+     */
     public function setDefaultHandler(callable $handler)
         {
         $this->defaultHandler = $handler;
@@ -61,11 +86,10 @@ final class Processor implements ProcessorInterface
         foreach($matches as $match)
             {
             $shortcode = $this->parser->parse($match->getString());
-            $shortcode = new Shortcode(
-                $shortcode->getName(),
-                $shortcode->getParameters(),
-                $shortcode->hasContent() ? $this->process($shortcode->getContent()) : null
-                );
+            $content = $shortcode->hasContent() && $this->recursion
+                ? $this->process($shortcode->getContent())
+                : $shortcode->getContent();
+            $shortcode = new Shortcode($shortcode->getName(), $shortcode->getParameters(), $content);
             $handler = $this->getHandler($shortcode->getName());
             if($handler)
                 {
@@ -75,6 +99,20 @@ final class Processor implements ProcessorInterface
             }
 
         return $text;
+        }
+
+    /**
+     * Recursive shortcodes processing is enabled by default, with this method
+     * it can be turned on or off as required.
+     *
+     * @param $status
+     * @return $this
+     */
+    public function setRecursion($status)
+        {
+        $this->recursion = $status;
+
+        return $this;
         }
 
     private function getHandler($name)

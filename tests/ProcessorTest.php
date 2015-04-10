@@ -38,7 +38,19 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             array('random [content]other[/content] various', 'random other various'),
             array('x [content]a-[name]-b[/content] y', 'x a-name-b y'),
             array('x [cnt]a-[n][/n]-b[/cnt] y', 'x a-n-b y'),
+            array('x [cnt]a-[cnt]v[/cnt]-b[/cnt] y', 'x a-v-b y'),
             );
+        }
+
+    public function testProcessorWithoutRecursion()
+        {
+        $processor = (new Processor(new Extractor(), new Parser()))
+            ->addHandler('name', function(Shortcode $s) { return $s->getName(); })
+            ->addHandler('content', function(Shortcode $s) { return $s->getContent(); })
+            ->setRecursion(false);
+
+        $result = $processor->process('x [content]a-[name][/name]-b[/content] y');
+        $this->assertSame('x a-[name][/name]-b y', $result);
         }
 
     public function testExceptionOnDuplicateHandler()

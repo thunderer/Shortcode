@@ -61,13 +61,34 @@ use Thunder\Shortcode\Shortcode;
 use Thunder\Shortcode\Serializer\JsonSerializer;
 
 $processor = new Processor(new Extractor(), new Parser());
+
+// Echo below will produce JSON encoded parsed data of given shortcode, eg.:
+// something {"name":"sample","args":{"argument":"value"},"content":"content"} other
 $processor->addHandler('sample', function(Shortcode $s) {    
     return (new JsonSerializer())->serialize($s);
     });
-    
-// this will produce JSON encoded parsed data of given shortcode, eg.:
-// something {"name":"sample","args":{"argument":"value"},"content":"content"} other
 echo $processor->process('something [sample argument=value]content[/sample] other');
+
+// Processor also supports default handler for unregistered shortcode names.
+// Echo below will produce "something [Invalid shortcode name qwerty!] other"
+$processor->setDefaultHandler('sample', function(Shortcode $s) {    
+    return sprintf('[Invalid shortcode name %s!]', $s->getName());
+    });
+echo $processor->process('something [qwerty argument=value]content[/qwerty] other');
+
+// There is also a feature called "shortcode aliases" which means that different
+// shortcode names can reuse same handler, echo below will also produce JSON
+// serialized shortcode data:
+$processor->addHandlerAlias('spl', 'sample');
+echo $processor->process('something [spl argument=value]content[/spl] other');
+
+// By default, Processor has enabled recursive processing of nested shortcodes,
+// which means that code below will produce :
+$processor->addHandler('c', function(Shortcode $s) { return $s->getContent() });
+assert("xyz" === $processor->process('[c]x[c]y[/c]z[/c]'));
+// this behavior can be controller through setRecursion($status) method:
+$processor->setRecursion(false);
+assert('x[c]yz[/c]' === $processor->process('[c]x[c]y[/c]z[/c]'))
 ```
 
 **Extraction**
@@ -134,14 +155,13 @@ Different syntaxes can be passed to both objects but that will result in an unpr
 
 * unsupported shortcodes (no registered handler) will be ignored and left as they are,
 * mismatching closing shortcode (`[code]content[/codex]`) will be ignored, opening tag will be interpreted as self-closing shortcode,
-* overlapping shortcodes (`[code]content[inner][/code]content[/inner]`) are not supported and will be interpreted as self-closing, closing tag will be ignored.
+* overlapping shortcodes (`[code]content[inner][/code]content[/inner]`) are not supported and will be interpreted as self-closing, closing tag will be ignored,
+* nested shortcodes of the same name are also considered overlapping, which means that (assume that shortcode [c] returns its content) string "[c]x[c]y[/c]z[/c]" will be interpreted as "xyz[/c]" (first closing tag was matched to first opening tag).
 
 ## Ideas
 
 Looking for contribution ideas? Here you are:
 
-* shortcode aliases,
-* configurable processor recursion,
 * XML serializer,
 * YAML serializer,
 * specialized exceptions classes,
