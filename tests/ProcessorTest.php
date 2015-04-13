@@ -5,6 +5,7 @@ use Thunder\Shortcode\Extractor;
 use Thunder\Shortcode\Parser;
 use Thunder\Shortcode\Processor;
 use Thunder\Shortcode\Shortcode;
+use Thunder\Shortcode\Tests\Fake\HtmlShortcode;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -18,6 +19,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $processor
             ->addHandler('name', function(Shortcode $s) { return $s->getName(); })
             ->addHandler('content', function(Shortcode $s) { return $s->getContent(); })
+            ->addHandler('html', new HtmlShortcode())
             ->addHandlerAlias('c', 'content')
             ->addHandlerAlias('n', 'name');
 
@@ -46,6 +48,8 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             array('x [content]a-[name]-b[/content] y', 'x a-name-b y'),
             array('x [c]a-[n][/n]-b[/c] y', 'x a-n-b y'),
             array('x [content]a-[c]v[/c]-b[/content] y', 'x a-v-b y'),
+            array('x [html b]bold[/html] y [html code]code[/html] z', 'x <b>bold</b> y <code>code</code> z'),
+            array('x [html]bold[/html] z', 'x [html]bold[/html] z'),
             );
         }
 
@@ -57,6 +61,13 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
 
         $result = $processor->process('x [content]a-[name][/name]-b[/content] y');
         $this->assertSame('x a-[name][/name]-b y', $result);
+        }
+
+    public function testExceptionOnInvalidHandler()
+        {
+        $processor = $this->getProcessor();
+        $this->setExpectedException('RuntimeException');
+        $processor->addHandler('invalid', new \stdClass());
         }
 
     public function testExceptionOnDuplicateHandler()

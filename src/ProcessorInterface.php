@@ -10,11 +10,11 @@ interface ProcessorInterface
      * Register shortcode callback handler
      *
      * @param string $name
-     * @param callable $handler
+     * @param callable|HandlerInterface $handler
      *
      * @return self
      */
-    public function addHandler($name, callable $handler);
+    public function addHandler($name, $handler);
 
     /**
      * Process text using registered shortcode handlers

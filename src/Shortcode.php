@@ -37,6 +37,22 @@ final class Shortcode
         return array_key_exists($name, $this->parameters);
         }
 
+    public function hasParameters()
+        {
+        return (bool)$this->parameters;
+        }
+
+    /**
+     * Returns parameter value using its name, throws exception when there was
+     * no parameter with given name and no default value was set
+     *
+     * @param $name
+     * @param null $default
+     *
+     * @throws \RuntimeException
+     *
+     * @return null
+     */
     public function getParameter($name, $default = null)
         {
         if($this->hasParameter($name))
@@ -52,6 +68,27 @@ final class Shortcode
         throw new \RuntimeException(sprintf($msg, $name));
         }
 
+    /**
+     * Returns name for position-based parameter, null if there was no parameter
+     * at given position
+     *
+     * @param $index
+     *
+     * @return string|null
+     */
+    public function getParameterAt($index)
+        {
+        $keys = array_keys($this->parameters);
+
+        return array_key_exists($index, $keys) ? $keys[$index] : null;
+        }
+
+    /**
+     * Returns shortcode content (data between opening and closing tag). Returns
+     * empty string if content was empty or null if shortcode has no closing tag
+     *
+     * @return string|null
+     */
     public function getContent()
         {
         return $this->content;

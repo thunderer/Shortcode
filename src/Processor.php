@@ -22,12 +22,17 @@ final class Processor implements ProcessorInterface
      * Registers handler for given shortcode name.
      *
      * @param string $name
-     * @param callable $handler
+     * @param callable|HandlerInterface $handler
      *
      * @return $this
      */
-    public function addHandler($name, callable $handler)
+    public function addHandler($name, $handler)
         {
+        if(!is_callable($handler) && !$handler instanceof HandlerInterface)
+            {
+            $msg = 'Shortcode handler must be callable or implement HandlerInterface!';
+            throw new \RuntimeException(sprintf($msg));
+            }
         if($this->hasHandler($name))
             {
             $msg = 'Cannot register duplicate shortcode handler for %s!';
@@ -93,7 +98,7 @@ final class Processor implements ProcessorInterface
             $handler = $this->getHandler($shortcode->getName());
             if($handler)
                 {
-                $replace = call_user_func_array($handler, array($shortcode));
+                $replace = $this->callHandler($handler, $shortcode, $match);
                 $text = substr_replace($text, $replace, $match->getPosition(), $match->getLength());
                 }
             }
@@ -113,6 +118,18 @@ final class Processor implements ProcessorInterface
         $this->recursion = $status;
 
         return $this;
+        }
+
+    private function callHandler($handler, Shortcode $shortcode, Match $match)
+        {
+        if($handler instanceof HandlerInterface)
+            {
+            return $handler->isValid($shortcode)
+                ? $handler->handle($shortcode)
+                : $match->getString();
+            }
+
+        return call_user_func_array($handler, array($shortcode));
         }
 
     private function getHandler($name)
