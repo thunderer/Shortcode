@@ -9,7 +9,7 @@
 [![Code Coverage](https://scrutinizer-ci.com/g/thunderer/Shortcode/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/thunderer/Shortcode/?branch=master)
 [![Code Climate](https://codeclimate.com/github/thunderer/Shortcode/badges/gpa.svg)](https://codeclimate.com/github/thunderer/Shortcode)
 
-Shortcode is a framework and library agnostic engine for interpreting and replacing "shortcodes" (small script-like text fragments) using dynamic callbacks. It can be used to create dynamic content replacement mechanism that is usable even by non-technical people without much training. Usual syntax of shortcodes is as shown in the examples below:
+Shortcode is a framework and library agnostic engine for interpreting and processing "shortcodes" (small script-like text fragments) using dynamic callbacks. It can be used to create dynamic content replacement mechanism that is usable even by non-technical people without much training. Usual syntax of shortcodes is as shown in the examples below:
 
 ```
 [shortcode]
@@ -25,7 +25,7 @@ All those variants (and many more, see the tests) are supported.
 
 No required dependencies, only PHP >=5.4
 
-> PHP 5.3 is marked as minimal version in Composer, but it won't work because parsing mechanism relies on passing context of $this into closures (calling object methods inside them). This can be fixed, but since PHP 5.3 has already reached its EOL months ago I really advise you to upgrade to latest stable version. There are many performance improvements and new features that are extremely useful.
+> PHP 5.3 is marked as minimal version in Composer, but it won't work because parsing mechanism relies on passing context of `$this` into closures (calling object methods inside them). This can be fixed, but since PHP 5.3 has already reached its [EOL](http://php.net/eol.php) months ago I really advise you to upgrade to latest stable version. There are many performance improvements, security patches, and new features that are extremely useful.
 
 ## Installation
 
@@ -45,7 +45,7 @@ in your terminal or manually update your `composer.json` with
 (...)
 ```
 
-and run `composer install` or `composer update` afterwards. If you're not using Composer, then you can download sources from GitHub and load them as you wish in your project. But really, please use Composer.
+and run `composer install` or `composer update` afterwards. If you're not using Composer, download sources from GitHub and load them as required. But really, please use Composer.
 
 ## Usage
 
@@ -61,34 +61,37 @@ use Thunder\Shortcode\Shortcode;
 use Thunder\Shortcode\Serializer\JsonSerializer;
 
 $processor = new Processor(new Extractor(), new Parser());
-
-// Echo below will produce JSON encoded parsed data of given shortcode, eg.:
-// something {"name":"sample","args":{"argument":"value"},"content":"content"} other
 $processor->addHandler('sample', function(Shortcode $s) {    
     return (new JsonSerializer())->serialize($s);
     });
-echo $processor->process('something [sample argument=value]content[/sample] other');
+assert('x {"name":"sample","args":{"arg":"val"},"content":"cnt"} y'
+    === $processor->process('x [sample arg=val]cnt[/sample] y');
+```
 
-// Processor also supports default handler for unregistered shortcode names.
-// Echo below will produce "something [Invalid shortcode name qwerty!] other"
+Default handler can be set to catch any unsupported shortcodes:
+
+```
 $processor->setDefaultHandler('sample', function(Shortcode $s) {    
-    return sprintf('[Invalid shortcode name %s!]', $s->getName());
+    return sprintf('[Invalid shortcode %s!]', $s->getName());
     });
-echo $processor->process('something [qwerty argument=value]content[/qwerty] other');
+assert('something [Invalid shortcode x!] other' 
+    === $processor->process('something [x arg=val]content[/x] other');
+```
 
-// There is also a feature called "shortcode aliases" which means that different
-// shortcode names can reuse same handler, echo below will also produce JSON
-// serialized shortcode data:
+Shortcodes can be aliased to reuse same handler:
+
+```
 $processor->addHandlerAlias('spl', 'sample');
-echo $processor->process('something [spl argument=value]content[/spl] other');
+assert('sth {"name":"spl","parameters":{"arg":"val"},"content":"cnt"} end'
+    === $processor->process('sth [spl arg=val]cnt[/spl] end');
+```
 
-// By default, Processor has enabled recursive processing of nested shortcodes,
-// which means that code below will produce :
-$processor
-    ->addHandler('c', function(Shortcode $s) { return $s->getContent() })
-    ->addHandlerAlias('d', 'c');
+Recursive shortcode processing is enabled by default, use `Processor::setRecursion($status)` to control that behavior:
+
+```
+$processor->addHandler('c', function(Shortcode $s) { return $s->getContent() })
+$processor->addHandlerAlias('d', 'c');
 assert("xyz" === $processor->process('[c]x[d]y[/d]z[/c]'));
-// this behavior can be controller through setRecursion($status) method:
 $processor->setRecursion(false);
 assert('x[d]y[/d]z' === $processor->process('[c]x[d]y[/d]z[/c]'))
 ```
@@ -103,8 +106,7 @@ use Thunder\Shortcode\Extractor;
 $extractor = new Extractor();
 $matches = $extractor->extract('something [x] other [random]sth[/random] other');
 
-// array will contain two instances of class Match with match offsets and exact 
-// strings, like [10, '[x]'] and [20, '[random]sth[/random]']
+// array(Match(10, '[x]'), Match(20, '[random]sth[/random]'))
 var_dump($matches);
 ```
 
@@ -130,6 +132,7 @@ use Thunder\Shortcode\Syntax;
 use Thunder\Shortcode\SyntaxBuilder;
 
 // these two are equivalent, builder is more verbose
+$syntax = new Syntax('[[', ']]', '//', '==', '""');
 $syntax = (new SyntaxBuilder())
     ->setOpeningTag('[[')
     ->setClosingTag(']]')
@@ -137,15 +140,13 @@ $syntax = (new SyntaxBuilder())
     ->setParameterValueSeparator('==')
     ->setParameterValueDelimiter('""')
     ->getSyntax();
-    
-$syntax = new Syntax('[[', ']]', '//', '==', '""');
 
 // create both objects as usual, if nothing is passed defaults are assumed
 $parser = new Parser($syntax);
 $extractor = new Extractor($syntax);
 
 // will contain one matched shortcode string 
-$matches = $extractor->extract('something [[code arg==""value random""]]content[[//code]] other');
+$matches = $extractor->extract('x [[code arg==""value random""]]content[[//code]] y');
 
 // will contain correctly parsed shortcode inside passed string
 $shortcode = $parser->parse('[[code arg==""value random""]]content[[//code]]');
@@ -157,8 +158,8 @@ Different syntaxes can be passed to both objects but that will result in an unpr
 
 * unsupported shortcodes (no registered handler) will be ignored and left as they are,
 * mismatching closing shortcode (`[code]content[/codex]`) will be ignored, opening tag will be interpreted as self-closing shortcode,
-* overlapping shortcodes (`[code]content[inner][/code]content[/inner]`) are not supported and will be interpreted as self-closing, closing tag will be ignored,
-* nested shortcodes of the same name are also considered overlapping, which means that (assume that shortcode [c] returns its content) string "[c]x[c]y[/c]z[/c]" will be interpreted as "xyz[/c]" (first closing tag was matched to first opening tag). This can be solved by aliasing given shortcode handler name, because for example "[c]x[d]y[/d]z[/c]" will be processed "correctly".
+* overlapping shortcodes (`[code]content[inner][/code]content[/inner]`) are not supported and will be interpreted as self-closing, second closing tag will be ignored,
+* nested shortcodes with the same name are also considered overlapping, which means that (assume that shortcode `[c]` returns its content) string `[c]x[c]y[/c]z[/c]` will be interpreted as `xyz[/c]` (first closing tag was matched to first opening tag). This can be solved by aliasing given shortcode handler name, because for example `[c]x[d]y[/d]z[/c]` will be processed "correctly".
 
 ## Ideas
 
@@ -168,9 +169,12 @@ Looking for contribution ideas? Here you are:
 * YAML serializer,
 * specialized exceptions classes,
 * library facade for easier usage,
-* example handlers for common shortcodes ([b], [i], [url]),
-* specialized parameter values (array=value,value, map=key:value,key:value),
-* shortcode validators and strict mode.
+* example handlers for common shortcodes (`[b]`, `[i]`, `[url]`),
+* specialized parameter values (`array=value,value`, `map=key:value,key:value`),
+* shortcode validators and strict mode,
+* forced self-closing tags (`[code /][code]x[/code]` parsed as two matches),
+* iterative processing (`[c]x[c]y[/c]z[/c]` > `x[c]yz[/c]` > `xyz`),
+* ...your idea?
 
 ## License
 

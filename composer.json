@@ -1,6 +1,7 @@
 {
     "name": "thunderer/shortcode",
     "description": "Framework and library agnostic shortcode engine for PHP",
+    "keywords": ["shortcode", "bbcode", "parser", "engine", "library"],
     "license": "MIT",
     "authors": [
         {
