@@ -70,7 +70,7 @@ assert('x {"name":"sample","args":{"arg":"val"},"content":"cnt"} y'
 
 Default handler can be set to catch any unsupported shortcodes:
 
-```
+```php
 $processor->setDefaultHandler('sample', function(Shortcode $s) {    
     return sprintf('[Invalid shortcode %s!]', $s->getName());
     });
@@ -80,7 +80,7 @@ assert('something [Invalid shortcode x!] other'
 
 Shortcodes can be aliased to reuse same handler:
 
-```
+```php
 $processor->addHandlerAlias('spl', 'sample');
 assert('sth {"name":"spl","parameters":{"arg":"val"},"content":"cnt"} end'
     === $processor->process('sth [spl arg=val]cnt[/spl] end');
@@ -88,7 +88,7 @@ assert('sth {"name":"spl","parameters":{"arg":"val"},"content":"cnt"} end'
 
 Recursive shortcode processing is enabled by default, use `Processor::setRecursion($status)` and `Processor::setRecursionDepth($depth)` to control that behavior:
 
-```
+```php
 $processor->addHandler('c', function(Shortcode $s) { return $s->getContent() })
 $processor->addHandlerAlias('d', 'c');
 assert("xyz" === $processor->process('[c]x[d]y[/d]z[/c]'));
@@ -98,7 +98,7 @@ assert('x[d]y[/d]z' === $processor->process('[c]x[d]y[/d]z[/c]'))
 
 Default number of iterations is `1`, but this can be controlled using `Processor::setMaxIterations()`:
 
-```
+```php
 $processor->addHandler('c', function(Shortcode $s) { return $s->getContent() })
 $processor->addHandlerAlias('d', 'c');
 $processor->addHandlerAlias('e', 'c');
