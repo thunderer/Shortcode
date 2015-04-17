@@ -63,6 +63,23 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('x a-[name][/name]-b y', $result);
         }
 
+    public function testProcessorIterative()
+        {
+        $processor = $this
+            ->getProcessor()
+            ->addHandlerAlias('d', 'c')
+            ->addHandlerAlias('e', 'c')
+            ->setRecursion(false);
+
+        $processor->setMaxIterations(2);
+        $this->assertSame('x a y', $processor->process('x [c]a[/c] y'));
+        $this->assertSame('x abc y', $processor->process('x [c]a[d]b[/d]c[/c] y'));
+        $this->assertSame('x ab[e]c[/e]de y', $processor->process('x [c]a[d]b[e]c[/e]d[/d]e[/c] y'));
+
+        $processor->setMaxIterations(null);
+        $this->assertSame('x abcde y', $processor->process('x [c]a[d]b[e]c[/e]d[/d]e[/c] y'));
+        }
+
     public function testExceptionOnInvalidHandler()
         {
         $processor = $this->getProcessor();
@@ -90,5 +107,19 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $processor = $this->getProcessor();
         $this->setExpectedException('InvalidArgumentException');
         $processor->setRecursionDepth(new \stdClass());
+        }
+
+    public function testPreventInfiniteLoop()
+        {
+        $processor = $this
+            ->getProcessor()
+            ->addHandler('self', function(Shortcode $s) { return '[self]'; })
+            ->addHandler('other', function(Shortcode $s) { return '[self]'; })
+            ->addHandler('random', function(Shortcode $s) { return '[various]'; })
+            ->setMaxIterations(null);
+
+        $processor->process('[self]');
+        $processor->process('[other]');
+        $processor->process('[random]');
         }
     }

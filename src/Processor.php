@@ -11,6 +11,7 @@ final class Processor implements ProcessorInterface
     private $parser;
     private $defaultHandler;
     private $recursionDepth = null;
+    private $maxIterations = 1;
 
     public function __construct(ExtractorInterface $extractor, ParserInterface $parser)
         {
@@ -75,16 +76,41 @@ final class Processor implements ProcessorInterface
         }
 
     /**
+     * Entry point for shortcode processing. Implements iterative algorithm for
+     * both limited and unlimited number of iterations.
+     *
+     * @param string $text Text to process
+     *
+     * @return string
+     */
+    public function process($text)
+        {
+        $iterations = $this->maxIterations === null ? 1 : $this->maxIterations;
+        while($iterations--)
+            {
+            $newText = $this->processIteration($text, 0);
+            if($newText === $text)
+                {
+                break;
+                }
+            $text = $newText;
+            $iterations += $this->maxIterations === null ? 1 : 0;
+            }
+
+        return $text;
+        }
+
+    /**
      * Expects matches sorted by position returned from Extractor. Matches are
      * processed from the last to the first to avoid replace position errors.
      * Edge cases are described in README.
      *
-     * @param string $text
-     * @param int $level
+     * @param string $text Current text state
+     * @param int $level Current recursion depth level
      *
      * @return string
      */
-    public function process($text, $level = 0)
+    private function processIteration($text, $level)
         {
         if(null !== $this->recursionDepth && $level > $this->recursionDepth)
             {
@@ -93,12 +119,11 @@ final class Processor implements ProcessorInterface
 
         /** @var $matches Match[] */
         $matches = array_reverse($this->extractor->extract($text));
-
         foreach($matches as $match)
             {
             $shortcode = $this->parser->parse($match->getString());
             $content = $shortcode->hasContent()
-                ? $this->process($shortcode->getContent(), $level + 1)
+                ? $this->processIteration($shortcode->getContent(), $level + 1)
                 : $shortcode->getContent();
             $shortcode = new Shortcode($shortcode->getName(), $shortcode->getParameters(), $content);
             $handler = $this->getHandler($shortcode->getName());
@@ -129,6 +154,27 @@ final class Processor implements ProcessorInterface
             }
 
         $this->recursionDepth = $depth;
+
+        return $this;
+        }
+
+    /**
+     * Maximum number of iterations, null means infinite, any integer greater
+     * than or equal to zero sets value.
+     *
+     * @param int|null $iterations
+     *
+     * @return self
+     */
+    public function setMaxIterations($iterations)
+        {
+        if(null !== $iterations && !(is_int($iterations) && $iterations >= 0))
+            {
+            $msg = 'Maximum number of iterations must be null (infinite) or integer >= 0!';
+            throw new \InvalidArgumentException($msg);
+            }
+
+        $this->maxIterations = $iterations;
 
         return $this;
         }
