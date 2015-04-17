@@ -84,4 +84,11 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame('namerandom', $processor->process('[name][other][/name][random]'));
         }
+
+    public function testExceptionOnInvalidRecursionDepth()
+        {
+        $processor = $this->getProcessor();
+        $this->setExpectedException('InvalidArgumentException');
+        $processor->setRecursionDepth(new \stdClass());
+        }
     }
