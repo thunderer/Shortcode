@@ -86,7 +86,7 @@ assert('sth {"name":"spl","parameters":{"arg":"val"},"content":"cnt"} end'
     === $processor->process('sth [spl arg=val]cnt[/spl] end');
 ```
 
-Recursive shortcode processing is enabled by default, use `Processor::setRecursion($status)` to control that behavior:
+Recursive shortcode processing is enabled by default, use `Processor::setRecursion($status)` and `Processor::setRecursionDepth($depth)` to control that behavior:
 
 ```
 $processor->addHandler('c', function(Shortcode $s) { return $s->getContent() })
@@ -94,6 +94,24 @@ $processor->addHandlerAlias('d', 'c');
 assert("xyz" === $processor->process('[c]x[d]y[/d]z[/c]'));
 $processor->setRecursion(false);
 assert('x[d]y[/d]z' === $processor->process('[c]x[d]y[/d]z[/c]'))
+```
+
+Default number of iterations is `1`, but this can be controlled using `Processor::setMaxIterations()`:
+
+```
+$processor->addHandler('c', function(Shortcode $s) { return $s->getContent() })
+$processor->addHandlerAlias('d', 'c');
+$processor->addHandlerAlias('e', 'c');
+$processor->setRecursionDepth(0);
+
+$processor->setMaxIterations(1);
+assert("ab[d]cd[/d]e" === $processor->process('a[c]b[d]c[/c]d[/d]e'));
+
+$processor->setMaxIterations(2);
+assert("ab[e]c[/e]de" === $processor->process('[c]a[d]b[e]c[/e]d[/d]e[/c]'));
+
+$processor->setMaxIterations(null);
+assert('abcde' === $processor->process('[c]a[d]b[e]c[/e]d[/d]e[/c]'));
 ```
 
 **Extraction**
@@ -173,7 +191,6 @@ Looking for contribution ideas? Here you are:
 * specialized parameter values (`array=value,value`, `map=key:value,key:value`),
 * shortcode validators and strict mode,
 * forced self-closing tags (`[code /][code]x[/code]` parsed as two matches),
-* iterative processing (`[c]x[c]y[/c]z[/c]` > `x[c]yz[/c]` > `xyz`),
 * ...your idea?
 
 ## License

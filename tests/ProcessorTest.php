@@ -109,13 +109,20 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $processor->setRecursionDepth(new \stdClass());
         }
 
+    public function testExceptionOnInvalidMaxIterations()
+        {
+        $processor = $this->getProcessor();
+        $this->setExpectedException('InvalidArgumentException');
+        $processor->setMaxIterations(new \stdClass());
+        }
+
     public function testPreventInfiniteLoop()
         {
         $processor = $this
             ->getProcessor()
-            ->addHandler('self', function(Shortcode $s) { return '[self]'; })
-            ->addHandler('other', function(Shortcode $s) { return '[self]'; })
-            ->addHandler('random', function(Shortcode $s) { return '[various]'; })
+            ->addHandler('self', function() { return '[self]'; })
+            ->addHandler('other', function() { return '[self]'; })
+            ->addHandler('random', function() { return '[various]'; })
             ->setMaxIterations(null);
 
         $processor->process('[self]');
