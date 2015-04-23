@@ -33,6 +33,8 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
             array('[sc x="multi'."\n".'line"]', 'sc', array('x' => 'multi'."\n".'line'), null),
             array('[sc noval x="val" y]content[/sc]', 'sc', array('noval'=> null, 'x' => 'val', 'y' => null), 'content'),
             array('[sc x="{..}"]', 'sc', array('x' => '{..}'), null),
+            array('[sc a="x y" b="x" c=""]', 'sc', array('a' => 'x y', 'b' => 'x', 'c' => ''), null),
+            array('[sc a="a \"\" b"]', 'sc', array('a' => 'a \"\" b'), null),
             );
         }
 
@@ -52,5 +54,15 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(1, $shortcode->getParameters());
         $this->assertSame('val oth', $shortcode->getParameter('arg'));
         $this->assertSame('cont', $shortcode->getContent());
+        }
+
+    public function testDifferentSyntaxEscapedQuotes()
+        {
+        $parser = new Parser(new Syntax('^', '$', '&', '!!!', '@@'));
+        $shortcode = $parser->parse('^code a!!!@@\"\"@@ b!!!@@x\"y@@ c$cnt^&code$');
+
+        $this->assertSame('code', $shortcode->getName());
+        $this->assertSame(array('a' => '\\"\\"', 'b' => 'x\"y', 'c' => null), $shortcode->getParameters());
+        $this->assertSame('cnt', $shortcode->getContent());
         }
     }

@@ -37,7 +37,7 @@ final class Syntax
         $equals = $this->quote($this->getParameterValueSeparator());
         $string = $this->quote($this->getParameterValueDelimiter());
 
-        return '~(?:\s+(\w+(?:(?=\s|$)|'.$equals.'\w+|'.$equals.$string.'.+'.$string.')))~us';
+        return '~(?:\s+(\w+(?:(?=\s|$)|'.$equals.'\w+|'.$equals.$string.'([^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*?)'.$string.')))~us';
         }
 
     private function createShortcodeRegex()
