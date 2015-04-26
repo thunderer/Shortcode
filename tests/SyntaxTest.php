@@ -33,7 +33,8 @@ final class SyntaxTest extends \PHPUnit_Framework_TestCase
 
     public function testBuilder()
         {
-        $syntax = (new SyntaxBuilder())->getSyntax();
+        $builder = new SyntaxBuilder();
+        $syntax = $builder->getSyntax();
 
         $this->assertSame('[', $syntax->getOpeningTag());
         $this->assertSame(']', $syntax->getClosingTag());
@@ -41,7 +42,8 @@ final class SyntaxTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('=', $syntax->getParameterValueSeparator());
         $this->assertSame('"', $syntax->getParameterValueDelimiter());
 
-        $syntax = (new SyntaxBuilder())
+        $builder = new SyntaxBuilder();
+        $syntax = $builder
             ->setOpeningTag('[[')
             ->setClosingTag(']]')
             ->setClosingTagMarker('//')

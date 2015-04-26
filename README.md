@@ -25,8 +25,6 @@ All those variants (and many more, see the tests) are supported.
 
 No required dependencies, only PHP >=5.4
 
-> PHP 5.3 is marked as minimal version in Composer, but it won't work because parsing mechanism relies on passing context of `$this` into closures (calling object methods inside them). This can be fixed, but since PHP 5.3 has already reached its [EOL](http://php.net/eol.php) months ago I really advise you to upgrade to latest stable version. There are many performance improvements, security patches, and new features that are extremely useful.
-
 ## Installation
 
 To install it from Packagist execute

@@ -29,20 +29,26 @@ final class Processor implements ProcessorInterface
      */
     public function addHandler($name, $handler)
         {
-        if(!is_callable($handler) && !$handler instanceof HandlerInterface)
+        $this->guardHandler($handler);
+
+        if(!$name || $this->hasHandler($name))
             {
-            $msg = 'Shortcode handler must be callable or implement HandlerInterface!';
-            throw new \RuntimeException(sprintf($msg));
-            }
-        if($this->hasHandler($name))
-            {
-            $msg = 'Cannot register duplicate shortcode handler for %s!';
+            $msg = 'Invalid name or duplicate shortcode handler for %s!';
             throw new \RuntimeException(sprintf($msg, $name));
             }
 
         $this->handlers[$name] = $handler;
 
         return $this;
+        }
+
+    private function guardHandler($handler)
+        {
+        if(!is_callable($handler) && !$handler instanceof HandlerInterface)
+            {
+            $msg = 'Shortcode handler must be callable or implement HandlerInterface!';
+            throw new \RuntimeException(sprintf($msg));
+            }
         }
 
     /**
@@ -56,8 +62,10 @@ final class Processor implements ProcessorInterface
      */
     public function addHandlerAlias($alias, $name)
         {
-        $this->addHandler($alias, function(Shortcode $shortcode) use($name) {
-            return call_user_func_array($this->getHandler($name), array($shortcode));
+        $handler = $this->getHandler($name);
+
+        $this->addHandler($alias, function(Shortcode $shortcode) use($handler) {
+            return call_user_func_array($handler, array($shortcode));
             });
 
         return $this;
@@ -68,10 +76,12 @@ final class Processor implements ProcessorInterface
      * without handler just like they were found. With this callable being set,
      * all matched shortcodes without registered handler will be passed to it.
      *
-     * @param callable $handler Handler for shortcodes without registered name handler
+     * @param callable|HandlerInterface $handler Handler for shortcodes without registered name handler
      */
-    public function setDefaultHandler(callable $handler)
+    public function setDefaultHandler($handler)
         {
+        $this->guardHandler($handler);
+
         $this->defaultHandler = $handler;
         }
 
