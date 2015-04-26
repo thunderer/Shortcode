@@ -23,7 +23,7 @@ All those variants (and many more, see the tests) are supported.
 
 ## Requirements
 
-No required dependencies, only PHP >=5.4
+No required dependencies, only PHP >=5.3
 
 ## Installation
 
