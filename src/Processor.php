@@ -19,6 +19,13 @@ final class Processor implements ProcessorInterface
         $this->parser = $parser;
         }
 
+    public static function createDefault(Syntax $syntax = null)
+        {
+        $syntax = $syntax ?: new Syntax();
+
+        return new self(new Extractor($syntax), new Parser($syntax));
+        }
+
     /**
      * Registers handler for given shortcode name.
      *

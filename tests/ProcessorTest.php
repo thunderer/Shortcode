@@ -14,9 +14,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
     {
     private function getProcessor()
         {
-        $processor = new Processor(new Extractor(), new Parser());
-
-        $processor
+        $processor = Processor::createDefault()
             ->addHandler('name', function(Shortcode $s) { return $s->getName(); })
             ->addHandler('content', function(Shortcode $s) { return $s->getContent(); })
             ->addHandler('html', new HtmlShortcode())
