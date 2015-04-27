@@ -15,6 +15,11 @@ final class JsonSerializer implements SerializerInterface
             ));
         }
 
+    /**
+     * @param string $text
+     *
+     * @return Shortcode
+     */
     public function unserialize($text)
         {
         $data = json_decode($text, true);
