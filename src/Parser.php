@@ -25,9 +25,11 @@ final class Parser implements ParserInterface
             }
 
         return new Shortcode(
-            $matches[2],
-            isset($matches[3]) ? $this->parseParameters($matches[3]) : array(),
-            isset($matches[4]) ? $matches[4] : null
+            isset($matches[4]) ? $matches[4] : $matches[2],
+            isset($matches[5])
+                ? $this->parseParameters($matches[5])
+                : (isset($matches[3]) ? $this->parseParameters($matches[3]) : array()),
+            isset($matches[6]) ? $matches[6] : null
             );
         }
 

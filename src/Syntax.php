@@ -46,7 +46,10 @@ final class Syntax
         $slash = $this->quote($this->getClosingTagMarker());
         $close = $this->quote($this->getClosingTag());
 
-        return '('.$open.'([\w-]+)(\s+.+?)?'.$close.'(?:(.*?)'.$open.$slash.'(\2)'.$close.')?)';
+        $selfClosed  = $open.'([\w-]+)(\s+[^'.$slash.']+?)?\s*'.$slash.$close;
+        $withContent = $open.'([\w-]+)(\s+[^'.$slash.']+?)?'.$close.'(?:(.*?)'.$open.$slash.'(\4)'.$close.')?';
+
+        return '((?:'.$selfClosed.'|'.$withContent.'))';
         }
 
     private function quote($text)
