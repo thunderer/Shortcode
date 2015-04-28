@@ -5,7 +5,7 @@ namespace Thunder\Shortcode;
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 interface HandlerInterface
-    {
+{
     /**
      * Checks if shortcode contains enough and valid data to be processed
      *
@@ -23,4 +23,4 @@ interface HandlerInterface
      * @return string
      */
     public function handle(Shortcode $shortcode);
-    }
+}

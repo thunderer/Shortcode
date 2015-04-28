@@ -5,7 +5,7 @@ namespace Thunder\Shortcode;
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 interface SerializerInterface
-    {
+{
     /**
      * Serializes Shortcode class instance into given format
      *
@@ -23,4 +23,4 @@ interface SerializerInterface
      * @return Shortcode
      */
     public function unserialize($text);
-    }
+}

@@ -5,7 +5,7 @@ namespace Thunder\Shortcode;
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 interface ProcessorInterface
-    {
+{
     /**
      * Register shortcode callback handler
      *
@@ -24,4 +24,4 @@ interface ProcessorInterface
      * @return string
      */
     public function process($text);
-    }
+}

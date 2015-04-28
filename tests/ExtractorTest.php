@@ -9,7 +9,7 @@ use Thunder\Shortcode\Syntax;
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 final class ExtractorTest extends \PHPUnit_Framework_TestCase
-    {
+{
     /**
      * @param string $text
      * @param Match[] $matches
@@ -17,21 +17,20 @@ final class ExtractorTest extends \PHPUnit_Framework_TestCase
      * @dataProvider provideTexts
      */
     public function testShortcode($text, array $matches)
-        {
+    {
         $extractor = new Extractor();
         $foundMatches = $extractor->extract($text);
 
         $matchesCount = count($matches);
         $this->assertSame($matchesCount, count($foundMatches));
-        for($i = 0; $i < $matchesCount; $i++)
-            {
+        for ($i = 0; $i < $matchesCount; $i++) {
             $this->assertSame($matches[$i]->getPosition(), $foundMatches[$i]->getPosition());
             $this->assertSame($matches[$i]->getString(), $foundMatches[$i]->getString());
-            }
         }
+    }
 
     public function provideTexts()
-        {
+    {
         return array(
             array('Lorem [ipsum] random [code-code arg=val] which is here', array(
                 new Match(6, '[ipsum]'),
@@ -50,10 +49,10 @@ final class ExtractorTest extends \PHPUnit_Framework_TestCase
                 new Match(27, '[x x y=z a="b c"]a[/x]'),
                 )),
             );
-        }
+    }
 
     public function testWithDifferentSyntax()
-        {
+    {
         $extractor = new Extractor(new Syntax('[[', ']]', '//', '==', '""'));
 
         $matches = $extractor->extract('so[[m]]ething [[code]] othe[[r]]various[[//r]]');
@@ -62,5 +61,5 @@ final class ExtractorTest extends \PHPUnit_Framework_TestCase
 
         $matches = $extractor->extract('x [[code arg==""val oth""]]cont[[//code]] y');
         $this->assertCount(1, $matches);
-        }
     }
+}

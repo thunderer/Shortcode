@@ -2,3 +2,4 @@ vendor
 composer.lock
 coverage
 coverage.xml
+/.php_cs.cache

@@ -5,7 +5,7 @@ namespace Thunder\Shortcode;
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 interface ParserInterface
-    {
+{
     /**
      * Parse single shortcode match into object
      *
@@ -14,4 +14,4 @@ interface ParserInterface
      * @return Shortcode
      */
     public function parse($text);
-    }
+}
