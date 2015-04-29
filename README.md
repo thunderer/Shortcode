@@ -188,7 +188,6 @@ Looking for contribution ideas? Here you are:
 * example handlers for common shortcodes (`[b]`, `[i]`, `[url]`),
 * specialized parameter values (`array=value,value`, `map=key:value,key:value`),
 * shortcode validators and strict mode,
-* forced self-closing tags (`[code /][code]x[/code]` parsed as two matches),
 * ...your idea?
 
 ## License

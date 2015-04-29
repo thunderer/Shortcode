@@ -37,7 +37,14 @@ final class Syntax
         $equals = $this->quote($this->getParameterValueSeparator());
         $string = $this->quote($this->getParameterValueDelimiter());
 
-        return '~(?:\s+(\w+(?:(?=\s|$)|'.$equals.'\w+|'.$equals.$string.'([^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*?)'.$string.')))~us';
+        // lookahead test for either space or end of string
+        $empty = '(?=\s|$)';
+        // equals sign and alphanumeric value
+        $simple = $equals.'\w+';
+        // equals sign and value without unescaped string delimiters enclosed in them
+        $complex = $equals.$string.'([^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*?)'.$string;
+
+        return '~(?:\s+(\w+(?:'.$empty.'|'.$simple.'|'.$complex.')))~us';
         }
 
     private function createShortcodeRegex()
@@ -46,7 +53,20 @@ final class Syntax
         $slash = $this->quote($this->getClosingTagMarker());
         $close = $this->quote($this->getClosingTag());
 
-        return '('.$open.'([\w-]+)(\s+.+?)?'.$close.'(?:(.*?)'.$open.$slash.'(\2)'.$close.')?)';
+        // alphanumeric characters and dash
+        $name = '([\w-]+)';
+        // any characters that are not closing tag marker
+        $parameters = '(\s+[^'.$slash.']+?)?';
+        // non-greedy match for any characters
+        $content = '(.*?)';
+
+        // open tag, name, parameters, maybe some spaces, closing marker, closing tag
+        $selfClosed  = $open.$name.$parameters.'\s*'.$slash.$close;
+        // open tag, name, parameters, closing tag, maybe some content and closing
+        // block with backreference name validation
+        $withContent = $open.$name.$parameters.$close.'(?:'.$content.$open.$slash.'(\4)'.$close.')?';
+
+        return '((?:'.$selfClosed.'|'.$withContent.'))';
         }
 
     private function quote($text)

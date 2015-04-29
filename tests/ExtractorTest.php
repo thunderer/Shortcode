@@ -49,6 +49,17 @@ final class ExtractorTest extends \PHPUnit_Framework_TestCase
                 new Match(2, '[x x y=z a="b c"]a[/x]'),
                 new Match(27, '[x x y=z a="b c"]a[/x]'),
                 )),
+            array('x [code /] y [code]z[/code] x [code] y [code/] a', array(
+                new Match(2, '[code /]'),
+                new Match(13, '[code]z[/code]'),
+                new Match(30, '[code]'),
+                new Match(39, '[code/]'),
+                )),
+            array('x [code arg=val /] y [code cmp="xx"/] x [code x=y/] a', array(
+                new Match(2, '[code arg=val /]'),
+                new Match(21, '[code cmp="xx"/]'),
+                new Match(40, '[code x=y/]'),
+                )),
             );
         }
 

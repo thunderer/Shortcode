@@ -35,14 +35,30 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
             array('[sc x="{..}"]', 'sc', array('x' => '{..}'), null),
             array('[sc a="x y" b="x" c=""]', 'sc', array('a' => 'x y', 'b' => 'x', 'c' => ''), null),
             array('[sc a="a \"\" b"]', 'sc', array('a' => 'a \"\" b'), null),
+            array('[sc/]', 'sc', array(), null),
+            array('[sc    /]', 'sc', array(), null),
+            array('[sc arg=val cmp="a b"/]', 'sc', array('arg' => 'val', 'cmp' => 'a b'), null),
+            array('[sc x y   /]', 'sc', array('x' => null, 'y' => null), null),
+            array('[sc x="\ "   /]', 'sc', array('x' => '\ '), null),
             );
         }
 
-    public function testExceptionInvalidShortcode()
+    /**
+     * @dataProvider provideInvalid
+     */
+    public function testParserInvalid($code)
         {
         $parser = new Parser();
         $this->setExpectedException('RuntimeException');
-        $parser->parse('');
+        $parser->parse($code);
+        }
+
+    public function provideInvalid()
+        {
+        return array(
+            array(''),
+            array('[sc x y   /]ddd[/sc]'),
+            );
         }
 
     public function testWithDifferentSyntax()
