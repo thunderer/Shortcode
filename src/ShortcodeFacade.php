@@ -7,82 +7,98 @@ use Thunder\Shortcode\Serializer\TextSerializer;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class ShortcodeFacade implements ExtractorInterface, ParserInterface, ProcessorInterface
+class ShortcodeFacade
     {
+    /** @var ExtractorInterface */
     private $extractor;
+    /** @var ParserInterface */
     private $parser;
+    /** @var ProcessorInterface */
     private $processor;
 
+    /** @var SerializerInterface */
     private $jsonSerializer;
+    /** @var SerializerInterface */
     private $textSerializer;
 
-    private function __construct(ExtractorInterface $extractor = null, ParserInterface $parser = null)
-        {
-        $this->extractor = $extractor ?: new Extractor();
-        $this->parser = $parser ?: new Parser();
-        $this->processor = new Processor($this->extractor, $this->parser);
-
-        $this->jsonSerializer = new JsonSerializer();
-        $this->textSerializer = new TextSerializer();
-        }
-
-    public static function create(ExtractorInterface $extractor = null, ParserInterface $parser = null)
-        {
-        return new self($extractor, $parser);
-        }
-
-    public static function createWithSyntax(Syntax $syntax = null)
+    public function __construct(Syntax $syntax = null, array $handlers = array(), array $aliases = array())
         {
         $syntax = $syntax ?: new Syntax();
 
-        return new self(new Extractor($syntax), new Parser($syntax));
+        $this->createExtractor(new Extractor($syntax));
+        $this->createParser(new Parser($syntax));
+        $this->createProcessor(new Processor($this->extractor, $this->parser), $handlers, $aliases);
+
+        $this->createTextSerializer(new TextSerializer());
+        $this->createJsonSerializer(new JsonSerializer());
         }
 
-    public function extract($text)
+    protected function createExtractor(ExtractorInterface $extractor)
+        {
+        $this->extractor = $extractor;
+        }
+
+    protected function createParser(ParserInterface $parser)
+        {
+        $this->parser = $parser;
+        }
+
+    protected function createProcessor(ProcessorInterface $processor, array $handlers, array $aliases)
+        {
+        /** @var $processor Processor */
+        $this->processor = $processor;
+
+        foreach($handlers as $name => $handler)
+            {
+            $this->processor->addHandler($name, $handler);
+            }
+        foreach($aliases as $alias => $name)
+            {
+            $this->processor->addHandlerAlias($alias, $name);
+            }
+        }
+
+    protected function createTextSerializer(SerializerInterface $serializer)
+        {
+        $this->textSerializer = $serializer;
+        }
+
+    protected function createJsonSerializer(SerializerInterface $serializer)
+        {
+        $this->jsonSerializer = $serializer;
+        }
+
+    final public function extract($text)
         {
         return $this->extractor->extract($text);
         }
 
-    public function parse($code)
+    final public function parse($code)
         {
         return $this->parser->parse($code);
         }
 
-    public function addHandler($name, $handler)
-        {
-        $this->processor->addHandler($name, $handler);
-
-        return $this;
-        }
-
-    public function addHandlerAlias($alias, $name)
-        {
-        $this->processor->addHandlerAlias($alias, $name);
-
-        return $this;
-        }
-
-    public function process($text)
+    final public function process($text)
         {
         return $this->processor->process($text);
         }
 
-    public function serializeToText(Shortcode $shortcode)
+    final public function serializeToText(Shortcode $shortcode)
         {
         return $this->textSerializer->serialize($shortcode);
         }
 
-    public function unserializeFromText($text)
+    final public function unserializeFromText($text)
         {
         return $this->textSerializer->unserialize($text);
         }
 
-    public function serializeToJson(Shortcode $shortcode)
+    final public function serializeToJson(Shortcode $shortcode)
         {
         return $this->jsonSerializer->serialize($shortcode);
         }
 
-    public function unserializeFromJson($json)
+    final public function unserializeFromJson($json)
         {
         return $this->jsonSerializer->unserialize($json);
         }

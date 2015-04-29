@@ -5,7 +5,6 @@ use Thunder\Shortcode\Extractor;
 use Thunder\Shortcode\Parser;
 use Thunder\Shortcode\Processor;
 use Thunder\Shortcode\Shortcode;
-use Thunder\Shortcode\ShortcodeFacade;
 use Thunder\Shortcode\Tests\Fake\HtmlShortcode;
 
 /**
