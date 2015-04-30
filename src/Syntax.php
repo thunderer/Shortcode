@@ -41,13 +41,24 @@ final class Syntax
 
         if (!isset(self::$regexCache[$cacheKey])) {
 
+            $optionalWhitespace = '\s*';
+
+            $equals = $optionalWhitespace . $equals . $optionalWhitespace;
+
             $regex =
                     '(?:' .
                         '\s+' .
                         '(' .
                             '\w+' .
                             '(?:' .
-                                '(?=\s|$)' .    // lookahead test for either space or end of string
+                                '(?=' .
+                                    '\s+' .
+                                    '[^' .
+                                        $equals .
+                                    ']+' .
+                                    '|' .
+                                    '$' .
+                                ')' .
                                 '|' .
                                 $equals .       // equals sign and alphanumeric value
                                 '\w+' .

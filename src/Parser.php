@@ -40,7 +40,7 @@ final class Parser implements ParserInterface
         $return = array();
         foreach($argsMatches[1] as $item)
             {
-            $parts = explode($this->syntax->getParameterValueSeparator(), $item, 2);
+            $parts = preg_split('~\s*' . $this->syntax->getParameterValueSeparator() . '\s*~', $item, 2);
             $return[$parts[0]] = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
             }
 
