@@ -97,6 +97,7 @@ final class Syntax
             $optionalWhitespace = '\s*';
 
             $openingTag = $openingTag . $optionalWhitespace;
+            $closingTag = $optionalWhitespace . $closingTag;
 
             self::$regexCache[$cacheKey] =
 

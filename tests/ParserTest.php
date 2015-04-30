@@ -56,6 +56,22 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
             array('[  sc arg=val cmp="a b"/]', 'sc', array('arg' => 'val', 'cmp' => 'a b'), null),
             array('[  sc x y   /]', 'sc', array('x' => null, 'y' => null), null),
             array('[  sc x="\ "   /]', 'sc', array('x' => '\ '), null),
+
+            //check for whitespace after opening tag
+            array('[sc  ]', 'sc', array(), null),
+            array('[sc arg=val  ]', 'sc', array('arg' => 'val'), null),
+            array('[sc novalue arg="complex value"  ]', 'sc', array('novalue' => null, 'arg' => 'complex value'), null),
+            array('[sc x="ąćęłńóśżź ĄĆĘŁŃÓŚŻŹ"  ]', 'sc', array('x' => 'ąćęłńóśżź ĄĆĘŁŃÓŚŻŹ'), null),
+            array('[sc x="multi'."\n".'line"  ]', 'sc', array('x' => 'multi'."\n".'line'), null),
+            array('[sc noval x="val" y  ]content[/sc  ]', 'sc', array('noval'=> null, 'x' => 'val', 'y' => null), 'content'),
+            array('[sc x="{..}"  ]', 'sc', array('x' => '{..}'), null),
+            array('[sc a="x y" b="x" c=""  ]', 'sc', array('a' => 'x y', 'b' => 'x', 'c' => ''), null),
+            array('[sc a="a \"\" b"  ]', 'sc', array('a' => 'a \"\" b'), null),
+            array('[sc/  ]', 'sc', array(), null),
+            array('[sc    /  ]', 'sc', array(), null),
+            array('[sc arg=val cmp="a b"/  ]', 'sc', array('arg' => 'val', 'cmp' => 'a b'), null),
+            array('[sc x y   /  ]', 'sc', array('x' => null, 'y' => null), null),
+            array('[sc x="\ "   /  ]', 'sc', array('x' => '\ '), null),
             );
         }
 
