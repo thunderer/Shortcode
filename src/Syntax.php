@@ -94,6 +94,10 @@ final class Syntax
             // non-greedy match for any characters
             $content = '(.*?)';
 
+            $optionalWhitespace = '\s*';
+
+            $openingTag = $openingTag . $optionalWhitespace;
+
             self::$regexCache[$cacheKey] =
 
                 '(' .
@@ -101,7 +105,7 @@ final class Syntax
                         $openingTag .
                         $name .
                         $parameters .
-                        '\s*' .
+                        $optionalWhitespace .
                         $closingTagMarker .
                         $closingTag .
                         '|' .
