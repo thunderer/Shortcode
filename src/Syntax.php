@@ -21,6 +21,12 @@ final class Syntax
         $this->closingTagMarker = $closingTagMarker ?: '/';
         $this->parameterValueSeparator = $parameterValueSeparator ?: '=';
         $this->parameterValueDelimiter = $parameterValueDelimiter ?: '"';
+
+        $this->openingTag = trim($this->openingTag);
+        $this->closingTag = trim($this->closingTag);
+        $this->closingTagMarker = trim($this->closingTagMarker);
+        $this->parameterValueSeparator = trim($this->parameterValueSeparator);
+        $this->parameterValueDelimiter = trim($this->parameterValueDelimiter);
         }
 
     public function getShortcodeRegex()

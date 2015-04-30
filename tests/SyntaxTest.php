@@ -57,4 +57,42 @@ final class SyntaxTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('==', $syntax->getParameterValueSeparator());
         $this->assertSame('""', $syntax->getParameterValueDelimiter());
         }
+
+    /**
+     * @dataProvider getDataForSpacesTrimmedCorrectly
+     */
+    public function testSpacesTrimmedCorrectly($incoming, $expected)
+        {
+            $propertiesToTest = array(
+
+                'OpeningTag',
+                'ClosingTag',
+                'ClosingTagMarker',
+                'ParameterValueSeparator',
+                'ParameterValueDelimiter'
+            );
+
+            foreach ($propertiesToTest as $property) {
+
+                $getter = "get$property";
+                $setter = "set$property";
+
+                $builder = new SyntaxBuilder();
+                $syntax = $builder->$setter($incoming)->getSyntax();
+                $this->assertEquals($expected, $syntax->$getter());
+            }
+        }
+
+    public function getDataForSpacesTrimmedCorrectly()
+        {
+            return array(
+
+                array('  x  ', 'x'),
+                array('x  ', 'x'),
+                array('  x', 'x'),
+                array("\tx\t", 'x'),
+                array("x\t", 'x'),
+                array("\tx", 'x'),
+            );
+        }
     }
