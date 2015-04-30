@@ -47,6 +47,34 @@ and run `composer install` or `composer update` afterwards. If you're not using 
 
 ## Usage
 
+**Facade**
+
+There is a facade that contains shortcuts to all features in the library. You can instantiate it by using named constructor `ShortcodeFacade::create()` and pass optional `Syntax` object and arrays of shortcode handlers and aliases:
+
+```php
+use Thunder\Shortcode\ShortcodeFacade;
+
+$facade = ShortcodeFacade::create(null, array(
+    'name' => function(Shortcode $s) { return $s->getName(); },
+    'content' => function(Shortcode $s) { return $s->getContent(); },
+    ), array(
+    'c' => 'content',
+    'n' => 'name',
+    ));
+    
+$facade->extract('[c]');
+$facade->parse('[c]');
+$facade->process('[c]');
+
+$s = new Shortcode('c', array(), null);
+$facade->serializeToText($s);
+$facade->unserializeFromText('[c]');
+$facade->serializeToJson($s);
+$facade->unserializeFromJson('{"name":"c","parameters":[],"content":null}');
+```
+
+All those calls are equivalent to the examples below. If you want to change the dependencies, extend `ShortcodeFacade` class and replace them by overloading protected `create*` methods.
+
 **Replacement**
 
 Create `Processor` class instance, register required shortcodes handlers and use `process()` method to dynamically replace found matches using registered callbacks:
