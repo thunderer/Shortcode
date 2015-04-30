@@ -11,6 +11,7 @@ final class Syntax
     private $closingTagMarker;
     private $parameterValueSeparator;
     private $parameterValueDelimiter;
+    private static $regexCache = array();
 
     public function __construct($openingTag = null, $closingTag = null, $closingTagMarker = null,
                                 $parameterValueSeparator = null, $parameterValueDelimiter = null)
@@ -35,38 +36,91 @@ final class Syntax
     public function getArgumentsRegex()
         {
         $equals = $this->quote($this->getParameterValueSeparator());
-        $string = $this->quote($this->getParameterValueDelimiter());
+        $quote = $this->quote($this->getParameterValueDelimiter());
+        $cacheKey = "arguments-$equals-$quote";
 
-        // lookahead test for either space or end of string
-        $empty = '(?=\s|$)';
-        // equals sign and alphanumeric value
-        $simple = $equals.'\w+';
-        // equals sign and value without unescaped string delimiters enclosed in them
-        $complex = $equals.$string.'([^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*?)'.$string;
+        if (!isset(self::$regexCache[$cacheKey])) {
 
-        return '~(?:\s+(\w+(?:'.$empty.'|'.$simple.'|'.$complex.')))~us';
+            $regex =
+                    '(?:' .
+                        '\s+' .
+                        '(' .
+                            '\w+' .
+                            '(?:' .
+                                '(?=\s|$)' .    // lookahead test for either space or end of string
+                                '|' .
+                                $equals .       // equals sign and alphanumeric value
+                                '\w+' .
+                                '|' .
+                                $equals .       // equals sign and value without unescaped string delimiters enclosed in them
+                                $quote .
+                                '(' .
+                                    '[^' .
+                                        $quote .
+                                        '\\\\' .
+                                    ']*' .
+                                    '(?:' .
+                                        '\\\\.' .
+                                        '[^' .
+                                            $quote .
+                                            '\\\\' .
+                                        ']*' .
+                                    ')*?' .
+                                ')' .
+                                $quote .
+                            ')' .
+                        ')' .
+                    ')';
+
+            self::$regexCache[$cacheKey] = "~$regex~us";
+        }
+
+        return self::$regexCache[$cacheKey];
         }
 
     private function createShortcodeRegex()
         {
-        $open = $this->quote($this->getOpeningTag());
-        $slash = $this->quote($this->getClosingTagMarker());
-        $close = $this->quote($this->getClosingTag());
+        $openingTag = $this->quote($this->getOpeningTag());
+        $closingTagMarker = $this->quote($this->getClosingTagMarker());
+        $closingTag = $this->quote($this->getClosingTag());
+        $cacheKey = "shortcode-$openingTag-$closingTagMarker-$closingTag";
 
-        // alphanumeric characters and dash
-        $name = '([\w-]+)';
-        // any characters that are not closing tag marker
-        $parameters = '(\s+[^'.$slash.']+?)?';
-        // non-greedy match for any characters
-        $content = '(.*?)';
+        if (!isset(self::$regexCache[$cacheKey])) {
 
-        // open tag, name, parameters, maybe some spaces, closing marker, closing tag
-        $selfClosed  = $open.$name.$parameters.'\s*'.$slash.$close;
-        // open tag, name, parameters, closing tag, maybe some content and closing
-        // block with backreference name validation
-        $withContent = $open.$name.$parameters.$close.'(?:'.$content.$open.$slash.'(\4)'.$close.')?';
+            // alphanumeric characters and dash
+            $name = '([\w-]+)';
+            // any characters that are not closing tag marker
+            $parameters = '(\s+[^'.$closingTagMarker.']+?)?';
+            // non-greedy match for any characters
+            $content = '(.*?)';
 
-        return '((?:'.$selfClosed.'|'.$withContent.'))';
+            self::$regexCache[$cacheKey] =
+
+                '(' .
+                    '(?:' .
+                        $openingTag .
+                        $name .
+                        $parameters .
+                        '\s*' .
+                        $closingTagMarker .
+                        $closingTag .
+                        '|' .
+                        $openingTag .
+                        $name .
+                        $parameters .
+                        $closingTag .
+                        '(?:' .
+                            $content .
+                            $openingTag .
+                            $closingTagMarker .
+                            '(\4)' .
+                            $closingTag .
+                        ')?' .
+                    ')' .
+                ')';
+        }
+
+        return self::$regexCache[$cacheKey];
         }
 
     private function quote($text)
