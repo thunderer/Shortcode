@@ -11,7 +11,7 @@ final class FacadeTest extends \PHPUnit_Framework_TestCase
     {
     public function testSyntax()
         {
-        $facade = new ShortcodeFacade(null, array(
+        $facade = ShortcodeFacade::create(null, array(
             'name' => function(Shortcode $s) { return $s->getName(); },
             'content' => function(Shortcode $s) { return $s->getContent(); },
             ), array(

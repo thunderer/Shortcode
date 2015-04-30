@@ -21,7 +21,7 @@ class ShortcodeFacade
     /** @var SerializerInterface */
     private $textSerializer;
 
-    public function __construct(Syntax $syntax = null, array $handlers = array(), array $aliases = array())
+    protected function __construct(Syntax $syntax = null, array $handlers = array(), array $aliases = array())
         {
         $syntax = $syntax ?: new Syntax();
 
@@ -31,6 +31,11 @@ class ShortcodeFacade
 
         $this->createTextSerializer(new TextSerializer());
         $this->createJsonSerializer(new JsonSerializer());
+        }
+
+    public static function create(Syntax $syntax = null, array $handlers = array(), array $aliases = array())
+        {
+        return new self($syntax, $handlers, $aliases);
         }
 
     protected function createExtractor(ExtractorInterface $extractor)
