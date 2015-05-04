@@ -12,6 +12,10 @@ final class Syntax
     private $parameterValueSeparator;
     private $parameterValueDelimiter;
 
+    private $shortcodeRegex;
+    private $singleShortcodeRegex;
+    private $argumentsRegex;
+
     public function __construct($openingTag = null, $closingTag = null, $closingTagMarker = null,
                                 $parameterValueSeparator = null, $parameterValueDelimiter = null)
         {
@@ -20,19 +24,29 @@ final class Syntax
         $this->closingTagMarker = $closingTagMarker ?: '/';
         $this->parameterValueSeparator = $parameterValueSeparator ?: '=';
         $this->parameterValueDelimiter = $parameterValueDelimiter ?: '"';
+
+        $shortcodeRegex = $this->createShortcodeRegexContent();
+        $this->shortcodeRegex = '~'.$shortcodeRegex.'~us';
+        $this->singleShortcodeRegex = '~^'.$shortcodeRegex.'$~us';
+        $this->createArgumentsRegex();
         }
 
     public function getShortcodeRegex()
         {
-        return '~'.$this->createShortcodeRegex().'~us';
+        return $this->shortcodeRegex;
         }
 
     public function getSingleShortcodeRegex()
         {
-        return '~^'.$this->createShortcodeRegex().'$~us';
+        return $this->singleShortcodeRegex;
         }
 
     public function getArgumentsRegex()
+        {
+        return $this->argumentsRegex;
+        }
+
+    private function createArgumentsRegex()
         {
         $equals = $this->quote($this->getParameterValueSeparator());
         $string = $this->quote($this->getParameterValueDelimiter());
@@ -44,10 +58,10 @@ final class Syntax
         // equals sign and value without unescaped string delimiters enclosed in them
         $complex = $equals.$string.'([^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*?)'.$string;
 
-        return '~(?:\s+(\w+(?:'.$empty.'|'.$simple.'|'.$complex.')))~us';
+        $this->argumentsRegex = '~(?:\s+(\w+(?:'.$empty.'|'.$simple.'|'.$complex.')))~us';
         }
 
-    private function createShortcodeRegex()
+    private function createShortcodeRegexContent()
         {
         $open = $this->quote($this->getOpeningTag());
         $slash = $this->quote($this->getClosingTagMarker());
