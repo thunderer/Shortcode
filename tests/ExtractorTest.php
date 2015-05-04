@@ -60,6 +60,11 @@ final class ExtractorTest extends \PHPUnit_Framework_TestCase
                 new Match(21, '[code cmp="xx"/]'),
                 new Match(40, '[code x=y/]'),
                 )),
+            array('x [    code arg=val /]a[ code/]c[x    /    ]', array(
+                new Match(2, '[    code arg=val /]'),
+                new Match(23, '[ code/]'),
+                new Match(32, '[x    /    ]'),
+                )),
             );
         }
 

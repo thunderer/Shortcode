@@ -25,7 +25,7 @@ final class Parser implements ParserInterface
             }
 
         return new Shortcode(
-            isset($matches[4]) ? $matches[4] : $matches[2],
+            trim(isset($matches[4]) ? $matches[4] : $matches[2]),
             isset($matches[5])
                 ? $this->parseParameters($matches[5])
                 : (isset($matches[3]) ? $this->parseParameters($matches[3]) : array()),
@@ -41,7 +41,7 @@ final class Parser implements ParserInterface
         foreach($argsMatches[1] as $item)
             {
             $parts = explode($this->syntax->getParameterValueSeparator(), $item, 2);
-            $return[$parts[0]] = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
+            $return[trim($parts[0])] = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
             }
 
         return $return;
@@ -49,9 +49,9 @@ final class Parser implements ParserInterface
 
     private function parseValue($value)
         {
-        return $this->isStringValue($value)
-            ? $this->extractStringValue($value)
-            : $value;
+        return $this->isStringValue(trim($value))
+            ? $this->extractStringValue(trim($value))
+            : (null === $value ? null : trim($value));
         }
 
     private function extractStringValue($value)

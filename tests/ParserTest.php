@@ -40,6 +40,8 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
             array('[sc arg=val cmp="a b"/]', 'sc', array('arg' => 'val', 'cmp' => 'a b'), null),
             array('[sc x y   /]', 'sc', array('x' => null, 'y' => null), null),
             array('[sc x="\ "   /]', 'sc', array('x' => '\ '), null),
+            array('[   sc   x =  "\ "   y =   value  z   /    ]', 'sc', array('x' => '\ ', 'y' => 'value', 'z' => null), null),
+            array('[   sc   x=  "\ "   y    =value  z    ]', 'sc', array('x' => '\ ', 'y' => 'value', 'z' => null), null),
             );
         }
 
