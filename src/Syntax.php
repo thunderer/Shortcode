@@ -12,6 +12,7 @@ final class Syntax
     private $parameterValueSeparator;
     private $parameterValueDelimiter;
 
+    private $ws = '\s*';
     private $shortcodeRegex;
     private $singleShortcodeRegex;
     private $argumentsRegex;
@@ -29,6 +30,22 @@ final class Syntax
         $this->shortcodeRegex = '~'.$shortcodeRegex.'~us';
         $this->singleShortcodeRegex = '~^'.$shortcodeRegex.'$~us';
         $this->createArgumentsRegex();
+        }
+
+    public static function create($openingTag = null, $closingTag = null, $closingTagMarker = null,
+                                  $parameterValueSeparator = null, $parameterValueDelimiter = null)
+        {
+        return new self($openingTag, $closingTag, $closingTagMarker, $parameterValueSeparator, $parameterValueDelimiter);
+        }
+
+    public static function createStrict($openingTag = null, $closingTag = null, $closingTagMarker = null,
+                                        $parameterValueSeparator = null, $parameterValueDelimiter = null)
+        {
+        $syntax = new self();
+        $syntax->ws = '';
+        $syntax->__construct($openingTag, $closingTag, $closingTagMarker, $parameterValueSeparator, $parameterValueDelimiter);
+
+        return $syntax;
         }
 
     public function getShortcodeRegex()
@@ -54,9 +71,9 @@ final class Syntax
         // lookahead test for either space or end of string
         $empty = '(?=\s|$)';
         // equals sign and alphanumeric value
-        $simple = '\s*'.$equals.'\s*\w+';
+        $simple = $this->ws.$equals.$this->ws.'\w+';
         // equals sign and value without unescaped string delimiters enclosed in them
-        $complex = '\s*'.$equals.'\s*'.$string.'([^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*?)'.$string;
+        $complex = $this->ws.$equals.$this->ws.$string.'([^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*?)'.$string;
 
         $this->argumentsRegex = '~(?:\s*(\w+(?:'.$simple.'|'.$complex.'|'.$empty.')))~us';
         }
@@ -68,18 +85,18 @@ final class Syntax
         $close = $this->quote($this->getClosingTag());
 
         // alphanumeric characters and dash
-        $name = '\s*([\w-]+)';
+        $name = $this->ws.'([\w-]+)';
         // any characters that are not closing tag marker
         $parameters = '(\s+[^'.$slash.']+?)?';
         // non-greedy match for any characters
         $content = '(.*?)';
 
         // open tag, name, parameters, maybe some spaces, closing marker, closing tag
-        $selfClosed  = $open.$name.$parameters.'\s*'.$slash.'\s*'.$close;
+        $selfClosed  = $open.$name.$parameters.$this->ws.$slash.$this->ws.$close;
         // open tag, name, parameters, closing tag, maybe some content and closing
         // block with backreference name validation
-        $closingTag = $open.'\s*'.$slash.'\s*(\4)\s*'.$close;
-        $withContent = $open.$name.$parameters.'\s*'.$close.'(?:'.$content.$closingTag.')?';
+        $closingTag = $open.$this->ws.$slash.$this->ws.'(\4)'.$this->ws.$close;
+        $withContent = $open.$name.$parameters.$this->ws.$close.'(?:'.$content.$closingTag.')?';
 
         return '((?:'.$selfClosed.'|'.$withContent.'))';
         }
