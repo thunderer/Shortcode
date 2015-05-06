@@ -68,7 +68,7 @@ final class Syntax
         $close = $this->quote($this->getClosingTag());
 
         // alphanumeric characters and dash
-        $name = '(\s*[\w-]+)';
+        $name = '\s*([\w-]+)';
         // any characters that are not closing tag marker
         $parameters = '(\s+[^'.$slash.']+?)?';
         // non-greedy match for any characters
@@ -78,7 +78,8 @@ final class Syntax
         $selfClosed  = $open.$name.$parameters.'\s*'.$slash.'\s*'.$close;
         // open tag, name, parameters, closing tag, maybe some content and closing
         // block with backreference name validation
-        $withContent = $open.$name.$parameters.$close.'(?:'.$content.$open.$slash.'(\4)'.$close.')?';
+        $closingTag = $open.'\s*'.$slash.'\s*(\4)\s*'.$close;
+        $withContent = $open.$name.$parameters.'\s*'.$close.'(?:'.$content.$closingTag.')?';
 
         return '((?:'.$selfClosed.'|'.$withContent.'))';
         }
