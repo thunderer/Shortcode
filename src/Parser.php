@@ -49,19 +49,17 @@ final class Parser implements ParserInterface
 
     private function parseValue($value)
         {
-        return $this->isStringValue(trim($value))
-            ? $this->extractStringValue(trim($value))
-            : (null === $value ? null : trim($value));
+        return null === $value ? null : $this->extractValue(trim($value));
         }
 
-    private function extractStringValue($value)
+    private function extractValue($value)
         {
         $length = strlen($this->syntax->getParameterValueDelimiter());
 
-        return substr($value, $length, -1 * $length);
+        return $this->isDelimitedValue($value) ? substr($value, $length, -1 * $length) : $value;
         }
 
-    private function isStringValue($value)
+    private function isDelimitedValue($value)
         {
         return preg_match('/^'.$this->syntax->getParameterValueDelimiter().'/us', $value)
             && preg_match('/'.$this->syntax->getParameterValueDelimiter().'$/us', $value);
