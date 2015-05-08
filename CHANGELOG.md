@@ -2,6 +2,14 @@
 
 ## Version 0.*
 
+* v0.3.0 (08.05.2015)
+
+  * added support for `[self-closing /]`  shortcodes,
+  * added library facade for easier usage,
+  * `Syntax` regular expressions are now built once in constructor,
+  * added support for whitespace between shortcode fragments, ie. `[  code   arg = val ] [  / code ]`,
+  * `Syntax` and `SyntaxBuilder` support whitespaced and strict syntaxes.
+
 * v0.2.1 (23.04.2015)
 
   * fixed matching simple parameter values enclosed by delimiters,

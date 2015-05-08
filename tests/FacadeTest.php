@@ -9,7 +9,7 @@ use Thunder\Shortcode\ShortcodeFacade;
  */
 final class FacadeTest extends \PHPUnit_Framework_TestCase
     {
-    public function testSyntax()
+    public function testFacade()
         {
         $facade = ShortcodeFacade::create(null, array(
             'name' => function(Shortcode $s) { return $s->getName(); },

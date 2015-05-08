@@ -217,7 +217,6 @@ Looking for contribution ideas? Here you are:
 * library facade for easier usage,
 * example handlers for common shortcodes (`[b]`, `[i]`, `[url]`),
 * specialized parameter values (`array=value,value`, `map=key:value,key:value`),
-* shortcode validators and strict mode,
 * ...your idea?
 
 ## License
