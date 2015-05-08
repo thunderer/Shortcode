@@ -25,7 +25,7 @@ final class Parser implements ParserInterface
             }
 
         return new Shortcode(
-            isset($matches[4]) ? $matches[4] : $matches[2],
+            trim(isset($matches[4]) ? $matches[4] : $matches[2]),
             isset($matches[5])
                 ? $this->parseParameters($matches[5])
                 : (isset($matches[3]) ? $this->parseParameters($matches[3]) : array()),
@@ -41,7 +41,7 @@ final class Parser implements ParserInterface
         foreach($argsMatches[1] as $item)
             {
             $parts = explode($this->syntax->getParameterValueSeparator(), $item, 2);
-            $return[$parts[0]] = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
+            $return[trim($parts[0])] = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
             }
 
         return $return;
@@ -49,19 +49,17 @@ final class Parser implements ParserInterface
 
     private function parseValue($value)
         {
-        return $this->isStringValue($value)
-            ? $this->extractStringValue($value)
-            : $value;
+        return null === $value ? null : $this->extractValue(trim($value));
         }
 
-    private function extractStringValue($value)
+    private function extractValue($value)
         {
         $length = strlen($this->syntax->getParameterValueDelimiter());
 
-        return substr($value, $length, -1 * $length);
+        return $this->isDelimitedValue($value) ? substr($value, $length, -1 * $length) : $value;
         }
 
-    private function isStringValue($value)
+    private function isDelimitedValue($value)
         {
         return preg_match('/^'.$this->syntax->getParameterValueDelimiter().'/us', $value)
             && preg_match('/'.$this->syntax->getParameterValueDelimiter().'$/us', $value);

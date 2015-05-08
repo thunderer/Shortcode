@@ -40,7 +40,24 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
             array('[sc arg=val cmp="a b"/]', 'sc', array('arg' => 'val', 'cmp' => 'a b'), null),
             array('[sc x y   /]', 'sc', array('x' => null, 'y' => null), null),
             array('[sc x="\ "   /]', 'sc', array('x' => '\ '), null),
+            array('[   sc   x =  "\ "   y =   value  z   /    ]', 'sc', array('x' => '\ ', 'y' => 'value', 'z' => null), null),
+            array('[ sc   x=  "\ "   y    =value   ] vv [ /  sc  ]', 'sc', array('x' => '\ ', 'y' => 'value'), ' vv '),
             );
+        }
+
+    public function testParserWithStrictSyntax()
+        {
+        $parser = new Parser(Syntax::createStrict());
+
+        $provided = $this->provideShortcodes();
+        $shortcode = $parser->parse($provided[0][0]);
+
+        $this->assertSame($provided[0][1], $shortcode->getName());
+        $this->assertSame($provided[0][2], $shortcode->getParameters());
+        $this->assertSame($provided[0][3], $shortcode->getContent());
+
+        $this->setExpectedException('RuntimeException');
+        $parser->parse($provided[16][0]);
         }
 
     /**
