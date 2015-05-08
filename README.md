@@ -169,20 +169,22 @@ var_dump($shortcode);
 ```
 **Syntax**
 
-Both `Parser` and `Extractor` classes provide configurable shortcode syntax capabilities which can be achieved by passing `Syntax` object as their first argument:
+Both `Parser` and `Extractor` classes provide configurable shortcode syntax capabilities which can be achieved by passing `Syntax` object as their first argument. There are two syntax variants: liberal that allows extra whitespace (for example `[  code  arg  = val]content[ / code  ]`) and strict which requires no extra whitespace between shortcode fragments (like in the examples at the beginning of this README).
 
 ```php
 use Thunder\Shortcode\Syntax;
 use Thunder\Shortcode\SyntaxBuilder;
 
-// these two are equivalent, builder is more verbose
-$syntax = new Syntax('[[', ']]', '//', '==', '""');
+// all of these are equivalent, builder is more verbose
+$syntax = Syntax::create('[[', ']]', '//', '==', '""');
+$syntax = Syntax::createStrict('[[', ']]', '//', '==', '""');
 $syntax = (new SyntaxBuilder())
     ->setOpeningTag('[[')
     ->setClosingTag(']]')
     ->setClosingTagMarker('//')
     ->setParameterValueSeparator('==')
     ->setParameterValueDelimiter('""')
+    ->setStrict(true) // if true then strict syntax will be created
     ->getSyntax();
 
 // create both objects as usual, if nothing is passed defaults are assumed

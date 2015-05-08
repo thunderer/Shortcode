@@ -60,6 +60,7 @@ final class SyntaxTest extends \PHPUnit_Framework_TestCase
             ->setClosingTagMarker('//')
             ->setParameterValueSeparator('==')
             ->setParameterValueDelimiter('""')
+            ->setStrict(true)
             ->getSyntax();
 
         $this->assertSame('[[', $syntax->getOpeningTag());
