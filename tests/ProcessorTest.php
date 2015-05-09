@@ -5,6 +5,7 @@ use Thunder\Shortcode\Extractor;
 use Thunder\Shortcode\Parser;
 use Thunder\Shortcode\Processor;
 use Thunder\Shortcode\Shortcode;
+use Thunder\Shortcode\Shortcode\ContextAwareShortcode;
 use Thunder\Shortcode\Tests\Fake\HtmlShortcode;
 
 /**
@@ -61,6 +62,18 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
 
         $result = $processor->process('x [content]a-[name][/name]-b[/content] y');
         $this->assertSame('x a-[name][/name]-b y', $result);
+        }
+
+    public function testProcessorShortcodePositions()
+        {
+        $processor = new Processor(new Extractor(), new Parser());
+        $processor->addHandler('p', function(ContextAwareShortcode $s) { return $s->getPosition(); });
+        $processor->addHandler('n', function(ContextAwareShortcode $s) { return $s->getNamePosition(); });
+
+        $this->assertSame('123', $processor->process('[n][n][n]'));
+        $this->assertSame('123', $processor->process('[p][p][p]'));
+        $this->assertSame('113253', $processor->process('[p][n][p][n][p][n]'));
+        $this->assertSame('1231567', $processor->process('[p][p][p][n][p][p][p]'));
         }
 
     public function testProcessorIterative()

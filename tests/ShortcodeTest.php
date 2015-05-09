@@ -46,6 +46,8 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('value', $shortcode->getParameter('arg'));
         $this->assertSame('', $shortcode->getParameter('invalid', ''));
         $this->assertSame(42, $shortcode->getParameter('invalid', 42));
+
+        $this->assertNotSame($shortcode, $shortcode->withContent('x'));
         }
 
     public function testExceptionOnMissingParameterWithNoDefaultValue()
@@ -53,5 +55,20 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $shortcode = new Shortcode('name', array(), null);
         $this->setExpectedException('RuntimeException');
         $shortcode->getParameter('invalid');
+        }
+
+    public function testProcessedShortcode()
+        {
+        $shortcode = new Shortcode('code', array('arg' => 'val'), 'content');
+        $processed = new Shortcode\ContextAwareShortcode($shortcode, 20, 10, ' [code] ', 1);
+
+        $this->assertSame('code', $processed->getName());
+        $this->assertSame(array('arg' => 'val'), $processed->getParameters());
+        $this->assertSame('content', $processed->getContent());
+
+        $this->assertSame(20, $processed->getPosition());
+        $this->assertSame(10, $processed->getNamePosition());
+        $this->assertSame(' [code] ', $processed->getText());
+        $this->assertSame(1, $processed->getOffset());
         }
     }

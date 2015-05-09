@@ -1,5 +1,6 @@
 <?php
 namespace Thunder\Shortcode;
+use Thunder\Shortcode\Shortcode\ContextAwareShortcode;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -95,10 +96,12 @@ final class Processor implements ProcessorInterface
      */
     public function process($text)
         {
+        $position = 0;
+        $namePositions = array();
         $iterations = $this->maxIterations === null ? 1 : $this->maxIterations;
         while($iterations--)
             {
-            $newText = $this->processIteration($text, 0);
+            $newText = $this->processIteration($text, 0, $position, $namePositions);
             if($newText === $text)
                 {
                 break;
@@ -117,10 +120,12 @@ final class Processor implements ProcessorInterface
      *
      * @param string $text Current text state
      * @param int $level Current recursion depth level
+     * @param int $position Current shortcode position
+     * @param array $namePositions Current shortcodes name positions
      *
      * @return string
      */
-    private function processIteration($text, $level)
+    private function processIteration($text, $level, &$position, array &$namePositions)
         {
         if(null !== $this->recursionDepth && $level > $this->recursionDepth)
             {
@@ -128,23 +133,51 @@ final class Processor implements ProcessorInterface
             }
 
         /** @var $matches Match[] */
-        $matches = array_reverse($this->extractor->extract($text));
-        foreach($matches as $match)
+        $matches = $this->extractor->extract($text);
+        $matchesCount = count($matches);
+
+        /** @var $shortcodes ContextAwareShortcode[] */
+        $shortcodes = $this->prepareContextAwareShortcodes($matches, $position, $namePositions);
+        for($i = $matchesCount - 1; $i >= 0; $i--)
             {
-            $shortcode = $this->parser->parse($match->getString());
-            $content = $shortcode->hasContent()
-                ? $this->processIteration($shortcode->getContent(), $level + 1)
-                : $shortcode->getContent();
-            $shortcode = new Shortcode($shortcode->getName(), $shortcode->getParameters(), $content);
+            $match = $matches[$i];
+            $shortcode = $shortcodes[$i];
+
+            if($shortcode->hasContent())
+                {
+                $content = $this->processIteration($shortcode->getContent(), $level + 1, $position, $namePositions);
+                $shortcode = $shortcode->withContent($content);
+                }
+
             $handler = $this->getHandler($shortcode->getName());
             if($handler)
                 {
-                $replace = $this->callHandler($handler, $shortcode, $match);
+                $replace = $this->callHandler($handler, $shortcode, $match->getString());
                 $text = substr_replace($text, $replace, $match->getPosition(), $match->getLength());
                 }
             }
 
         return $text;
+        }
+
+    private function prepareContextAwareShortcodes(array $matches, &$position, array &$namePositions)
+        {
+        $processed = array();
+
+        /** @var $matches Match[] */
+        foreach($matches as $match)
+            {
+            $shortcode = $this->parser->parse($match->getString());
+            $name = $shortcode->getName();
+            $namePositions[$name] = array_key_exists($name, $namePositions)
+                ? $namePositions[$name] + 1
+                : 1;
+            $position++;
+
+            $processed[] = new ContextAwareShortcode($shortcode, $position, $namePositions[$name], $match->getString(), $match->getPosition());
+            }
+
+        return $processed;
         }
 
     /**
@@ -201,13 +234,13 @@ final class Processor implements ProcessorInterface
         return $this->setRecursionDepth($recursion ? null : 0);
         }
 
-    private function callHandler($handler, Shortcode $shortcode, Match $match)
+    private function callHandler($handler, ShortcodeInterface $shortcode, $string)
         {
         if($handler instanceof HandlerInterface)
             {
             return $handler->isValid($shortcode)
                 ? $handler->handle($shortcode)
-                : $match->getString();
+                : $string;
             }
 
         return call_user_func_array($handler, array($shortcode));
