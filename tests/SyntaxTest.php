@@ -3,7 +3,7 @@ namespace Thunder\Shortcode\Tests;
 
 use Thunder\Shortcode\Syntax;
 use Thunder\Shortcode\SyntaxBuilder;
-use Thunder\Shortcode\Syntax\StandardSyntax;
+use Thunder\Shortcode\Syntax\CommonSyntax;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -23,7 +23,7 @@ final class SyntaxTest extends \PHPUnit_Framework_TestCase
 
     public function testStandardSyntax()
         {
-        $syntax = new StandardSyntax();
+        $syntax = new CommonSyntax();
 
         $this->assertSame('[', $syntax->getOpeningTag());
         $this->assertSame(']', $syntax->getClosingTag());

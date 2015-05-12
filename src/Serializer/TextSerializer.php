@@ -2,11 +2,11 @@
 namespace Thunder\Shortcode\Serializer;
 
 use Thunder\Shortcode\Parser;
-use Thunder\Shortcode\SerializerInterface;
+use Thunder\Shortcode\SerializerInterface as OldSerializerInterface;
 use Thunder\Shortcode\Shortcode;
 use Thunder\Shortcode\Syntax;
 
-final class TextSerializer implements SerializerInterface
+final class TextSerializer implements OldSerializerInterface
     {
     private $syntax;
 

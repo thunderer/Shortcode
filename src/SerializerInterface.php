@@ -1,26 +1,16 @@
 <?php
 namespace Thunder\Shortcode;
 
-/**
- * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
- */
-interface SerializerInterface
-    {
-    /**
-     * Serializes Shortcode class instance into given format
-     *
-     * @param Shortcode $s Instance to serialize
-     *
-     * @return string
-     */
-    public function serialize(Shortcode $s);
+use Thunder\Shortcode\Serializer\SerializerInterface as SerializerInterfaceBase;
 
-    /**
-     * Loads back Shortcode instance from serialized format
-     *
-     * @param $text
-     *
-     * @return Shortcode
-     */
-    public function unserialize($text);
+/**
+ * This implementation is left only to not break IDE autocompletion, this class
+ * is deprecated, it was moved to the new location as specified in docblock.
+ * This file will be removed in version 1.0!
+ *
+ * @deprecated use Thunder\Shortcode\Serializer\SerializerInterface
+ * @codeCoverageIgnore
+ */
+interface SerializerInterface extends SerializerInterfaceBase
+    {
     }

@@ -4,7 +4,7 @@ namespace Thunder\Shortcode\Syntax;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class StandardSyntax implements SyntaxInterface
+final class CommonSyntax implements SyntaxInterface
     {
     public function getOpeningTag()
         {
