@@ -2,6 +2,7 @@
 namespace Thunder\Shortcode;
 
 use Thunder\Shortcode\Shortcode\ContextAwareShortcode;
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>

@@ -1,6 +1,11 @@
 <?php
 namespace Thunder\Shortcode;
 
+use Thunder\Shortcode\Syntax\SyntaxInterface;
+
+/**
+ * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
+ */
 class_alias('Thunder\\Shortcode\\Syntax\\Syntax', 'Thunder\\Shortcode\\Syntax', true);
 return;
 

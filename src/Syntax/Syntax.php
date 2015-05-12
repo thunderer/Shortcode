@@ -1,8 +1,6 @@
 <?php
 namespace Thunder\Shortcode\Syntax;
 
-use Thunder\Shortcode\SyntaxInterface;
-
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */

@@ -1,5 +1,5 @@
 <?php
-namespace Thunder\Shortcode;
+namespace Thunder\Shortcode\Shortcode;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
