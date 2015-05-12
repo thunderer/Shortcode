@@ -122,9 +122,9 @@ final class Processor implements ProcessorInterface
         }
 
     /**
-     * Expects matches sorted by position returned from Extractor. Matches are
-     * processed from the last to the first to avoid replace position errors.
-     * Edge cases are described in README.
+     * Expects matches sorted by position returned from Extractor. Replaces are
+     * applied in reverse order to avoid replace position errors. Edge cases
+     * are described in README.
      *
      * @param string $text Current text state
      * @param int $level Current recursion depth level
@@ -142,15 +142,17 @@ final class Processor implements ProcessorInterface
 
         /** @var $matches Match[] */
         $matches = $this->extractor->extract($text);
-        $matchesCount = count($matches);
-
-        /** @var $shortcodes ContextAwareShortcode[] */
-        $shortcodes = $this->prepareContextAwareShortcodes($matches, $text, $position, $namePositions);
-        for($i = $matchesCount - 1; $i >= 0; $i--)
+        $replaces = array();
+        foreach($matches as $match)
             {
-            $match = $matches[$i];
-            $shortcode = $shortcodes[$i];
+            $shortcode = $this->parser->parse($match->getString());
+            $name = $shortcode->getName();
+            $namePositions[$name] = array_key_exists($name, $namePositions)
+                ? $namePositions[$name] + 1
+                : 1;
+            $position++;
 
+            $shortcode = new ContextAwareShortcode($shortcode, $position, $namePositions[$name], $text, $match->getPosition(), $match->getString());
             if($shortcode->hasContent())
                 {
                 $content = $this->processIteration($shortcode->getContent(), $level + 1, $position, $namePositions);
@@ -161,31 +163,15 @@ final class Processor implements ProcessorInterface
             if($handler)
                 {
                 $replace = $this->callHandler($handler, $shortcode, $match->getString());
-                $text = substr_replace($text, $replace, $match->getPosition(), $match->getLength());
+                $replaces[] = array($match->getPosition(), $match->getLength(), $replace);
                 }
             }
 
+        $text = array_reduce(array_reverse($replaces), function($state, array $item) {
+            return substr_replace($state, $item[2], $item[0], $item[1]);
+            }, $text);
+
         return $text;
-        }
-
-    private function prepareContextAwareShortcodes(array $matches, $text, &$position, array &$namePositions)
-        {
-        $processed = array();
-
-        /** @var $matches Match[] */
-        foreach($matches as $match)
-            {
-            $shortcode = $this->parser->parse($match->getString());
-            $name = $shortcode->getName();
-            $namePositions[$name] = array_key_exists($name, $namePositions)
-                ? $namePositions[$name] + 1
-                : 1;
-            $position++;
-
-            $processed[] = new ContextAwareShortcode($shortcode, $position, $namePositions[$name], $text, $match->getPosition(), $match->getString());
-            }
-
-        return $processed;
         }
 
     /**
