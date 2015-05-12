@@ -25,12 +25,12 @@ final class Syntax implements SyntaxInterface
 
     public static function create()
         {
-        return null;
+        return new self();
         }
 
     public static function createStrict()
         {
-        return null;
+        return new self();
         }
 
     public function getOpeningTag()
