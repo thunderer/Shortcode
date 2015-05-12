@@ -1,5 +1,6 @@
 <?php
 namespace Thunder\Shortcode;
+
 use Thunder\Shortcode\Shortcode\ContextAwareShortcode;
 
 /**

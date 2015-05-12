@@ -1,67 +1,21 @@
 <?php
 namespace Thunder\Shortcode;
 
+class_alias('Thunder\\Shortcode\\Parser\\RegexParser', 'Thunder\\Shortcode\\Parser', true);
+return;
+
 /**
- * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
+ * This implementation is left only to not break IDE autocompletion, this class
+ * is deprecated, it was moved to the new location as specified in docblock.
+ * This file will be removed in version 1.0!
+ *
+ * @deprecated use Thunder\Shortcode\Parser\RegexParser
+ * @codeCoverageIgnore
  */
-final class Parser implements ParserInterface
+class Parser implements ParserInterface
     {
-    /** @var Syntax */
-    private $syntax;
-
-    public function __construct(Syntax $syntax = null)
-        {
-        $this->syntax = $syntax ?: new Syntax();
-        }
-
     public function parse($text)
         {
-        $count = preg_match($this->syntax->getSingleShortcodeRegex(), $text, $matches);
-
-        if(!$count)
-            {
-            $msg = 'Failed to match single shortcode in text "%s"!';
-            throw new \RuntimeException(sprintf($msg, $text));
-            }
-
-        return new Shortcode(
-            trim(isset($matches[4]) ? $matches[4] : $matches[2]),
-            isset($matches[5])
-                ? $this->parseParameters($matches[5])
-                : (isset($matches[3]) ? $this->parseParameters($matches[3]) : array()),
-            isset($matches[6]) ? $matches[6] : null
-            );
-        }
-
-    private function parseParameters($text)
-        {
-        preg_match_all($this->syntax->getArgumentsRegex(), $text, $argsMatches);
-
-        $return = array();
-        foreach($argsMatches[1] as $item)
-            {
-            $parts = explode($this->syntax->getParameterValueSeparator(), $item, 2);
-            $return[trim($parts[0])] = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
-            }
-
-        return $return;
-        }
-
-    private function parseValue($value)
-        {
-        return null === $value ? null : $this->extractValue(trim($value));
-        }
-
-    private function extractValue($value)
-        {
-        $length = strlen($this->syntax->getParameterValueDelimiter());
-
-        return $this->isDelimitedValue($value) ? substr($value, $length, -1 * $length) : $value;
-        }
-
-    private function isDelimitedValue($value)
-        {
-        return preg_match('/^'.$this->syntax->getParameterValueDelimiter().'/us', $value)
-            && preg_match('/'.$this->syntax->getParameterValueDelimiter().'$/us', $value);
+        return new Shortcode('', array(), '');
         }
     }
