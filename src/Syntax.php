@@ -22,19 +22,14 @@ final class Syntax
         $this->parameterValueDelimiter = $parameterValueDelimiter ?: '"';
         }
 
-    public static function create($openingTag = null, $closingTag = null, $closingTagMarker = null,
-                                  $parameterValueSeparator = null, $parameterValueDelimiter = null)
+    public static function create()
         {
-        return new self($openingTag, $closingTag, $closingTagMarker, $parameterValueSeparator, $parameterValueDelimiter);
+        return new self();
         }
 
-    public static function createStrict($openingTag = null, $closingTag = null, $closingTagMarker = null,
-                                        $parameterValueSeparator = null, $parameterValueDelimiter = null)
+    public static function createStrict()
         {
-        $syntax = new self();
-        $syntax->__construct($openingTag, $closingTag, $closingTagMarker, $parameterValueSeparator, $parameterValueDelimiter);
-
-        return $syntax;
+        return new self();
         }
 
     public function getOpeningTag()

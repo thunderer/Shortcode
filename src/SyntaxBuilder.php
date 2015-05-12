@@ -11,7 +11,6 @@ final class SyntaxBuilder
     private $closingTagMarker;
     private $parameterValueSeparator;
     private $parameterValueDelimiter;
-    private $isStrict = false;
 
     public function __construct()
         {
@@ -19,17 +18,15 @@ final class SyntaxBuilder
 
     public function getSyntax()
         {
-        $args = array($this->openingTag, $this->closingTag, $this->closingTagMarker,
+        return new Syntax($this->openingTag, $this->closingTag, $this->closingTagMarker,
             $this->parameterValueSeparator, $this->parameterValueDelimiter);
-        $method = $this->isStrict ? 'createStrict' : 'create';
-
-        return call_user_func_array(array('Thunder\Shortcode\Syntax', $method), $args);
         }
 
+    /**
+     * @deprecated
+     */
     public function setStrict($isStrict)
         {
-        $this->isStrict = (bool)$isStrict;
-
         return $this;
         }
 
