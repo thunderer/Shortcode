@@ -3,7 +3,10 @@ namespace Thunder\Shortcode\Utility;
 
 use Thunder\Shortcode\Syntax;
 
-class RegexBuilderUtility
+/**
+ * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
+ */
+final class RegexBuilderUtility
     {
     public static function buildShortcodeRegex(Syntax $syntax)
         {
@@ -24,11 +27,11 @@ class RegexBuilderUtility
         // lookahead test for either space or end of string
         $empty = '(?=\s|$)';
         // equals sign and alphanumeric value
-        $simple = $ws.$equals.$ws.'\w+';
+        $simple = $ws.$equals.$ws.'[^\s]+';
         // equals sign and value without unescaped string delimiters enclosed in them
         $complex = $ws.$equals.$ws.$string.'([^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*?)'.$string;
 
-        return '~(?:\s*(\w+(?:'.$simple.'|'.$complex.'|'.$empty.')))~us';
+        return '~(?:\s*(\w+(?:'.$complex.'|'.$simple.'|'.$empty.')))~us';
         }
 
     private static function createShortcodeRegexContent(Syntax $syntax)

@@ -1,59 +1,55 @@
 <?php
 namespace Thunder\Shortcode;
 
-/**
- * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
- */
-final class Syntax
-    {
-    private $openingTag;
-    private $closingTag;
-    private $closingTagMarker;
-    private $parameterValueSeparator;
-    private $parameterValueDelimiter;
+class_alias('Thunder\\Shortcode\\Syntax\\Syntax', 'Thunder\\Shortcode\\Syntax', true);
+return;
 
-    public function __construct($openingTag = null, $closingTag = null, $closingTagMarker = null,
-                                $parameterValueSeparator = null, $parameterValueDelimiter = null)
+/**
+ * This implementation is left only to not break IDE autocompletion, this class
+ * is deprecated, it was moved to the new location as specified in docblock.
+ * This file will be removed in version 1.0!
+ *
+ * @deprecated use Thunder\Shortcode\Syntax\Syntax
+ * @codeCoverageIgnore
+ */
+final class Syntax implements SyntaxInterface
+    {
+    public function __construct()
         {
-        $this->openingTag = $openingTag ?: '[';
-        $this->closingTag = $closingTag ?: ']';
-        $this->closingTagMarker = $closingTagMarker ?: '/';
-        $this->parameterValueSeparator = $parameterValueSeparator ?: '=';
-        $this->parameterValueDelimiter = $parameterValueDelimiter ?: '"';
         }
 
     public static function create()
         {
-        return new self();
+        return null;
         }
 
     public static function createStrict()
         {
-        return new self();
+        return null;
         }
 
     public function getOpeningTag()
         {
-        return $this->openingTag;
+        return '';
         }
 
     public function getClosingTag()
         {
-        return $this->closingTag;
+        return '';
         }
 
     public function getClosingTagMarker()
         {
-        return $this->closingTagMarker;
+        return '';
         }
 
     public function getParameterValueSeparator()
         {
-        return $this->parameterValueSeparator;
+        return '';
         }
 
     public function getParameterValueDelimiter()
         {
-        return $this->parameterValueDelimiter;
+        return '';
         }
     }
