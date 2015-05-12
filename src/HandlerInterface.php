@@ -1,26 +1,16 @@
 <?php
 namespace Thunder\Shortcode;
 
-/**
- * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
- */
-interface HandlerInterface
-    {
-    /**
-     * Checks if shortcode contains enough and valid data to be processed
-     *
-     * @param Shortcode $shortcode
-     *
-     * @return bool
-     */
-    public function isValid(Shortcode $shortcode);
+use Thunder\Shortcode\Handler\HandlerInterface as HandlerInterfaceBase;
 
-    /**
-     * Target callable for handling shortcode
-     *
-     * @param Shortcode $shortcode
-     *
-     * @return string
-     */
-    public function handle(Shortcode $shortcode);
+/**
+ * This implementation is left only to not break IDE autocompletion, this class
+ * is deprecated, it was moved to the new location as specified in docblock.
+ * This file will be removed in version 1.0!
+ *
+ * @deprecated use Thunder\Shortcode\Extractor\RegexExtractor
+ * @codeCoverageIgnore
+ */
+interface HandlerInterface extends HandlerInterfaceBase
+    {
     }

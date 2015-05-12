@@ -18,4 +18,34 @@ class Processor implements ProcessorInterface
         {
         return '';
         }
+
+    public function addHandler()
+        {
+        return $this;
+        }
+
+    public function addHandlerAlias()
+        {
+        return $this;
+        }
+
+    public function setRecursion()
+        {
+        return $this;
+        }
+
+    public function setMaxIterations()
+        {
+        return $this;
+        }
+
+    public function setDefaultHandler()
+        {
+        return $this;
+        }
+
+    public function setRecursionDepth()
+        {
+        return $this;
+        }
     }

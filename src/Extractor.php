@@ -14,6 +14,11 @@ return;
  */
 class Extractor implements ExtractorInterface
     {
+    /**
+     * @param string $text
+     *
+     * @return Match[]
+     */
     public function extract($text)
         {
         return array();

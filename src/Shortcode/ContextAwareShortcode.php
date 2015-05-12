@@ -9,21 +9,25 @@ final class ContextAwareShortcode extends Shortcode
     private $position;
     private $namePosition;
     private $text;
-    private $offset;
+    private $textPosition;
+    private $textMatch;
 
-    public function __construct(ShortcodeInterface $s, $position, $namePosition, $text, $offset)
+    public function __construct(ShortcodeInterface $s, $position, $namePosition, $text, $textPosition, $textMatch)
         {
         parent::__construct($s->getName(), $s->getParameters(), $s->getContent());
 
         $this->position = $position;
         $this->namePosition = $namePosition;
         $this->text = $text;
-        $this->offset = $offset;
+        $this->textPosition = $textPosition;
+        $this->textMatch = $textMatch;
         }
 
     public function withContent($content)
         {
-        return new self(new Shortcode($this->getName(), $this->getParameters(), $content), $this->position, $this->namePosition, $this->text, $this->offset);
+        $s = new Shortcode($this->getName(), $this->getParameters(), $content);
+
+        return new self($s, $this->position, $this->namePosition, $this->text, $this->textPosition, $this->textMatch);
         }
 
     /**
@@ -49,7 +53,7 @@ final class ContextAwareShortcode extends Shortcode
     /**
      * Returns text in which shortcode was found
      *
-     * @return mixed
+     * @return string
      */
     public function getText()
         {
@@ -57,12 +61,22 @@ final class ContextAwareShortcode extends Shortcode
         }
 
     /**
-     * Returns offset at which shortcode was found in text
+     * Returns position at which shortcode was found in text
      *
      * @return int
      */
-    public function getOffset()
+    public function getTextPosition()
         {
-        return $this->offset;
+        return $this->textPosition;
+        }
+
+    /**
+     * Returns exact match, ie. exact string that was found in text
+     *
+     * @return string
+     */
+    public function getTextMatch()
+        {
+        return $this->textMatch;
         }
     }

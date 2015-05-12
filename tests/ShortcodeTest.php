@@ -60,7 +60,7 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
     public function testProcessedShortcode()
         {
         $shortcode = new Shortcode('code', array('arg' => 'val'), 'content');
-        $processed = new Shortcode\ContextAwareShortcode($shortcode, 20, 10, ' [code] ', 1);
+        $processed = new Shortcode\ContextAwareShortcode($shortcode, 20, 10, ' [code] ', 1, '[code]');
 
         $this->assertSame('code', $processed->getName());
         $this->assertSame(array('arg' => 'val'), $processed->getParameters());
@@ -69,6 +69,7 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(20, $processed->getPosition());
         $this->assertSame(10, $processed->getNamePosition());
         $this->assertSame(' [code] ', $processed->getText());
-        $this->assertSame(1, $processed->getOffset());
+        $this->assertSame(1, $processed->getTextPosition());
+        $this->assertSame('[code]', $processed->getTextMatch());
         }
     }

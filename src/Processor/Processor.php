@@ -145,7 +145,7 @@ final class Processor implements ProcessorInterface
         $matchesCount = count($matches);
 
         /** @var $shortcodes ContextAwareShortcode[] */
-        $shortcodes = $this->prepareContextAwareShortcodes($matches, $position, $namePositions);
+        $shortcodes = $this->prepareContextAwareShortcodes($matches, $text, $position, $namePositions);
         for($i = $matchesCount - 1; $i >= 0; $i--)
             {
             $match = $matches[$i];
@@ -168,7 +168,7 @@ final class Processor implements ProcessorInterface
         return $text;
         }
 
-    private function prepareContextAwareShortcodes(array $matches, &$position, array &$namePositions)
+    private function prepareContextAwareShortcodes(array $matches, $text, &$position, array &$namePositions)
         {
         $processed = array();
 
@@ -182,7 +182,7 @@ final class Processor implements ProcessorInterface
                 : 1;
             $position++;
 
-            $processed[] = new ContextAwareShortcode($shortcode, $position, $namePositions[$name], $match->getString(), $match->getPosition());
+            $processed[] = new ContextAwareShortcode($shortcode, $position, $namePositions[$name], $text, $match->getPosition(), $match->getString());
             }
 
         return $processed;
