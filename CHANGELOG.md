@@ -2,6 +2,12 @@
 
 ## Version 0.*
 
+* v0.4.0 (dd.mm.2015)
+
+  * introduced `ShortcodeInterface` for reusable shortcode implementation, handlers should typehint it,
+  * `Shortcode`, `Parser` and `Extractor` classes were renamed and moved to their own namespaces, see UPGRADE,
+  * introduced `ContextAwareShortcode` to provide more runtime information about context in handlers.
+
 * v0.3.0 (08.05.2015)
 
   * added support for `[self-closing /]`  shortcodes,

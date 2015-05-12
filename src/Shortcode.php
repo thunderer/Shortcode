@@ -1,96 +1,66 @@
 <?php
 namespace Thunder\Shortcode;
 
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
+
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class Shortcode
-    {
-    private $name;
-    private $parameters;
-    private $content;
+class_alias('Thunder\\Shortcode\\Shortcode\\Shortcode', 'Thunder\\Shortcode\\Shortcode', true);
+return;
 
-    public function __construct($name, array $arguments, $content)
+/**
+ * This implementation is left only to not break IDE autocompletion, this class
+ * is deprecated, it was moved to the new location as specified in docblock.
+ * This file will be removed in version 1.0!
+ *
+ * @deprecated use Thunder\Shortcode\Shortcode\Shortcode
+ * @codeCoverageIgnore
+ */
+class Shortcode implements ShortcodeInterface
+    {
+    public function withContent($content)
         {
-        $this->name = $name;
-        $this->parameters = $arguments;
-        $this->content = $content;
+        return $this;
         }
 
     public function hasContent()
         {
-        return $this->content !== null;
+        return true;
         }
 
     public function getName()
         {
-        return $this->name;
+        return '';
         }
 
     public function getParameters()
         {
-        return $this->parameters;
+        return array();
         }
 
     public function hasParameter($name)
         {
-        return array_key_exists($name, $this->parameters);
+        return true;
         }
 
     public function hasParameters()
         {
-        return (bool)$this->parameters;
+        return true;
         }
 
-    /**
-     * Returns parameter value using its name, throws exception when there was
-     * no parameter with given name and no default value was set
-     *
-     * @param $name
-     * @param null $default
-     *
-     * @throws \RuntimeException
-     *
-     * @return null
-     */
     public function getParameter($name, $default = null)
         {
-        if($this->hasParameter($name))
-            {
-            return $this->parameters[$name];
-            }
-        if(null !== $default)
-            {
-            return $default;
-            }
-
-        $msg = 'Shortcode parameter %s not found and no default value was set!';
-        throw new \RuntimeException(sprintf($msg, $name));
+        return null;
         }
 
-    /**
-     * Returns name for position-based parameter, null if there was no parameter
-     * at given position
-     *
-     * @param $index
-     *
-     * @return string|null
-     */
     public function getParameterAt($index)
         {
-        $keys = array_keys($this->parameters);
-
-        return array_key_exists($index, $keys) ? $keys[$index] : null;
+        return null;
         }
 
-    /**
-     * Returns shortcode content (data between opening and closing tag). Returns
-     * empty string if content was empty or null if shortcode has no closing tag
-     *
-     * @return string|null
-     */
     public function getContent()
         {
-        return $this->content;
+        return '';
         }
     }

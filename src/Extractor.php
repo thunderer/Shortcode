@@ -1,29 +1,26 @@
 <?php
 namespace Thunder\Shortcode;
 
+class_alias('Thunder\\Shortcode\\Extractor\\RegexExtractor', 'Thunder\\Shortcode\\Extractor', true);
+return;
+
 /**
- * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
+ * This implementation is left only to not break IDE autocompletion, this class
+ * is deprecated, it was moved to the new location as specified in docblock.
+ * This file will be removed in version 1.0!
+ *
+ * @deprecated use Thunder\Shortcode\Extractor\RegexExtractor
+ * @codeCoverageIgnore
  */
-final class Extractor implements ExtractorInterface
+class Extractor implements ExtractorInterface
     {
-    /** @var Syntax */
-    private $syntax;
-
-    public function __construct(Syntax $syntax = null)
-        {
-        $this->syntax = $syntax ?: new Syntax();
-        }
-
     /**
      * @param string $text
+     *
      * @return Match[]
      */
     public function extract($text)
         {
-        preg_match_all($this->syntax->getShortcodeRegex(), $text, $matches, PREG_OFFSET_CAPTURE);
-
-        return array_map(function(array $matches) {
-            return new Match($matches[1], $matches[0]);
-            }, $matches[0]);
+        return array();
         }
     }

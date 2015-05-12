@@ -47,6 +47,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParserWithStrictSyntax()
         {
+        $this->markTestSkipped('Will be removed with Syntax named constructors');
         $parser = new Parser(Syntax::createStrict());
 
         $provided = $this->provideShortcodes();
