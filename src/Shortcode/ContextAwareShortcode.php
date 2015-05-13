@@ -6,16 +6,18 @@ namespace Thunder\Shortcode\Shortcode;
  */
 final class ContextAwareShortcode extends Shortcode
     {
+    private $parent;
     private $position;
     private $namePosition;
     private $text;
     private $textPosition;
     private $textMatch;
 
-    public function __construct(ShortcodeInterface $s, $position, $namePosition, $text, $textPosition, $textMatch)
+    public function __construct(ShortcodeInterface $s, ShortcodeInterface $parent = null, $position, $namePosition, $text, $textPosition, $textMatch)
         {
         parent::__construct($s->getName(), $s->getParameters(), $s->getContent());
 
+        $this->parent = $parent;
         $this->position = $position;
         $this->namePosition = $namePosition;
         $this->text = $text;
@@ -27,7 +29,12 @@ final class ContextAwareShortcode extends Shortcode
         {
         $s = new Shortcode($this->getName(), $this->getParameters(), $content);
 
-        return new self($s, $this->position, $this->namePosition, $this->text, $this->textPosition, $this->textMatch);
+        return new self($s, $this->parent, $this->position, $this->namePosition, $this->text, $this->textPosition, $this->textMatch);
+        }
+
+    public function getParent()
+        {
+        return $this->parent;
         }
 
     /**

@@ -54,6 +54,21 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             );
         }
 
+    public function testProcessorParentContext()
+        {
+        $processor = new Processor(new Extractor(), new Parser());
+        $processor->addHandler('outer', function(ContextAwareShortcode $s) {
+            $name = $s->getParent() ? $s->getParent()->getName() : 'root';
+
+            return $name.'['.$s->getContent().']';
+            });
+        $processor->addHandlerAlias('inner', 'outer');
+        $processor->addHandlerAlias('level', 'outer');
+
+        $result = $processor->process('x [outer]a [inner]c [level]x[/level] d[/inner] b[/outer] y');
+        $this->assertSame('x root[a outer[c inner[x] d] b] y', $result);
+        }
+
     public function testProcessorWithoutRecursion()
         {
         $processor = $this

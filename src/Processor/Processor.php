@@ -109,7 +109,7 @@ final class Processor implements ProcessorInterface
         $iterations = $this->maxIterations === null ? 1 : $this->maxIterations;
         while($iterations--)
             {
-            $newText = $this->processIteration($text, 0, $position, $namePositions);
+            $newText = $this->processIteration($text, 0, $position, $namePositions, null);
             if($newText === $text)
                 {
                 break;
@@ -130,10 +130,11 @@ final class Processor implements ProcessorInterface
      * @param int $level Current recursion depth level
      * @param int $position Current shortcode position
      * @param array $namePositions Current shortcodes name positions
+     * @param ShortcodeInterface $parent Parent shortcode in recursive processing
      *
      * @return string
      */
-    private function processIteration($text, $level, &$position, array &$namePositions)
+    private function processIteration($text, $level, &$position, array &$namePositions, ShortcodeInterface $parent = null)
         {
         if(null !== $this->recursionDepth && $level > $this->recursionDepth)
             {
@@ -152,10 +153,10 @@ final class Processor implements ProcessorInterface
                 : 1;
             $position++;
 
-            $shortcode = new ContextAwareShortcode($shortcode, $position, $namePositions[$name], $text, $match->getPosition(), $match->getString());
+            $shortcode = new ContextAwareShortcode($shortcode, $parent, $position, $namePositions[$name], $text, $match->getPosition(), $match->getString());
             if($shortcode->hasContent())
                 {
-                $content = $this->processIteration($shortcode->getContent(), $level + 1, $position, $namePositions);
+                $content = $this->processIteration($shortcode->getContent(), $level + 1, $position, $namePositions, $shortcode);
                 $shortcode = $shortcode->withContent($content);
                 }
 

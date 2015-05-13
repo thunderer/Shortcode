@@ -47,7 +47,6 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParserWithStrictSyntax()
         {
-        $this->markTestSkipped('Will be removed with Syntax named constructors');
         $parser = new Parser(Syntax::createStrict());
 
         $provided = $this->provideShortcodes();
@@ -57,8 +56,9 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($provided[0][2], $shortcode->getParameters());
         $this->assertSame($provided[0][3], $shortcode->getContent());
 
-        $this->setExpectedException('RuntimeException');
-        $parser->parse($provided[16][0]);
+        // exception is not thrown as whitespaced syntax is now the default
+        // $this->setExpectedException('RuntimeException');
+        // $parser->parse($provided[16][0]);
         }
 
     /**
