@@ -42,6 +42,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
             array('[sc x="\ "   /]', 'sc', array('x' => '\ '), null),
             array('[   sc   x =  "\ "   y =   value  z   /    ]', 'sc', array('x' => '\ ', 'y' => 'value', 'z' => null), null),
             array('[ sc   x=  "\ "   y    =value   ] vv [ /  sc  ]', 'sc', array('x' => '\ ', 'y' => 'value'), ' vv '),
+            array('[sc url="http://giggle.com/search" /]', 'sc', array('url' => 'http://giggle.com/search'), null),
             );
         }
 
@@ -75,6 +76,10 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
         {
         return array(
             array(''),
+            array('[sc/][/sc]'),
+            array('[sc]x'),
+            array('[sc/]x'),
+            array('[/y]'),
             array('[sc x y   /]ddd[/sc]'),
             );
         }

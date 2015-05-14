@@ -10,12 +10,12 @@ final class RegexBuilderUtility
     {
     public static function buildShortcodeRegex(Syntax $syntax)
         {
-        return '~'.static::createShortcodeRegexContent($syntax).'~us';
+        return '~('.static::createShortcodeRegexContent($syntax).')~us';
         }
 
     public static function buildSingleShortcodeRegex(Syntax $syntax)
         {
-        return '~^'.static::createShortcodeRegexContent($syntax).'$~us';
+        return '~(\A'.static::createShortcodeRegexContent($syntax).'\Z)~us';
         }
 
     public static function buildArgumentsRegex(Syntax $syntax)
@@ -39,23 +39,34 @@ final class RegexBuilderUtility
         $open = static::quote($syntax->getOpeningTag());
         $slash = static::quote($syntax->getClosingTagMarker());
         $close = static::quote($syntax->getClosingTag());
+        $equals = static::quote($syntax->getParameterValueSeparator());
+        $string = static::quote($syntax->getParameterValueDelimiter());
 
         $ws = '\s*';
+
+        // lookahead test for space, closing tag, self-closing tag or end of string
+        $empty = '(?=\s|'.$close.'|'.$slash.$ws.$close.'|$)';
+        // equals sign and alphanumeric value
+        $simple = $ws.$equals.$ws.'(?:[^\s'.$close.']+)';
+        // equals sign and value without unescaped string delimiters enclosed in them
+        $complex = $ws.$equals.$ws.$string.'(?:[^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*)'.$string;
+        // complete parameters matching regex
+        $parameters = '((?:\s*(?:\w+(?:'.$complex.'|'.$simple.'|'.$empty.')))*)';
+
         // alphanumeric characters and dash
-        $name = $ws.'([\w-]+)';
-        // any characters that are not closing tag marker
-        $parameters = '(\s+[^'.$slash.']+?)?';
+        $name = '([\w-]+)';
         // non-greedy match for any characters
         $content = '(.*?)';
 
-        // open tag, name, parameters, maybe some spaces, closing marker, closing tag
-        $selfClosed  = $open.$name.$parameters.$ws.$slash.$ws.$close;
-        // open tag, name, parameters, closing tag, maybe some content and closing
-        // block with backreference name validation
-        $closingTag = $open.$ws.$slash.$ws.'(\4)'.$ws.$close;
-        $withContent = $open.$name.$parameters.$ws.$close.'(?:'.$content.$closingTag.')?';
+        // equal beginning for each variant: open tag, name and parameters
+        $common = $open.$ws.$name.$parameters.$ws;
+        // closing tag variants: just closing tag, self closing tag or content
+        // and closing block with backreference name validation
+        $justClosed = $close;
+        $selfClosed  = $slash.$ws.$close;
+        $withContent = $close.$content.$open.$ws.$slash.$ws.'(\2)'.$ws.$close;
 
-        return '((?:'.$selfClosed.'|'.$withContent.'))';
+        return '(?:'.$common.'(?:'.$withContent.'|'.$justClosed.'|'.$selfClosed.'))';
         }
 
     private static function quote($text)

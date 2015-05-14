@@ -33,13 +33,11 @@ final class RegexParser implements ParserInterface
             throw new \RuntimeException(sprintf($msg, $text));
             }
 
-        return new Shortcode(
-            trim(isset($matches[4]) ? $matches[4] : $matches[2]),
-            isset($matches[5])
-                ? $this->parseParameters($matches[5])
-                : (isset($matches[3]) ? $this->parseParameters($matches[3]) : array()),
-            isset($matches[6]) ? $matches[6] : null
-            );
+        $name = $matches[2];
+        $parameters = isset($matches[3]) ? $this->parseParameters($matches[3]) : array();
+        $content = isset($matches[4]) ? $matches[4] : null;
+
+        return new Shortcode($name, $parameters, $content);
         }
 
     private function parseParameters($text)
