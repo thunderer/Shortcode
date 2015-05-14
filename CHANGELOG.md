@@ -4,9 +4,14 @@
 
 * v0.4.0 (dd.mm.2015)
 
+  * introduced UPGRADE document to notify about breaking changes in the project,
   * introduced `ShortcodeInterface` for reusable shortcode implementation, handlers should typehint it,
-  * `Shortcode`, `Parser` and `Extractor` classes were renamed and moved to their own namespaces, see UPGRADE,
-  * introduced `ContextAwareShortcode` to provide more runtime information about context in handlers.
+  * nearly all classes and interfaces were renamed and moved to their own namespaces, see UPGRADE,
+  * introduced `ContextAwareShortcode` to provide more runtime information about context in handlers,
+  * strict syntax capabilities were removed (will be reimplemented in the future),
+  * introduced `CommonSyntax` with default values,
+  * introduced `RegexBuilderUtility` to separate regex building from `Syntax` class,
+  * improved regular expressions which now offer more flexibility.
 
 * v0.3.0 (08.05.2015)
 
