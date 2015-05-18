@@ -65,8 +65,10 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $processor->addHandlerAlias('inner', 'outer');
         $processor->addHandlerAlias('level', 'outer');
 
-        $result = $processor->process('x [outer]a [inner]c [level]x[/level] d[/inner] b[/outer] y');
-        $this->assertSame('x root[a outer[c inner[x] d] b] y', $result);
+        $text = 'x [outer]a [inner]c [level]x[/level] d[/inner] b[/outer] y';
+        $result = 'x root[a outer[c inner[x] d] b] y';
+        $this->assertSame($result, $processor->process($text));
+        $this->assertSame($result.$result, $processor->process($text.$text));
         }
 
     public function testProcessorWithoutRecursion()
@@ -74,6 +76,16 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $processor = $this
             ->getProcessor()
             ->setRecursion(false);
+
+        $result = $processor->process('x [content]a-[name][/name]-b[/content] y');
+        $this->assertSame('x a-[name][/name]-b y', $result);
+        }
+
+    public function testProcessorWithoutContentAutoProcessing()
+        {
+        $processor = $this
+            ->getProcessor()
+            ->setAutoProcessContent(false);
 
         $result = $processor->process('x [content]a-[name][/name]-b[/content] y');
         $this->assertSame('x a-[name][/name]-b y', $result);

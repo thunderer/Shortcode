@@ -4,7 +4,7 @@ namespace Thunder\Shortcode\Shortcode;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-class Shortcode implements ShortcodeInterface
+/* final */ class Shortcode implements ShortcodeInterface
     {
     private $name;
     private $parameters;

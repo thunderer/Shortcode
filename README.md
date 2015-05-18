@@ -53,6 +53,7 @@ There is a facade that contains shortcuts to all features in the library. You ca
 
 ```php
 use Thunder\Shortcode\ShortcodeFacade;
+use Thunder\Shortcode\Shortcode\Shortcode;
 
 $facade = ShortcodeFacade::create(null, array(
     'name' => function(Shortcode $s) { return $s->getName(); },
@@ -62,15 +63,15 @@ $facade = ShortcodeFacade::create(null, array(
     'n' => 'name',
     ));
     
-$facade->extract('[c]');
-$facade->parse('[c]');
-$facade->process('[c]');
+$matches = $facade->extract('[c]');
+$shortcode = $facade->parse('[c]');
+$result = $facade->process('[c]');
 
 $s = new Shortcode('c', array(), null);
-$facade->serializeToText($s);
-$facade->unserializeFromText('[c]');
-$facade->serializeToJson($s);
-$facade->unserializeFromJson('{"name":"c","parameters":[],"content":null}');
+$text = $facade->serializeToText($s);
+$shortcode = $facade->unserializeFromText('[c]');
+$json = $facade->serializeToJson($s);
+$shortcode = $facade->unserializeFromJson('{"name":"c","parameters":[],"content":null}');
 ```
 
 All those calls are equivalent to the examples below. If you want to change the dependencies, extend `ShortcodeFacade` class and replace them by overloading protected `create*` methods.
@@ -80,13 +81,13 @@ All those calls are equivalent to the examples below. If you want to change the 
 Create `Processor` class instance, register required shortcodes handlers and use `process()` method to dynamically replace found matches using registered callbacks:
 
 ```php
-use Thunder\Shortcode\Extractor;
-use Thunder\Shortcode\Parser;
-use Thunder\Shortcode\Processor;
-use Thunder\Shortcode\Shortcode;
+use Thunder\Shortcode\Extractor\RegexExtractor;
+use Thunder\Shortcode\Parser\RegexParser;
+use Thunder\Shortcode\Processor\Processor;
+use Thunder\Shortcode\Shortcode\Shortcode;
 use Thunder\Shortcode\Serializer\JsonSerializer;
 
-$processor = new Processor(new Extractor(), new Parser());
+$processor = new Processor(new RegexExtractor(), new RegexParser());
 $processor->addHandler('sample', function(Shortcode $s) {    
     return (new JsonSerializer())->serialize($s);
     });
@@ -145,9 +146,9 @@ assert('abcde' === $processor->process('[c]a[d]b[e]c[/e]d[/d]e[/c]'));
 Create instance of class `Extractor` and use its `extract()` method to get array of shortcode matches:
 
 ```php
-use Thunder\Shortcode\Extractor;
+use Thunder\Shortcode\Extractor\RegexExtractor;
 
-$extractor = new Extractor();
+$extractor = new RegexExtractor();
 $matches = $extractor->extract('something [x] other [random]sth[/random] other');
 
 // array(Match(10, '[x]'), Match(20, '[random]sth[/random]'))
@@ -159,9 +160,9 @@ var_dump($matches);
 Create instance of `Parser` class and use its `parse()` method to parse single shortcode string match into `Shortcode` instance with easy access to its name, parameters, and content (null if none present):
 
 ```php
-use Thunder\Shortcode\Parser;
+use Thunder\Shortcode\Parser\RegexParser;
 
-$parser = new Parser();
+$parser = new RegexParser();
 $shortcode = $parser->parse('[code arg=value]something[/code]');
 
 // will contain name "code", one argument and "something" as content.
@@ -172,12 +173,11 @@ var_dump($shortcode);
 Both `Parser` and `Extractor` classes provide configurable shortcode syntax capabilities which can be achieved by passing `Syntax` object as their first argument. There are two syntax variants: liberal that allows extra whitespace (for example `[  code  arg  = val]content[ / code  ]`) and strict which requires no extra whitespace between shortcode fragments (like in the examples at the beginning of this README).
 
 ```php
-use Thunder\Shortcode\Syntax;
-use Thunder\Shortcode\SyntaxBuilder;
+use Thunder\Shortcode\Syntax\Syntax;
+use Thunder\Shortcode\Syntax\SyntaxBuilder;
 
 // all of these are equivalent, builder is more verbose
-$syntax = Syntax::create('[[', ']]', '//', '==', '""');
-$syntax = Syntax::createStrict('[[', ']]', '//', '==', '""');
+$syntax = new Syntax('[[', ']]', '//', '==', '""');
 $syntax = (new SyntaxBuilder())
     ->setOpeningTag('[[')
     ->setClosingTag(']]')

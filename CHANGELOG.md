@@ -21,6 +21,10 @@
   * added support for whitespace between shortcode fragments, ie. `[  code   arg = val ] [  / code ]`,
   * `Syntax` and `SyntaxBuilder` support whitespaced and strict syntaxes.
 
+* v0.2.2 (26.04.2015)
+
+  * fixed support for PHP 5.3.
+
 * v0.2.1 (23.04.2015)
 
   * fixed matching simple parameter values enclosed by delimiters,

@@ -8,7 +8,7 @@ use Thunder\Shortcode\Handler\HandlerInterface as HandlerInterfaceBase;
  * is deprecated, it was moved to the new location as specified in docblock.
  * This file will be removed in version 1.0!
  *
- * @deprecated use Thunder\Shortcode\Extractor\RegexExtractor
+ * @deprecated use Thunder\Shortcode\Handler\HandlerInterface
  * @codeCoverageIgnore
  */
 interface HandlerInterface extends HandlerInterfaceBase

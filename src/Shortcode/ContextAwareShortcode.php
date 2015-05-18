@@ -12,8 +12,13 @@ final class ContextAwareShortcode extends Shortcode
     private $text;
     private $textPosition;
     private $textMatch;
+    private $iterationNumber;
+    private $recursionLevel;
 
-    public function __construct(ShortcodeInterface $s, ShortcodeInterface $parent = null, $position, $namePosition, $text, $textPosition, $textMatch)
+    public function __construct(ShortcodeInterface $s, ShortcodeInterface $parent = null,
+                                $position, $namePosition,
+                                $text, $textPosition, $textMatch,
+                                $iterationNumber, $recursionLevel)
         {
         parent::__construct($s->getName(), $s->getParameters(), $s->getContent());
 
@@ -23,13 +28,18 @@ final class ContextAwareShortcode extends Shortcode
         $this->text = $text;
         $this->textPosition = $textPosition;
         $this->textMatch = $textMatch;
+        $this->iterationNumber = $iterationNumber;
+        $this->recursionLevel = $recursionLevel;
         }
 
     public function withContent($content)
         {
         $s = new Shortcode($this->getName(), $this->getParameters(), $content);
 
-        return new self($s, $this->parent, $this->position, $this->namePosition, $this->text, $this->textPosition, $this->textMatch);
+        return new self($s, $this->parent,
+            $this->position, $this->namePosition,
+            $this->text, $this->textPosition, $this->textMatch,
+            $this->iterationNumber, $this->recursionLevel);
         }
 
     public function getParent()

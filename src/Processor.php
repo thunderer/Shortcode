@@ -9,7 +9,7 @@ return;
  * is deprecated, it was moved to the new location as specified in docblock.
  * This file will be removed in version 1.0!
  *
- * @deprecated use Thunder\Shortcode\Extractor\RegexExtractor
+ * @deprecated use Thunder\Shortcode\Processor\Processor
  * @codeCoverageIgnore
  */
 class Processor implements ProcessorInterface
@@ -40,6 +40,11 @@ class Processor implements ProcessorInterface
         }
 
     public function setDefaultHandler()
+        {
+        return $this;
+        }
+
+    public function setAutoProcessContent()
         {
         return $this;
         }

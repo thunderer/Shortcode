@@ -7,7 +7,6 @@ use Thunder\Shortcode\Match;
 use Thunder\Shortcode\ParserInterface;
 use Thunder\Shortcode\ProcessorInterface;
 use Thunder\Shortcode\Shortcode;
-use Thunder\Shortcode\Shortcode\ContextAwareShortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 /**
@@ -19,13 +18,16 @@ final class Processor implements ProcessorInterface
     private $extractor;
     private $parser;
     private $defaultHandler;
-    private $recursionDepth = null;
-    private $maxIterations = 1;
+    private $recursionDepth = null; // infinite recursion
+    private $maxIterations = 1; // one iteration
+    private $autoProcessContent = true; // automatically process shortcode content
+    private $context;
 
     public function __construct(ExtractorInterface $extractor, ParserInterface $parser)
         {
         $this->extractor = $extractor;
         $this->parser = $parser;
+        $this->context = new ProcessorContext();
         }
 
     /**
@@ -49,15 +51,6 @@ final class Processor implements ProcessorInterface
         $this->handlers[$name] = $handler;
 
         return $this;
-        }
-
-    private function guardHandler($handler)
-        {
-        if(!is_callable($handler) && !$handler instanceof HandlerInterface)
-            {
-            $msg = 'Shortcode handler must be callable or implement HandlerInterface!';
-            throw new \RuntimeException(sprintf($msg));
-            }
         }
 
     /**
@@ -104,12 +97,13 @@ final class Processor implements ProcessorInterface
      */
     public function process($text)
         {
-        $position = 0;
-        $namePositions = array();
         $iterations = $this->maxIterations === null ? 1 : $this->maxIterations;
+        $this->context->reset();
+
         while($iterations--)
             {
-            $newText = $this->processIteration($text, 0, $position, $namePositions, null);
+            $this->context->incrementIterationNumber();
+            $newText = $this->processIteration($text);
             if($newText === $text)
                 {
                 break;
@@ -121,63 +115,59 @@ final class Processor implements ProcessorInterface
         return $text;
         }
 
-    /**
-     * Expects matches sorted by position returned from Extractor. Replaces are
-     * applied in reverse order to avoid replace position errors. Edge cases
-     * are described in README.
-     *
-     * @param string $text Current text state
-     * @param int $level Current recursion depth level
-     * @param int $position Current shortcode position
-     * @param array $namePositions Current shortcodes name positions
-     * @param ShortcodeInterface $parent Parent shortcode in recursive processing
-     *
-     * @return string
-     */
-    private function processIteration($text, $level, &$position, array &$namePositions, ShortcodeInterface $parent = null)
+    private function processIteration($text)
         {
-        if(null !== $this->recursionDepth && $level > $this->recursionDepth)
+        if(null !== $this->recursionDepth && $this->context->getRecursionLevel() > $this->recursionDepth)
             {
             return $text;
             }
 
-        /** @var $matches Match[] */
+        $this->context->setText($text);
         $matches = $this->extractor->extract($text);
         $replaces = array();
         foreach($matches as $match)
             {
-            $shortcode = $this->parser->parse($match->getString());
-            $name = $shortcode->getName();
-            $namePositions[$name] = array_key_exists($name, $namePositions)
-                ? $namePositions[$name] + 1
-                : 1;
-            $position++;
+            $replaces[] = $this->processMatch($match);
+            }
+        $replaces = array_reverse(array_filter($replaces));
 
-            $shortcode = new ContextAwareShortcode($shortcode, $parent, $position, $namePositions[$name], $text, $match->getPosition(), $match->getString());
-            if($shortcode->hasContent())
-                {
-                $content = $this->processIteration($shortcode->getContent(), $level + 1, $position, $namePositions, $shortcode);
-                $shortcode = $shortcode->withContent($content);
-                }
+        return array_reduce($replaces, function($state, array $item) {
+            return substr_replace($state, $item[0], $item[1], $item[2]);
+            }, $text);
+        }
 
-            $handler = $this->getHandler($shortcode->getName());
-            if($handler)
-                {
-                $replace = $this->callHandler($handler, $shortcode, $match->getString());
-                $replaces[] = array($match->getPosition(), $match->getLength(), $replace);
-                }
+    private function processMatch(Match $match)
+        {
+        $shortcode = $this->parser->parse($match->getString());
+        $this->context->incrementPosition();
+        $this->context->incrementNamePosition($shortcode->getName());
+
+        $shortcode = $this->context->getShortcode($shortcode, $this->context->getText(), $match);
+        if($this->autoProcessContent && $shortcode->hasContent())
+            {
+            $this->context->incrementRecursionLevel();
+            $this->context->setParent($shortcode);
+            $content = $this->processIteration($shortcode->getContent());
+            $shortcode = $shortcode->withContent($content);
+            $this->context->clearParent();
+            $this->context->decrementRecursionLevel();
             }
 
-        $text = array_reduce(array_reverse($replaces), function($state, array $item) {
-            return substr_replace($state, $item[2], $item[0], $item[1]);
-            }, $text);
+        $handler = $this->getHandler($shortcode->getName());
+        if(!$handler)
+            {
+            return null;
+            }
 
-        return $text;
+        $replace = $this->callHandler($handler, $shortcode, $match->getString());
+
+        return array($replace, $match->getPosition(), $match->getLength());
         }
 
     /**
      * Recursion depth level, null means infinite, any integer greater than or
-     * equal to zero sets value.
+     * equal to zero sets value (number of recursion levels). Zero disables
+     * recursion.
      *
      * @param int|null $depth
      *
@@ -198,7 +188,8 @@ final class Processor implements ProcessorInterface
 
     /**
      * Maximum number of iterations, null means infinite, any integer greater
-     * than or equal to zero sets value.
+     * than zero sets value. Zero is invalid because there must be at least one
+     * iteration.
      *
      * @param int|null $iterations
      *
@@ -206,13 +197,29 @@ final class Processor implements ProcessorInterface
      */
     public function setMaxIterations($iterations)
         {
-        if(null !== $iterations && !(is_int($iterations) && $iterations >= 0))
+        if(null !== $iterations && !(is_int($iterations) && $iterations > 0))
             {
-            $msg = 'Maximum number of iterations must be null (infinite) or integer >= 0!';
+            $msg = 'Maximum number of iterations must be null (infinite) or integer > 0!';
             throw new \InvalidArgumentException($msg);
             }
 
         $this->maxIterations = $iterations;
+
+        return $this;
+        }
+
+    /**
+     * Whether shortcode content will be automatically processed and handler
+     * already receives shortcode with processed content. If false, every
+     * shortcode handler needs to process content on its own.
+     *
+     * @param bool $flag True if enabled (default), false otherwise
+     *
+     * @return self
+     */
+    public function setAutoProcessContent($flag)
+        {
+        $this->autoProcessContent = (bool)$flag;
 
         return $this;
         }
@@ -227,6 +234,15 @@ final class Processor implements ProcessorInterface
     public function setRecursion($recursion)
         {
         return $this->setRecursionDepth($recursion ? null : 0);
+        }
+
+    private function guardHandler($handler)
+        {
+        if(!is_callable($handler) && !$handler instanceof HandlerInterface)
+            {
+            $msg = 'Shortcode handler must be callable or implement HandlerInterface!';
+            throw new \RuntimeException(sprintf($msg));
+            }
         }
 
     private function callHandler($handler, ShortcodeInterface $shortcode, $string)
