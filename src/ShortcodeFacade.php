@@ -9,6 +9,7 @@ use Thunder\Shortcode\Serializer\TextSerializer;
  */
 class ShortcodeFacade
     {
+    private $syntax;
     /** @var ExtractorInterface */
     private $extractor;
     /** @var ParserInterface */
@@ -23,14 +24,14 @@ class ShortcodeFacade
 
     protected function __construct(Syntax $syntax = null, array $handlers = array(), array $aliases = array())
         {
-        $syntax = $syntax ?: new Syntax();
+        $this->syntax = $syntax ?: new Syntax();
 
-        $this->createExtractor(new Extractor($syntax));
-        $this->createParser(new Parser($syntax));
-        $this->createProcessor(new Processor($this->extractor, $this->parser), $handlers, $aliases);
+        $this->createExtractor();
+        $this->createParser();
+        $this->createProcessor($handlers, $aliases);
 
-        $this->createTextSerializer(new TextSerializer());
-        $this->createJsonSerializer(new JsonSerializer());
+        $this->createTextSerializer();
+        $this->createJsonSerializer();
         }
 
     public static function create(Syntax $syntax = null, array $handlers = array(), array $aliases = array())
@@ -38,20 +39,19 @@ class ShortcodeFacade
         return new self($syntax, $handlers, $aliases);
         }
 
-    protected function createExtractor(ExtractorInterface $extractor)
+    protected function createExtractor()
         {
-        $this->extractor = $extractor;
+        $this->extractor = new Extractor($this->syntax);
         }
 
-    protected function createParser(ParserInterface $parser)
+    protected function createParser()
         {
-        $this->parser = $parser;
+        $this->parser = new Parser($this->syntax);
         }
 
-    protected function createProcessor(ProcessorInterface $processor, array $handlers, array $aliases)
+    protected function createProcessor(array $handlers, array $aliases)
         {
-        /** @var $processor Processor */
-        $this->processor = $processor;
+        $this->processor = new Processor($this->extractor, $this->parser);
 
         foreach($handlers as $name => $handler)
             {
@@ -63,14 +63,14 @@ class ShortcodeFacade
             }
         }
 
-    protected function createTextSerializer(SerializerInterface $serializer)
+    protected function createTextSerializer()
         {
-        $this->textSerializer = $serializer;
+        $this->textSerializer = new TextSerializer();
         }
 
-    protected function createJsonSerializer(SerializerInterface $serializer)
+    protected function createJsonSerializer()
         {
-        $this->jsonSerializer = $serializer;
+        $this->jsonSerializer = new JsonSerializer();
         }
 
     final public function extract($text)
