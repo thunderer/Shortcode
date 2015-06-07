@@ -5,7 +5,7 @@ use Thunder\Shortcode\Extractor;
 use Thunder\Shortcode\Parser;
 use Thunder\Shortcode\Processor;
 use Thunder\Shortcode\Shortcode;
-use Thunder\Shortcode\Shortcode\ContextAwareShortcode;
+use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 use Thunder\Shortcode\Tests\Fake\HtmlShortcode;
 
 /**
@@ -57,7 +57,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
     public function testProcessorParentContext()
         {
         $processor = new Processor(new Extractor(), new Parser());
-        $processor->addHandler('outer', function(ContextAwareShortcode $s) {
+        $processor->addHandler('outer', function(ProcessedShortcode $s) {
             $name = $s->getParent() ? $s->getParent()->getName() : 'root';
 
             return $name.'['.$s->getContent().']';
@@ -94,11 +94,11 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
     public function testProcessorShortcodePositions()
         {
         $processor = new Processor(new Extractor(), new Parser());
-        $processor->addHandler('p', function(ContextAwareShortcode $s) { return $s->getPosition(); });
-        $processor->addHandler('n', function(ContextAwareShortcode $s) { return $s->getNamePosition(); });
+        $processor->addHandler('p', function(ProcessedShortcode $s) { return $s->getPosition(); });
+        $processor->addHandler('n', function(ProcessedShortcode $s) { return $s->getNamePosition(); });
 
-        $this->assertSame('123', $processor->process('[n][n][n]'));
-        $this->assertSame('123', $processor->process('[p][p][p]'));
+        $this->assertSame('123', $processor->process('[n][n][n]'), '3n');
+        $this->assertSame('123', $processor->process('[p][p][p]'), '3p');
         $this->assertSame('113253', $processor->process('[p][n][p][n][p][n]'));
         $this->assertSame('1231567', $processor->process('[p][p][p][n][p][p][p]'));
         }

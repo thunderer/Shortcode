@@ -1,10 +1,12 @@
 <?php
 namespace Thunder\Shortcode\Shortcode;
 
+use Thunder\Shortcode\ProcessorInterface;
+
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class ContextAwareShortcode extends Shortcode
+final class ProcessedShortcode extends Shortcode
     {
     private $parent;
     private $position;
@@ -14,11 +16,12 @@ final class ContextAwareShortcode extends Shortcode
     private $textMatch;
     private $iterationNumber;
     private $recursionLevel;
+    private $processor;
 
     public function __construct(ShortcodeInterface $s, ShortcodeInterface $parent = null,
                                 $position, $namePosition,
                                 $text, $textPosition, $textMatch,
-                                $iterationNumber, $recursionLevel)
+                                $iterationNumber, $recursionLevel, ProcessorInterface $processor)
         {
         parent::__construct($s->getName(), $s->getParameters(), $s->getContent());
 
@@ -30,6 +33,7 @@ final class ContextAwareShortcode extends Shortcode
         $this->textMatch = $textMatch;
         $this->iterationNumber = $iterationNumber;
         $this->recursionLevel = $recursionLevel;
+        $this->processor = $processor;
         }
 
     public function withContent($content)
@@ -39,7 +43,7 @@ final class ContextAwareShortcode extends Shortcode
         return new self($s, $this->parent,
             $this->position, $this->namePosition,
             $this->text, $this->textPosition, $this->textMatch,
-            $this->iterationNumber, $this->recursionLevel);
+            $this->iterationNumber, $this->recursionLevel, $this->processor);
         }
 
     public function getParent()
@@ -95,5 +99,35 @@ final class ContextAwareShortcode extends Shortcode
     public function getTextMatch()
         {
         return $this->textMatch;
+        }
+
+    /**
+     * Returns number of current iteration
+     *
+     * @return int
+     */
+    public function getIterationNumber()
+        {
+        return $this->iterationNumber;
+        }
+
+    /**
+     * Returns current level of recursive processing
+     *
+     * @return int
+     */
+    public function getRecursionLevel()
+        {
+        return $this->recursionLevel;
+        }
+
+    /**
+     * Returns instance of processor processing the text
+     *
+     * @return ProcessorInterface
+     */
+    public function getProcessor()
+        {
+        return $this->processor;
         }
     }

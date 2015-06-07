@@ -1,6 +1,9 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
+use Thunder\Shortcode\Extractor;
+use Thunder\Shortcode\Parser;
+use Thunder\Shortcode\Processor;
 use Thunder\Shortcode\Serializer\TextSerializer;
 use Thunder\Shortcode\Shortcode;
 
@@ -59,8 +62,9 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
 
     public function testProcessedShortcode()
         {
+        $processor = new Processor(new Extractor(), new Parser());
         $shortcode = new Shortcode('code', array('arg' => 'val'), 'content');
-        $processed = new Shortcode\ContextAwareShortcode($shortcode, null, 20, 10, ' [code] ', 1, '[code]', 1, 0);
+        $processed = new Shortcode\ProcessedShortcode($shortcode, null, 20, 10, ' [code] ', 1, '[code]', 1, 0, $processor);
 
         $this->assertSame('code', $processed->getName());
         $this->assertSame(array('arg' => 'val'), $processed->getParameters());
