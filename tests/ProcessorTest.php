@@ -116,6 +116,26 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('1231567', $processor->process('[p][p][p][n][p][p][p]'), 'pppnppp');
         }
 
+    public function testProcessorDeclare()
+        {
+        $processor = $this->getProcessor();
+        $processor->addHandler('declare', function(Shortcode\ShortcodeInterface $s) use($processor) {
+            $processor->addHandler($s->getParameterAt(0), function(Shortcode\ShortcodeInterface $x) use($s) {
+                $keys = array_map(function($item) {
+                    return '%'.$item.'%';
+                    }, array_keys($x->getParameters()));
+                $values = array_values($x->getParameters());
+
+                return str_replace($keys, $values, $s->getContent());
+                });
+            });
+
+        $this->assertSame('You are 18 years old.', trim($processor->process('
+            [declare age]You are %age% years old.[/declare]
+            [age age=18]
+            ')));
+        }
+
     public function testProcessorIterative()
         {
         $handlers = new HandlerContainer();
