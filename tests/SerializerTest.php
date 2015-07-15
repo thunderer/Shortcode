@@ -2,9 +2,9 @@
 namespace Thunder\Shortcode\Tests;
 
 use Thunder\Shortcode\Serializer\JsonSerializer;
+use Thunder\Shortcode\Serializer\SerializerInterface;
 use Thunder\Shortcode\Serializer\TextSerializer;
-use Thunder\Shortcode\SerializerInterface;
-use Thunder\Shortcode\Shortcode;
+use Thunder\Shortcode\Shortcode\Shortcode;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>

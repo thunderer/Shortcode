@@ -1,9 +1,9 @@
 <?php
 namespace Thunder\Shortcode\Extractor;
 
-use Thunder\Shortcode\ExtractorInterface;
 use Thunder\Shortcode\Match;
-use Thunder\Shortcode\Syntax;
+use Thunder\Shortcode\Syntax\Syntax;
+use Thunder\Shortcode\Syntax\SyntaxInterface;
 use Thunder\Shortcode\Utility\RegexBuilderUtility;
 
 /**
@@ -13,7 +13,7 @@ final class RegexExtractor implements ExtractorInterface
     {
     private $regex;
 
-    public function __construct(Syntax $syntax = null)
+    public function __construct(SyntaxInterface $syntax = null)
         {
         $this->regex = RegexBuilderUtility::buildShortcodeRegex($syntax ?: new Syntax());
         }

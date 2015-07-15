@@ -1,8 +1,8 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
-use Thunder\Shortcode\Parser;
-use Thunder\Shortcode\Syntax;
+use Thunder\Shortcode\Parser\RegexParser;
+use Thunder\Shortcode\Syntax\Syntax;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -14,7 +14,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
      */
     public function testParser($code, $name, array $args, $content)
         {
-        $parser = new Parser();
+        $parser = new RegexParser();
         $shortcode = $parser->parse($code);
 
         $this->assertSame($name, $shortcode->getName());
@@ -48,7 +48,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParserWithStrictSyntax()
         {
-        $parser = new Parser(Syntax::createStrict());
+        $parser = new RegexParser(Syntax::createStrict());
 
         $provided = $this->provideShortcodes();
         $shortcode = $parser->parse($provided[0][0]);
@@ -67,7 +67,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
      */
     public function testParserInvalid($code)
         {
-        $parser = new Parser();
+        $parser = new RegexParser();
         $this->setExpectedException('RuntimeException');
         $parser->parse($code);
         }
@@ -86,7 +86,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
 
     public function testWithDifferentSyntax()
         {
-        $parser = new Parser(new Syntax('[[', ']]', '//', '==', '""'));
+        $parser = new RegexParser(new Syntax('[[', ']]', '//', '==', '""'));
 
         $shortcode = $parser->parse('[[code arg==""val oth""]]cont[[//code]]');
         $this->assertSame('code', $shortcode->getName());
@@ -97,7 +97,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
 
     public function testDifferentSyntaxEscapedQuotes()
         {
-        $parser = new Parser(new Syntax('^', '$', '&', '!!!', '@@'));
+        $parser = new RegexParser(new Syntax('^', '$', '&', '!!!', '@@'));
         $shortcode = $parser->parse('^code a!!!@@\"\"@@ b!!!@@x\"y@@ c$cnt^&code$');
 
         $this->assertSame('code', $shortcode->getName());

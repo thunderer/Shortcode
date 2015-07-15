@@ -1,7 +1,7 @@
 <?php
 namespace Thunder\Shortcode\Utility;
 
-use Thunder\Shortcode\Syntax;
+use Thunder\Shortcode\Syntax\SyntaxInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -9,17 +9,17 @@ use Thunder\Shortcode\Syntax;
  */
 final class RegexBuilderUtility
     {
-    public static function buildShortcodeRegex(Syntax $syntax)
+    public static function buildShortcodeRegex(SyntaxInterface $syntax)
         {
         return '~('.static::createShortcodeRegexContent($syntax).')~us';
         }
 
-    public static function buildSingleShortcodeRegex(Syntax $syntax)
+    public static function buildSingleShortcodeRegex(SyntaxInterface $syntax)
         {
         return '~(\A'.static::createShortcodeRegexContent($syntax).'\Z)~us';
         }
 
-    public static function buildArgumentsRegex(Syntax $syntax)
+    public static function buildArgumentsRegex(SyntaxInterface $syntax)
         {
         $equals = static::quote($syntax->getParameterValueSeparator());
         $string = static::quote($syntax->getParameterValueDelimiter());
@@ -35,7 +35,7 @@ final class RegexBuilderUtility
         return '~(?:\s*(\w+(?:'.$complex.'|'.$simple.'|'.$empty.')))~us';
         }
 
-    private static function createShortcodeRegexContent(Syntax $syntax)
+    private static function createShortcodeRegexContent(SyntaxInterface $syntax)
         {
         $open = static::quote($syntax->getOpeningTag());
         $slash = static::quote($syntax->getClosingTagMarker());

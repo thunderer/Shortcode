@@ -1,7 +1,8 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
-use Thunder\Shortcode\Shortcode;
+use Thunder\Shortcode\Shortcode\Shortcode;
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 use Thunder\Shortcode\ShortcodeFacade;
 
 /**
@@ -12,8 +13,8 @@ final class FacadeTest extends \PHPUnit_Framework_TestCase
     public function testFacade()
         {
         $facade = ShortcodeFacade::create(null, array(
-            'name' => function(Shortcode $s) { return $s->getName(); },
-            'content' => function(Shortcode $s) { return $s->getContent(); },
+            'name' => function(ShortcodeInterface $s) { return $s->getName(); },
+            'content' => function(ShortcodeInterface $s) { return $s->getContent(); },
             ), array(
             'c' => 'content',
             'n' => 'name',
@@ -25,7 +26,7 @@ final class FacadeTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(1, $facade->extract('[x]'));
         $this->assertCount(2, $facade->extract('[x]x[y]'));
 
-        $this->assertInstanceOf('Thunder\\Shortcode\\Shortcode', $facade->parse('[b]'));
+        $this->assertInstanceOf('Thunder\\Shortcode\\Shortcode\\Shortcode', $facade->parse('[b]'));
 
         $s = new Shortcode('c', array(), null);
         $this->assertSame('[c]', $facade->serializeToText($s));

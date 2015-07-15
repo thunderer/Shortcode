@@ -1,8 +1,6 @@
 <?php
 namespace Thunder\Shortcode\Syntax;
 
-use Thunder\Shortcode\Syntax as OldSyntax;
-
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
@@ -20,16 +18,8 @@ final class SyntaxBuilder
 
     public function getSyntax()
         {
-        return new OldSyntax($this->openingTag, $this->closingTag, $this->closingTagMarker,
+        return new Syntax($this->openingTag, $this->closingTag, $this->closingTagMarker,
             $this->parameterValueSeparator, $this->parameterValueDelimiter);
-        }
-
-    /**
-     * @deprecated
-     */
-    public function setStrict($isStrict)
-        {
-        return $this;
         }
 
     public function setOpeningTag($tag)

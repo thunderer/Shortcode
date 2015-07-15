@@ -1,11 +1,10 @@
 <?php
 namespace Thunder\Shortcode\Processor;
 
-use Thunder\Shortcode\ExtractorInterface;
-use Thunder\Shortcode\HandlerInterface;
+use Thunder\Shortcode\Extractor\ExtractorInterface;
+use Thunder\Shortcode\Handler\HandlerInterface;
 use Thunder\Shortcode\Match;
-use Thunder\Shortcode\ParserInterface;
-use Thunder\Shortcode\ProcessorInterface;
+use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Shortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
@@ -76,7 +75,7 @@ final class Processor implements ProcessorInterface
         {
         $handler = $this->getHandler($name);
 
-        $this->addHandler($alias, function(Shortcode $shortcode) use($handler) {
+        $this->addHandler($alias, function(ShortcodeInterface $shortcode) use($handler) {
             return call_user_func_array($handler, array($shortcode));
             });
 

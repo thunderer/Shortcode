@@ -1,7 +1,6 @@
 <?php
 namespace Thunder\Shortcode\Processor;
 
-use Thunder\Shortcode\ProcessorInterface as OldProcessorInterface;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 /**
@@ -15,7 +14,7 @@ final class ProcessorContext
     /** @var ShortcodeInterface */
     public $parent = null;
 
-    /** @var OldProcessorInterface */
+    /** @var ProcessorInterface */
     public $processor = null;
 
     public $position = 0;

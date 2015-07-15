@@ -1,11 +1,12 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
-use Thunder\Shortcode\Extractor;
-use Thunder\Shortcode\Parser;
-use Thunder\Shortcode\Processor;
-use Thunder\Shortcode\Shortcode;
+
+use Thunder\Shortcode\Extractor\RegexExtractor;
+use Thunder\Shortcode\Parser\RegexParser;
+use Thunder\Shortcode\Processor\Processor;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 use Thunder\Shortcode\Tests\Fake\HtmlShortcode;
 use Thunder\Shortcode\Tests\Fake\ReverseShortcode;
 
@@ -16,11 +17,11 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
     {
     private function getProcessor()
         {
-        $processor = new Processor(new Extractor(), new Parser());
+        $processor = new Processor(new RegexExtractor(), new RegexParser());
 
         $processor
-            ->addHandler('name', function(Shortcode $s) { return $s->getName(); })
-            ->addHandler('content', function(Shortcode $s) { return $s->getContent(); })
+            ->addHandler('name', function(ShortcodeInterface $s) { return $s->getName(); })
+            ->addHandler('content', function(ShortcodeInterface $s) { return $s->getContent(); })
             ->addHandler('html', new HtmlShortcode())
             ->addHandler('reverse', new ReverseShortcode())
             ->addHandlerAlias('c', 'content')
@@ -59,7 +60,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
 
     public function testProcessorParentContext()
         {
-        $processor = new Processor(new Extractor(), new Parser());
+        $processor = new Processor(new RegexExtractor(), new RegexParser());
         $processor->addHandler('outer', function(ProcessedShortcode $s) {
             $name = $s->getParent() ? $s->getParent()->getName() : 'root';
 
@@ -96,7 +97,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
 
     public function testProcessorShortcodePositions()
         {
-        $processor = new Processor(new Extractor(), new Parser());
+        $processor = new Processor(new RegexExtractor(), new RegexParser());
         $processor->addHandler('p', function(ProcessedShortcode $s) { return $s->getPosition(); });
         $processor->addHandler('n', function(ProcessedShortcode $s) { return $s->getNamePosition(); });
 
@@ -140,7 +141,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
     public function testDefaultHandler()
         {
         $processor = $this->getProcessor();
-        $processor->setDefaultHandler(function(Shortcode $s) { return $s->getName(); });
+        $processor->setDefaultHandler(function(ShortcodeInterface $s) { return $s->getName(); });
 
         $this->assertSame('namerandom', $processor->process('[name][other][/name][random]'));
         }

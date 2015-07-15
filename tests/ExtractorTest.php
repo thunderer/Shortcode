@@ -1,9 +1,9 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
-use Thunder\Shortcode\Extractor;
+use Thunder\Shortcode\Extractor\RegexExtractor;
 use Thunder\Shortcode\Match;
-use Thunder\Shortcode\Syntax;
+use Thunder\Shortcode\Syntax\Syntax;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -18,7 +18,7 @@ final class ExtractorTest extends \PHPUnit_Framework_TestCase
      */
     public function testShortcode($text, array $matches)
         {
-        $extractor = new Extractor();
+        $extractor = new RegexExtractor();
         $foundMatches = $extractor->extract($text);
 
         $matchesCount = count($matches);
@@ -71,7 +71,7 @@ final class ExtractorTest extends \PHPUnit_Framework_TestCase
 
     public function testWithDifferentSyntax()
         {
-        $extractor = new Extractor(new Syntax('[[', ']]', '//', '==', '""'));
+        $extractor = new RegexExtractor(new Syntax('[[', ']]', '//', '==', '""'));
 
         $matches = $extractor->extract('so[[m]]ething [[code]] othe[[r]]various[[//r]]');
         $this->assertCount(3, $matches);

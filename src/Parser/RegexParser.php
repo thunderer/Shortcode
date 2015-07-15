@@ -1,9 +1,9 @@
 <?php
 namespace Thunder\Shortcode\Parser;
 
-use Thunder\Shortcode\ParserInterface;
-use Thunder\Shortcode\Shortcode;
-use Thunder\Shortcode\Syntax;
+use Thunder\Shortcode\Shortcode\Shortcode;
+use Thunder\Shortcode\Syntax\Syntax;
+use Thunder\Shortcode\Syntax\SyntaxInterface;
 use Thunder\Shortcode\Utility\RegexBuilderUtility;
 
 /**
@@ -11,12 +11,12 @@ use Thunder\Shortcode\Utility\RegexBuilderUtility;
  */
 final class RegexParser implements ParserInterface
     {
-    /** @var Syntax */
+    /** @var SyntaxInterface */
     private $syntax;
     private $shortcodeRegex;
     private $argumentsRegex;
 
-    public function __construct(Syntax $syntax = null)
+    public function __construct(SyntaxInterface $syntax = null)
         {
         $this->syntax = $syntax ?: new Syntax();
         $this->shortcodeRegex = RegexBuilderUtility::buildSingleShortcodeRegex($this->syntax);

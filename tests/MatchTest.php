@@ -1,5 +1,6 @@
 <?php
 namespace Thunder\Shortcode\Tests;
+
 use Thunder\Shortcode\Match;
 
 /**

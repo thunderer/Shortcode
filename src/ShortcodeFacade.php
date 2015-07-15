@@ -1,8 +1,18 @@
 <?php
 namespace Thunder\Shortcode;
 
+use Thunder\Shortcode\Extractor\ExtractorInterface;
+use Thunder\Shortcode\Extractor\RegexExtractor;
+use Thunder\Shortcode\Parser\ParserInterface;
+use Thunder\Shortcode\Parser\RegexParser;
+use Thunder\Shortcode\Processor\Processor;
+use Thunder\Shortcode\Processor\ProcessorInterface;
 use Thunder\Shortcode\Serializer\JsonSerializer;
+use Thunder\Shortcode\Serializer\SerializerInterface;
 use Thunder\Shortcode\Serializer\TextSerializer;
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
+use Thunder\Shortcode\Syntax\Syntax;
+use Thunder\Shortcode\Syntax\SyntaxInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -22,7 +32,7 @@ class ShortcodeFacade
     /** @var SerializerInterface */
     private $textSerializer;
 
-    protected function __construct(Syntax $syntax = null, array $handlers = array(), array $aliases = array())
+    protected function __construct(SyntaxInterface $syntax = null, array $handlers = array(), array $aliases = array())
         {
         $this->syntax = $syntax ?: new Syntax();
 
@@ -34,19 +44,19 @@ class ShortcodeFacade
         $this->createJsonSerializer();
         }
 
-    public static function create(Syntax $syntax = null, array $handlers = array(), array $aliases = array())
+    public static function create(SyntaxInterface $syntax = null, array $handlers = array(), array $aliases = array())
         {
         return new self($syntax, $handlers, $aliases);
         }
 
     protected function createExtractor()
         {
-        $this->extractor = new Extractor($this->syntax);
+        $this->extractor = new RegexExtractor($this->syntax);
         }
 
     protected function createParser()
         {
-        $this->parser = new Parser($this->syntax);
+        $this->parser = new RegexParser($this->syntax);
         }
 
     protected function createProcessor(array $handlers, array $aliases)
@@ -88,7 +98,7 @@ class ShortcodeFacade
         return $this->processor->process($text);
         }
 
-    final public function serializeToText(Shortcode $shortcode)
+    final public function serializeToText(ShortcodeInterface $shortcode)
         {
         return $this->textSerializer->serialize($shortcode);
         }
@@ -98,7 +108,7 @@ class ShortcodeFacade
         return $this->textSerializer->unserialize($text);
         }
 
-    final public function serializeToJson(Shortcode $shortcode)
+    final public function serializeToJson(ShortcodeInterface $shortcode)
         {
         return $this->jsonSerializer->serialize($shortcode);
         }

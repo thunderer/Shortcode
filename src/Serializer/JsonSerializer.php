@@ -1,12 +1,12 @@
 <?php
 namespace Thunder\Shortcode\Serializer;
 
-use Thunder\Shortcode\SerializerInterface as OldSerializerInterface;
-use Thunder\Shortcode\Shortcode;
+use Thunder\Shortcode\Shortcode\Shortcode;
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
-final class JsonSerializer implements OldSerializerInterface
+final class JsonSerializer implements SerializerInterface
     {
-    public function serialize(Shortcode $s)
+    public function serialize(ShortcodeInterface $s)
         {
         return json_encode(array(
             'name' => $s->getName(),

@@ -1,21 +1,21 @@
 <?php
 namespace Thunder\Shortcode\Serializer;
 
-use Thunder\Shortcode\Parser;
-use Thunder\Shortcode\SerializerInterface as OldSerializerInterface;
-use Thunder\Shortcode\Shortcode;
-use Thunder\Shortcode\Syntax;
+use Thunder\Shortcode\Parser\RegexParser;
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
+use Thunder\Shortcode\Syntax\Syntax;
+use Thunder\Shortcode\Syntax\SyntaxInterface;
 
-final class TextSerializer implements OldSerializerInterface
+final class TextSerializer implements SerializerInterface
     {
     private $syntax;
 
-    public function __construct(Syntax $syntax = null)
+    public function __construct(SyntaxInterface $syntax = null)
         {
         $this->syntax = $syntax ?: new Syntax();
         }
 
-    public function serialize(Shortcode $s)
+    public function serialize(ShortcodeInterface $s)
         {
         $open = $this->syntax->getOpeningTag();
         $close = $this->syntax->getClosingTag();
@@ -54,7 +54,7 @@ final class TextSerializer implements OldSerializerInterface
 
     public function unserialize($text)
         {
-        $parser = new Parser();
+        $parser = new RegexParser();
 
         return $parser->parse($text);
         }

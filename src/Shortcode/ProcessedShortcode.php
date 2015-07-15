@@ -1,12 +1,12 @@
 <?php
 namespace Thunder\Shortcode\Shortcode;
 
-use Thunder\Shortcode\ProcessorInterface;
+use Thunder\Shortcode\Processor\ProcessorInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class ProcessedShortcode extends Shortcode
+final class ProcessedShortcode extends AbstractShortcode
     {
     private $parent;
     private $position;
@@ -23,7 +23,9 @@ final class ProcessedShortcode extends Shortcode
                                 $text, $textPosition, $textMatch,
                                 $iterationNumber, $recursionLevel, ProcessorInterface $processor)
         {
-        parent::__construct($s->getName(), $s->getParameters(), $s->getContent());
+        $this->name = $s->getName();
+        $this->parameters = $s->getParameters();
+        $this->content = $s->getContent();
 
         $this->parent = $parent;
         $this->position = $position;

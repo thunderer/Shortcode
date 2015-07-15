@@ -1,11 +1,11 @@
 <?php
 namespace Thunder\Shortcode\Tests\Fake;
 
-use Thunder\Shortcode\Shortcode;
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 class ReverseShortcode
     {
-    public function __invoke(Shortcode $s)
+    public function __invoke(ShortcodeInterface $s)
         {
         return strrev($s->getContent());
         }

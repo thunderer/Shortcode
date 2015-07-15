@@ -1,7 +1,7 @@
 <?php
 namespace Thunder\Shortcode\Serializer;
 
-use Thunder\Shortcode\Shortcode;
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -11,18 +11,18 @@ interface SerializerInterface
     /**
      * Serializes Shortcode class instance into given format
      *
-     * @param Shortcode $s Instance to serialize
+     * @param ShortcodeInterface $s Instance to serialize
      *
      * @return string
      */
-    public function serialize(Shortcode $s);
+    public function serialize(ShortcodeInterface $s);
 
     /**
      * Loads back Shortcode instance from serialized format
      *
      * @param $text
      *
-     * @return Shortcode
+     * @return ShortcodeInterface
      */
     public function unserialize($text);
     }
