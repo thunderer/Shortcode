@@ -22,22 +22,6 @@ final class Syntax implements SyntaxInterface
         $this->parameterValueDelimiter = $parameterValueDelimiter ?: '"';
         }
 
-    /**
-     * @deprecated Do not use, will be removed
-     */
-    public static function create()
-        {
-        return new self();
-        }
-
-    /**
-     * @deprecated Do not use, will be removed
-     */
-    public static function createStrict()
-        {
-        return new self();
-        }
-
     public function getOpeningTag()
         {
         return $this->openingTag;

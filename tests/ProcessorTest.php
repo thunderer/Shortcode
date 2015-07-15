@@ -79,7 +79,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         {
         $processor = $this
             ->getProcessor()
-            ->setRecursion(false);
+            ->setRecursionDepth(0);
 
         $result = $processor->process('x [content]a-[name][/name]-b[/content] y');
         $this->assertSame('x a-[name][/name]-b y', $result);
@@ -113,7 +113,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             ->getProcessor()
             ->addHandlerAlias('d', 'c')
             ->addHandlerAlias('e', 'c')
-            ->setRecursion(false);
+            ->setRecursionDepth(0);
 
         $processor->setMaxIterations(2);
         $this->assertSame('x a y', $processor->process('x [c]a[/c] y'));

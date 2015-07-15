@@ -240,18 +240,6 @@ final class Processor implements ProcessorInterface
         return $this;
         }
 
-    /**
-     * @deprecated Use self::setRecursionDepth() instead
-     *
-     * @param bool $recursion
-     *
-     * @return self
-     */
-    public function setRecursion($recursion)
-        {
-        return $this->setRecursionDepth($recursion ? null : 0);
-        }
-
     private function guardHandler($handler)
         {
         if(!is_callable($handler) && !$handler instanceof HandlerInterface)

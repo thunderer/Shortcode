@@ -46,22 +46,6 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
             );
         }
 
-    public function testParserWithStrictSyntax()
-        {
-        $parser = new RegexParser(Syntax::createStrict());
-
-        $provided = $this->provideShortcodes();
-        $shortcode = $parser->parse($provided[0][0]);
-
-        $this->assertSame($provided[0][1], $shortcode->getName());
-        $this->assertSame($provided[0][2], $shortcode->getParameters());
-        $this->assertSame($provided[0][3], $shortcode->getContent());
-
-        // exception is not thrown as whitespaced syntax is now the default
-        // $this->setExpectedException('RuntimeException');
-        // $parser->parse($provided[16][0]);
-        }
-
     /**
      * @dataProvider provideInvalid
      */
