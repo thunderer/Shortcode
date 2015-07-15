@@ -11,7 +11,8 @@
   * strict syntax capabilities were removed (will be reimplemented in the future),
   * introduced `CommonSyntax` with default values,
   * introduced `RegexBuilderUtility` to separate regex building from `Syntax` class,
-  * improved regular expressions which now offer more flexibility.
+  * improved regular expressions which now offer more flexibility,
+  * `HandlerInterface` was deprecated, please use classes with __invoke() method.
 
 * v0.3.0 (08.05.2015)
 

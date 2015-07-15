@@ -5,6 +5,7 @@ use Thunder\Shortcode\Shortcode;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
+ * @deprecated Use classes with __invoke()
  */
 interface HandlerInterface
     {
