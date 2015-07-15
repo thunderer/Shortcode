@@ -28,15 +28,15 @@ final class Processor implements ProcessorInterface
         $this->extractor = $extractor;
         $this->parser = $parser;
 
-        $this->shortcodeBuilder = function(array $c) {
+        $this->shortcodeBuilder = function(ProcessorContext $c) {
             /** @var $s ShortcodeInterface */
-            $s = $c['shortcode'];
-            $namePosition = array_key_exists($s->getName(), $c['namePosition']) ? $c['namePosition'][$s->getName()] : 1;
+            $s = $c->shortcode;
+            $namePosition = array_key_exists($s->getName(), $c->namePosition) ? $c->namePosition[$s->getName()] : 1;
 
-            return new Shortcode\ProcessedShortcode($c['shortcode'], $c['parent'],
-                $c['position'], $namePosition,
-                $c['text'], $c['textPosition'], $c['textMatch'],
-                $c['iterationNumber'], $c['recursionLevel'], $c['processor']);
+            return new Shortcode\ProcessedShortcode($c->shortcode, $c->parent,
+                $c->position, $namePosition,
+                $c->text, $c->textPosition, $c->textMatch,
+                $c->iterationNumber, $c->recursionLevel, $c->processor);
             };
         }
 
@@ -108,18 +108,12 @@ final class Processor implements ProcessorInterface
     public function process($text)
         {
         $iterations = $this->maxIterations === null ? 1 : $this->maxIterations;
-        $context = array(
-            'processor' => $this,
-            'iterationNumber' => 0,
-            'recursionLevel' => 0,
-            'position' => 0,
-            'namePosition' => array(),
-            'parent' => null,
-            );
+        $context = new ProcessorContext();
+        $context->processor = $this;
 
         while($iterations--)
             {
-            $context['iterationNumber']++;
+            $context->iterationNumber++;
             $newText = $this->processIteration($text, $context);
             if($newText === $text)
                 {
@@ -132,20 +126,20 @@ final class Processor implements ProcessorInterface
         return $text;
         }
 
-    private function processIteration($text, array &$context)
+    private function processIteration($text, ProcessorContext $context)
         {
-        if(null !== $this->recursionDepth && $context['recursionLevel'] > $this->recursionDepth)
+        if(null !== $this->recursionDepth && $context->recursionLevel > $this->recursionDepth)
             {
             return $text;
             }
 
-        $context['text'] = $text;
+        $context->text = $text;
         $matches = $this->extractor->extract($text);
         $replaces = array();
         foreach($matches as $match)
             {
-            $context['textMatch'] = $match->getString();
-            $context['textPosition'] = $match->getPosition();
+            $context->textMatch = $match->getString();
+            $context->textPosition = $match->getPosition();
             $replaces[] = $this->processMatch($match, $context);
             }
         $replaces = array_reverse(array_filter($replaces));
@@ -155,25 +149,25 @@ final class Processor implements ProcessorInterface
             }, $text);
         }
 
-    private function processMatch(Match $match, array &$context)
+    private function processMatch(Match $match, ProcessorContext $context)
         {
         $shortcode = $this->parser->parse($match->getString());
-        $context['position']++;
-        $context['namePosition'][$shortcode->getName()] = array_key_exists($shortcode->getName(), $context['namePosition'])
-            ? $context['namePosition'][$shortcode->getName()] + 1
+        $context->position++;
+        $context->namePosition[$shortcode->getName()] = array_key_exists($shortcode->getName(), $context->namePosition)
+            ? $context->namePosition[$shortcode->getName()] + 1
             : 1;
 
         /** @var $shortcode ShortcodeInterface */
-        $context['shortcode'] = $shortcode;
+        $context->shortcode = $shortcode;
         $shortcode = call_user_func_array($this->shortcodeBuilder, array($context));
         if($this->autoProcessContent && $shortcode->hasContent())
             {
-            $context['recursionLevel']++;
-            $context['parent'] = $shortcode;
+            $context->recursionLevel++;
+            $context->parent = $shortcode;
             $content = $this->processIteration($shortcode->getContent(), $context);
             $shortcode = $shortcode->withContent($content);
-            $context['parent'] = null;
-            $context['recursionLevel']--;
+            $context->parent = null;
+            $context->recursionLevel--;
             }
 
         $handler = $this->getHandler($shortcode->getName());

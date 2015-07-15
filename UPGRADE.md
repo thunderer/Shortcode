@@ -19,9 +19,9 @@
   * next version of this library will remove all files marked as deprecated (listed above) and will introduce backward incompatible changes to allow finishing refactorings for version 1.0. Sneak peek:
     * `Extractor` abstraction will be removed and its functionality will be merged with `Parser`,
     * processing shortcode's content will be moved to its handler,
-    * `ContextAwareShortcode` will be aware of `ProcessorInterface` instance that is processing it,
+    * `ProcessedShortcode` will be aware of `ProcessorInterface` instance that is processing it,
     * `HandlerContainer` will be refactored outside `Processor` to remove SRP violation,
     * various methods will lose their ability to accept nullable parameters to enforce visibility of dependencies,
-    * `ContextAwareShortcode` will not extend `Shortcode` and `Shortcode` will be `final` again,
+    * `ProcessedShortcode` will not extend `Shortcode` and `Shortcode` will be `final` again,
     * `Match` class will be removed and `TextAwareShortcode` will be introduced in its place.
   * README was updated to reflect those changes.

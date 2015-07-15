@@ -19,37 +19,37 @@ class Processor implements ProcessorInterface
         return '';
         }
 
-    public function addHandler()
+    public function addHandler($name, $handler)
         {
         return $this;
         }
 
-    public function addHandlerAlias()
+    public function addHandlerAlias($alias, $name)
         {
         return $this;
         }
 
-    public function setRecursion()
+    public function setRecursion($status)
         {
         return $this;
         }
 
-    public function setMaxIterations()
+    public function setMaxIterations($status)
         {
         return $this;
         }
 
-    public function setDefaultHandler()
+    public function setDefaultHandler($status)
         {
         return $this;
         }
 
-    public function setAutoProcessContent()
+    public function setAutoProcessContent($status)
         {
         return $this;
         }
 
-    public function setRecursionDepth()
+    public function setRecursionDepth($status)
         {
         return $this;
         }
