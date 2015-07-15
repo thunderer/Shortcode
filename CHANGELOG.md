@@ -2,7 +2,7 @@
 
 ## Version 0.*
 
-* v0.4.0 (dd.mm.2015)
+* v0.4.0 (15.07.2015)
 
   * introduced UPGRADE document to notify about breaking changes in the project,
   * introduced `ShortcodeInterface` for reusable shortcode implementation, handlers should typehint it,

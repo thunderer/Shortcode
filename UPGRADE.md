@@ -2,7 +2,7 @@
 
 ## Version 0.*
 
-* v0.4.0 (dd.mm.2015)
+* v0.4.0 (15.07.2015)
 
   * nearly all classes and interfaces were moved to their own namespaces, update your `use` clauses and use new names. Backward compatibility was fully maintained, but note that previous class files will be removed in the next release. Old class files contain call to `class_alias()` and empty implementation for IDE autocompletion, interfaces extend those from new locations. All modified elements are listed below:
     * `Thunder\Shortcode\Extractor` &raquo; `Thunder\Shortcode\Parser\RegexExtractor`,
