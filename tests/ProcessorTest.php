@@ -22,7 +22,6 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $processor
             ->addHandler('name', function(ShortcodeInterface $s) { return $s->getName(); })
             ->addHandler('content', function(ShortcodeInterface $s) { return $s->getContent(); })
-            ->addHandler('html', new HtmlShortcode())
             ->addHandler('reverse', new ReverseShortcode())
             ->addHandlerAlias('c', 'content')
             ->addHandlerAlias('n', 'name');
@@ -52,7 +51,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             array('x [content]a-[name]-b[/content] y', 'x a-name-b y'),
             array('x [c]a-[n][/n]-b[/c] y', 'x a-n-b y'),
             array('x [content]a-[c]v[/c]-b[/content] y', 'x a-v-b y'),
-            array('x [html b]bold[/html] y [html code]code[/html] z', 'x <b>bold</b> y <code>code</code> z'),
+            // array('x [html b]bold[/html] y [html code]code[/html] z', 'x <b>bold</b> y <code>code</code> z'),
             array('x [html]bold[/html] z', 'x [html]bold[/html] z'),
             array('x [reverse]abc xyz[/reverse] z', 'x zyx cba z'),
             );
