@@ -23,9 +23,7 @@ final class ProcessedShortcode extends AbstractShortcode
                                 $text, $textPosition, $textMatch,
                                 $iterationNumber, $recursionLevel, ProcessorInterface $processor)
         {
-        $this->name = $s->getName();
-        $this->parameters = $s->getParameters();
-        $this->content = $s->getContent();
+        parent::__construct($s->getName(), $s->getParameters(), $s->getContent());
 
         $this->parent = $parent;
         $this->position = $position;

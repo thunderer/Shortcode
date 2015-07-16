@@ -2,7 +2,6 @@
 namespace Thunder\Shortcode\Processor;
 
 use Thunder\Shortcode\Extractor\ExtractorInterface;
-use Thunder\Shortcode\Handler\HandlerInterface;
 use Thunder\Shortcode\Match;
 use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Shortcode;
@@ -43,7 +42,7 @@ final class Processor implements ProcessorInterface
      * Registers handler for given shortcode name.
      *
      * @param string $name
-     * @param callable|HandlerInterface $handler
+     * @param callable $handler
      *
      * @return self
      */
@@ -87,7 +86,7 @@ final class Processor implements ProcessorInterface
      * without handler just like they were found. With this callable being set,
      * all matched shortcodes without registered handler will be passed to it.
      *
-     * @param callable|HandlerInterface $handler Handler for shortcodes without registered name handler
+     * @param callable $handler Handler for shortcodes without registered name handler
      */
     public function setDefaultHandler($handler)
         {
@@ -175,7 +174,7 @@ final class Processor implements ProcessorInterface
             return null;
             }
 
-        $replace = $this->callHandler($handler, $shortcode, $match->getString());
+        $replace = call_user_func_array($handler, array($shortcode));
 
         return array($replace, $match->getPosition(), $match->getLength());
         }
@@ -242,23 +241,11 @@ final class Processor implements ProcessorInterface
 
     private function guardHandler($handler)
         {
-        if(!is_callable($handler) && !$handler instanceof HandlerInterface)
+        if(!is_callable($handler))
             {
             $msg = 'Shortcode handler must be callable or implement HandlerInterface!';
             throw new \RuntimeException(sprintf($msg));
             }
-        }
-
-    private function callHandler($handler, ShortcodeInterface $shortcode, $string)
-        {
-        if($handler instanceof HandlerInterface)
-            {
-            return $handler->isValid($shortcode)
-                ? $handler->handle($shortcode)
-                : $string;
-            }
-
-        return call_user_func_array($handler, array($shortcode));
         }
 
     private function getHandler($name)

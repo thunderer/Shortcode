@@ -7,7 +7,6 @@ use Thunder\Shortcode\Parser\RegexParser;
 use Thunder\Shortcode\Processor\Processor;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
-use Thunder\Shortcode\Tests\Fake\HtmlShortcode;
 use Thunder\Shortcode\Tests\Fake\ReverseShortcode;
 
 /**
