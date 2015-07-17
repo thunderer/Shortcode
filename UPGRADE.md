@@ -1,5 +1,12 @@
 # Upgrade
 
+## Version 1.*
+
+* v1.0.0 (dd.mm.yyyy)
+
+  * removed classes and methods deprecated in previous releases,
+  * `Thunder\Shortcode\Match` class was moved to `Thunder\Shortcode\Extractor\ExtractorMatch`.
+
 ## Version 0.*
 
 * v0.4.0 (15.07.2015)
@@ -13,7 +20,7 @@
     * `Thunder\Shortcode\Processor` &raquo; `Thunder\Shortcode\Processor\Processor`,
     * `Thunder\Shortcode\ProcessorInterface` &raquo; `Thunder\Shortcode\Processor\ProcessorInterface`,
     * `Thunder\Shortcode\SerializerInterface` &raquo; `Thunder\Shortcode\Serializer\SerializerInterface`,
-    * `Thunder\Shortcode\Shortcode` &raquo; `Thunder\Shortcode\Shortcode\Shortcode`, 
+    * `Thunder\Shortcode\Shortcode` &raquo; `Thunder\Shortcode\Shortcode\Shortcode`,
     * `Thunder\Shortcode\Syntax` &raquo; `Thunder\Shortcode\Syntax\Syntax`,
     * `Thunder\Shortcode\SyntaxBuilder` &raquo; `Thunder\Shortcode\Syntax\SyntaxBuilder`,
   * next version of this library will remove all files marked as deprecated (listed above) and will introduce backward incompatible changes to allow finishing refactorings for version 1.0. Sneak peek:

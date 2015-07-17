@@ -27,11 +27,14 @@ final class SerializerTest extends \PHPUnit_Framework_TestCase
 
     public function provideShortcodes()
         {
+        $empty = new Shortcode('x', array('arg' => 'val'), null);
+        $content = new Shortcode('x', array('arg' => 'val'), 'cnt');
+
         return array(
-            array(new TextSerializer(), '[x arg=val]', new Shortcode('x', array('arg' => 'val'), null)),
-            array(new TextSerializer(), '[x arg=val]cnt[/x]', new Shortcode('x', array('arg' => 'val'), 'cnt')),
-            array(new JsonSerializer(), '{"name":"x","parameters":{"arg":"val"},"content":"cnt"}',
-                new Shortcode('x', array('arg' => 'val'), 'cnt')),
+            array(new TextSerializer(), '[x arg=val]', $empty),
+            array(new TextSerializer(), '[x arg=val]cnt[/x]', $content),
+            array(new JsonSerializer(), '{"name":"x","parameters":{"arg":"val"},"content":null}', $empty),
+            array(new JsonSerializer(), '{"name":"x","parameters":{"arg":"val"},"content":"cnt"}', $content),
             );
         }
 

@@ -1,10 +1,10 @@
 <?php
-namespace Thunder\Shortcode;
+namespace Thunder\Shortcode\Extractor;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class Match
+final class ExtractorMatch
     {
     private $position;
     private $string;
@@ -13,11 +13,6 @@ final class Match
         {
         $this->position = $position;
         $this->string = $string;
-        }
-
-    public function getLength()
-        {
-        return mb_strlen($this->string);
         }
 
     public function getPosition()

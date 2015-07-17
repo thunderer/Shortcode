@@ -1,7 +1,7 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
-use Thunder\Shortcode\Match;
+use Thunder\Shortcode\Extractor\ExtractorMatch;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -10,10 +10,9 @@ final class MatchTest extends \PHPUnit_Framework_TestCase
     {
     public function testMatch()
         {
-        $match = new Match(4, 'match');
+        $match = new ExtractorMatch(4, 'match');
 
         $this->assertSame(4, $match->getPosition());
         $this->assertSame('match', $match->getString());
-        $this->assertSame(5, $match->getLength());
         }
     }

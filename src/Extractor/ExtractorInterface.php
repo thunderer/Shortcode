@@ -1,8 +1,6 @@
 <?php
 namespace Thunder\Shortcode\Extractor;
 
-use Thunder\Shortcode\Match;
-
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
@@ -13,7 +11,7 @@ interface ExtractorInterface
      *
      * @param string $text Text to extract from
      *
-     * @return Match[]
+     * @return ExtractorMatch[]
      */
     public function extract($text);
     }
