@@ -3,6 +3,7 @@ namespace Thunder\Shortcode\Tests;
 
 
 use Thunder\Shortcode\Extractor\RegexExtractor;
+use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegexParser;
 use Thunder\Shortcode\Processor\Processor;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
@@ -16,16 +17,15 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
     {
     private function getProcessor()
         {
-        $processor = new Processor(new RegexExtractor(), new RegexParser());
-
-        $processor
+        $handlers = new HandlerContainer();
+        $handlers
             ->addHandler('name', function(ShortcodeInterface $s) { return $s->getName(); })
             ->addHandler('content', function(ShortcodeInterface $s) { return $s->getContent(); })
             ->addHandler('reverse', new ReverseShortcode())
-            ->addHandlerAlias('c', 'content')
-            ->addHandlerAlias('n', 'name');
+            ->addAlias('c', 'content')
+            ->addAlias('n', 'name');
 
-        return $processor;
+        return new Processor(new RegexExtractor(), new RegexParser(), $handlers);
         }
 
     /**
@@ -33,9 +33,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
      */
     public function testProcessor($text, $result)
         {
-        $processor = $this->getProcessor();
-
-        $this->assertSame($result, $processor->process($text));
+        $this->assertSame($result, $this->getProcessor()->process($text));
         }
 
     public function provideTexts()
@@ -58,14 +56,16 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
 
     public function testProcessorParentContext()
         {
-        $processor = new Processor(new RegexExtractor(), new RegexParser());
-        $processor->addHandler('outer', function(ProcessedShortcode $s) {
+        $handlers = new HandlerContainer();
+        $handlers->addHandler('outer', function(ProcessedShortcode $s) {
             $name = $s->getParent() ? $s->getParent()->getName() : 'root';
 
             return $name.'['.$s->getContent().']';
             });
-        $processor->addHandlerAlias('inner', 'outer');
-        $processor->addHandlerAlias('level', 'outer');
+        $handlers->addAlias('inner', 'outer');
+        $handlers->addAlias('level', 'outer');
+
+        $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
 
         $text = 'x [outer]a [inner]c [level]x[/level] d[/inner] b[/outer] y';
         $result = 'x root[a outer[c inner[x] d] b] y';
@@ -95,9 +95,10 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
 
     public function testProcessorShortcodePositions()
         {
-        $processor = new Processor(new RegexExtractor(), new RegexParser());
-        $processor->addHandler('p', function(ProcessedShortcode $s) { return $s->getPosition(); });
-        $processor->addHandler('n', function(ProcessedShortcode $s) { return $s->getNamePosition(); });
+        $handlers = new HandlerContainer();
+        $handlers->addHandler('p', function(ProcessedShortcode $s) { return $s->getPosition(); });
+        $handlers->addHandler('n', function(ProcessedShortcode $s) { return $s->getNamePosition(); });
+        $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
 
         $this->assertSame('123', $processor->process('[n][n][n]'), '3n');
         $this->assertSame('123', $processor->process('[p][p][p]'), '3p');
@@ -107,11 +108,16 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
 
     public function testProcessorIterative()
         {
-        $processor = $this
-            ->getProcessor()
-            ->addHandlerAlias('d', 'c')
-            ->addHandlerAlias('e', 'c')
-            ->setRecursionDepth(0);
+        $handlers = new HandlerContainer();
+        $handlers
+            ->addHandler('name', function(ShortcodeInterface $s) { return $s->getName(); })
+            ->addHandler('content', function(ShortcodeInterface $s) { return $s->getContent(); })
+            ->addAlias('c', 'content')
+            ->addAlias('n', 'name')
+            ->addAlias('d', 'c')
+            ->addAlias('e', 'c');
+        $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+        $processor->setRecursionDepth(0);
 
         $processor->setMaxIterations(2);
         $this->assertSame('x a y', $processor->process('x [c]a[/c] y'));
@@ -120,28 +126,6 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
 
         $processor->setMaxIterations(null);
         $this->assertSame('x abcde y', $processor->process('x [c]a[d]b[e]c[/e]d[/d]e[/c] y'));
-        }
-
-    public function testExceptionOnInvalidHandler()
-        {
-        $processor = $this->getProcessor();
-        $this->setExpectedException('RuntimeException');
-        $processor->addHandler('invalid', new \stdClass());
-        }
-
-    public function testExceptionOnDuplicateHandler()
-        {
-        $processor = $this->getProcessor();
-        $this->setExpectedException('RuntimeException');
-        $processor->addHandler('name', function() {});
-        }
-
-    public function testDefaultHandler()
-        {
-        $processor = $this->getProcessor();
-        $processor->setDefaultHandler(function(ShortcodeInterface $s) { return $s->getName(); });
-
-        $this->assertSame('namerandom', $processor->process('[name][other][/name][random]'));
         }
 
     public function testExceptionOnInvalidRecursionDepth()
@@ -158,14 +142,29 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $processor->setMaxIterations(new \stdClass());
         }
 
+    public function testDefaultHandler()
+        {
+        $handlers = new HandlerContainer();
+        $handlers->setDefault(function(ShortcodeInterface $s) { return $s->getName(); });
+        $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+
+        $this->assertSame('namerandom', $processor->process('[name][other][/name][random]'));
+        }
+
     public function testPreventInfiniteLoop()
         {
-        $processor = $this
-            ->getProcessor()
+        $handlers = new HandlerContainer();
+        $handlers
+            ->addHandler('name', function(ShortcodeInterface $s) { return $s->getName(); })
+            ->addHandler('content', function(ShortcodeInterface $s) { return $s->getContent(); })
+            ->addHandler('reverse', new ReverseShortcode())
+            ->addAlias('c', 'content')
+            ->addAlias('n', 'name')
             ->addHandler('self', function() { return '[self]'; })
             ->addHandler('other', function() { return '[self]'; })
-            ->addHandler('random', function() { return '[various]'; })
-            ->setMaxIterations(null);
+            ->addHandler('random', function() { return '[various]'; });
+        $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+        $processor->setMaxIterations(null);
 
         $processor->process('[self]');
         $processor->process('[other]');

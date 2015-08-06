@@ -3,6 +3,7 @@ namespace Thunder\Shortcode;
 
 use Thunder\Shortcode\Extractor\ExtractorInterface;
 use Thunder\Shortcode\Extractor\RegexExtractor;
+use Thunder\Shortcode\HandlerContainer\HandlerContainerInterface;
 use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Parser\RegexParser;
 use Thunder\Shortcode\Processor\Processor;
@@ -32,21 +33,21 @@ class ShortcodeFacade
     /** @var SerializerInterface */
     private $textSerializer;
 
-    protected function __construct(SyntaxInterface $syntax = null, array $handlers = array(), array $aliases = array())
+    protected function __construct(SyntaxInterface $syntax = null, HandlerContainerInterface $handlers)
         {
         $this->syntax = $syntax ?: new Syntax();
 
         $this->createExtractor();
         $this->createParser();
-        $this->createProcessor($handlers, $aliases);
+        $this->createProcessor($handlers);
 
         $this->createTextSerializer();
         $this->createJsonSerializer();
         }
 
-    public static function create(SyntaxInterface $syntax = null, array $handlers = array(), array $aliases = array())
+    public static function create(SyntaxInterface $syntax = null, HandlerContainerInterface $handlers)
         {
-        return new self($syntax, $handlers, $aliases);
+        return new self($syntax, $handlers);
         }
 
     protected function createExtractor()
@@ -59,18 +60,9 @@ class ShortcodeFacade
         $this->parser = new RegexParser($this->syntax);
         }
 
-    protected function createProcessor(array $handlers, array $aliases)
+    protected function createProcessor(HandlerContainerInterface $handlers)
         {
-        $this->processor = new Processor($this->extractor, $this->parser);
-
-        foreach($handlers as $name => $handler)
-            {
-            $this->processor->addHandler($name, $handler);
-            }
-        foreach($aliases as $alias => $name)
-            {
-            $this->processor->addHandlerAlias($alias, $name);
-            }
+        $this->processor = new Processor($this->extractor, $this->parser, $handlers);
         }
 
     protected function createTextSerializer()

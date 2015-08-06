@@ -2,6 +2,7 @@
 namespace Thunder\Shortcode\Processor;
 
 use Thunder\Shortcode\Extractor\ExtractorInterface;
+use Thunder\Shortcode\HandlerContainer\HandlerContainerInterface;
 use Thunder\Shortcode\Match\MatchInterface;
 use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Shortcode;
@@ -12,19 +13,19 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
  */
 final class Processor implements ProcessorInterface
     {
-    private $handlers = array();
+    private $handlers;
     private $extractor;
     private $parser;
-    private $defaultHandler;
     private $recursionDepth = null; // infinite recursion
     private $maxIterations = 1; // one iteration
     private $autoProcessContent = true; // automatically process shortcode content
     private $shortcodeBuilder;
 
-    public function __construct(ExtractorInterface $extractor, ParserInterface $parser)
+    public function __construct(ExtractorInterface $extractor, ParserInterface $parser, HandlerContainerInterface $handlers)
         {
         $this->extractor = $extractor;
         $this->parser = $parser;
+        $this->handlers = $handlers;
 
         $this->shortcodeBuilder = function(ProcessorContext $c) {
             /** @var $s ShortcodeInterface */
@@ -36,63 +37,6 @@ final class Processor implements ProcessorInterface
                 $c->text, $c->textPosition, $c->textMatch,
                 $c->iterationNumber, $c->recursionLevel, $c->processor);
             };
-        }
-
-    /**
-     * Registers handler for given shortcode name.
-     *
-     * @param string $name
-     * @param callable $handler
-     *
-     * @return self
-     */
-    public function addHandler($name, $handler)
-        {
-        $this->guardHandler($handler);
-
-        if(!$name || $this->hasHandler($name))
-            {
-            $msg = 'Invalid name or duplicate shortcode handler for %s!';
-            throw new \RuntimeException(sprintf($msg, $name));
-            }
-
-        $this->handlers[$name] = $handler;
-
-        return $this;
-        }
-
-    /**
-     * Registers handler alias for given shortcode name, which means that
-     * handler for target name will be called when alias is found.
-     *
-     * @param string $alias Alias shortcode name
-     * @param string $name Aliased shortcode name
-     *
-     * @return self
-     */
-    public function addHandlerAlias($alias, $name)
-        {
-        $handler = $this->getHandler($name);
-
-        $this->addHandler($alias, function(ShortcodeInterface $shortcode) use($handler) {
-            return call_user_func_array($handler, array($shortcode));
-            });
-
-        return $this;
-        }
-
-    /**
-     * Default library behavior is to ignore and return matches of shortcodes
-     * without handler just like they were found. With this callable being set,
-     * all matched shortcodes without registered handler will be passed to it.
-     *
-     * @param callable $handler Handler for shortcodes without registered name handler
-     */
-    public function setDefaultHandler($handler)
-        {
-        $this->guardHandler($handler);
-
-        $this->defaultHandler = $handler;
         }
 
     /**
@@ -168,7 +112,7 @@ final class Processor implements ProcessorInterface
             $context->recursionLevel--;
             }
 
-        $handler = $this->getHandler($shortcode->getName());
+        $handler = $this->handlers->getHandler($shortcode->getName());
         if(!$handler)
             {
             return null;
@@ -237,26 +181,5 @@ final class Processor implements ProcessorInterface
         $this->autoProcessContent = (bool)$flag;
 
         return $this;
-        }
-
-    private function guardHandler($handler)
-        {
-        if(!is_callable($handler))
-            {
-            $msg = 'Shortcode handler must be callable or implement HandlerInterface!';
-            throw new \RuntimeException(sprintf($msg));
-            }
-        }
-
-    private function getHandler($name)
-        {
-        return $this->hasHandler($name)
-            ? $this->handlers[$name]
-            : ($this->defaultHandler ? $this->defaultHandler : null);
-        }
-
-    private function hasHandler($name)
-        {
-        return array_key_exists($name, $this->handlers);
         }
     }

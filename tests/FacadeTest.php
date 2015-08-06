@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
+use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Shortcode\Shortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 use Thunder\Shortcode\ShortcodeFacade;
@@ -12,13 +13,14 @@ final class FacadeTest extends \PHPUnit_Framework_TestCase
     {
     public function testFacade()
         {
-        $facade = ShortcodeFacade::create(null, array(
-            'name' => function(ShortcodeInterface $s) { return $s->getName(); },
-            'content' => function(ShortcodeInterface $s) { return $s->getContent(); },
-            ), array(
-            'c' => 'content',
-            'n' => 'name',
-            ));
+        $handlers = new HandlerContainer();
+        $handlers
+            ->addHandler('name', function(ShortcodeInterface $s) { return $s->getName(); })
+            ->addHandler('content', function(ShortcodeInterface $s) { return $s->getContent(); })
+            ->addAlias('c', 'content')
+            ->addAlias('n', 'name');
+
+        $facade = ShortcodeFacade::create(null, $handlers);
 
         $this->assertSame('n', $facade->process('[n]'));
         $this->assertSame('c', $facade->process('[c]c[/c]'));

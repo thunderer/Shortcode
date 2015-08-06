@@ -2,6 +2,7 @@
 namespace Thunder\Shortcode\Tests;
 
 use Thunder\Shortcode\Extractor\RegexExtractor;
+use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegexParser;
 use Thunder\Shortcode\Processor\Processor;
 use Thunder\Shortcode\Serializer\TextSerializer;
@@ -63,7 +64,7 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
 
     public function testProcessedShortcode()
         {
-        $processor = new Processor(new RegexExtractor(), new RegexParser());
+        $processor = new Processor(new RegexExtractor(), new RegexParser(), new HandlerContainer());
         $shortcode = new Shortcode('code', array('arg' => 'val'), 'content');
         $processed = new ProcessedShortcode($shortcode, null, 20, 10, ' [code] ', 1, '[code]', 1, 0, $processor);
 
