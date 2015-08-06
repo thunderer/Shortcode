@@ -16,4 +16,20 @@ final class HandlerContainerTest extends \PHPUnit_Framework_TestCase
         $this->setExpectedException('RuntimeException');
         $handlers->addHandler('name', function() {});
         }
+
+    public function testSomething()
+        {
+        $x = function() {};
+        $y = function() {};
+
+        $handler = new HandlerContainer();
+        $handler->addHandler('x', $x);
+        $handler->addAlias('y', 'x');
+        $handler->setDefault($y);
+
+        $this->assertTrue($handler->hasHandler('x'));
+        $this->assertTrue($handler->hasHandler('y'));
+        $this->assertSame($x, $handler->getHandler('x'));
+        $this->assertSame($y, $handler->getHandler('z'));
+        }
     }

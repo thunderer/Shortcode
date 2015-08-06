@@ -28,9 +28,9 @@ final class Processor implements ProcessorInterface
         $this->handlers = $handlers;
 
         $this->shortcodeBuilder = function(ProcessorContext $c) {
-            /** @var $s ShortcodeInterface */
-            $s = $c->shortcode;
-            $namePosition = array_key_exists($s->getName(), $c->namePosition) ? $c->namePosition[$s->getName()] : 1;
+            $namePosition = array_key_exists($c->shortcode->getName(), $c->namePosition)
+                ? $c->namePosition[$c->shortcode->getName()]
+                : 1;
 
             return new Shortcode\ProcessedShortcode($c->shortcode, $c->parent,
                 $c->position, $namePosition,

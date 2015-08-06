@@ -26,6 +26,8 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($args, $s->getParameters());
         $this->assertSame($content, $s->getContent());
         $this->assertSame($expected, $textSerializer->serialize($s));
+        $this->assertSame('arg', $s->getParameterAt(0));
+        $this->assertTrue($s->hasParameters());
         }
 
     public function provideShortcodes()
@@ -77,5 +79,9 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(' [code] ', $processed->getText());
         $this->assertSame(1, $processed->getTextPosition());
         $this->assertSame('[code]', $processed->getTextMatch());
+        $this->assertSame(1, $processed->getIterationNumber());
+        $this->assertSame(0, $processed->getRecursionLevel());
+        $this->assertSame(null, $processed->getParent());
+        $this->assertSame($processor, $processed->getProcessor());
         }
     }
