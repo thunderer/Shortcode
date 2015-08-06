@@ -15,8 +15,10 @@ class HandlerContainer implements HandlerContainerInterface
         {
         }
 
-    public function addHandler($name, callable $handler)
+    public function addHandler($name, $handler)
         {
+        $this->guardHandler($handler);
+
         if(!$name || $this->hasHandler($name))
             {
             $msg = 'Invalid name or duplicate shortcode handler for %s!';
@@ -39,8 +41,10 @@ class HandlerContainer implements HandlerContainerInterface
         return $this;
         }
 
-    public function setDefault(callable $handler)
+    public function setDefault($handler)
         {
+        $this->guardHandler($handler);
+
         $this->defaultHandler = $handler;
         }
 
@@ -54,5 +58,14 @@ class HandlerContainer implements HandlerContainerInterface
     public function hasHandler($name)
         {
         return array_key_exists($name, $this->handlers);
+        }
+
+    private function guardHandler($handler)
+        {
+        if(!is_callable($handler))
+            {
+            $msg = 'Shortcode handler must be callable!';
+            throw new \RuntimeException(sprintf($msg));
+            }
         }
     }

@@ -11,7 +11,7 @@ interface HandlerContainerInterface
      *
      * @return self
      */
-    public function addHandler($name, callable $handler);
+    public function addHandler($name, $handler);
 
     /**
      * Registers handler alias for given shortcode name, which means that
@@ -31,7 +31,7 @@ interface HandlerContainerInterface
      *
      * @param callable $handler Handler for shortcodes without registered name handler
      */
-    public function setDefault(callable $handler);
+    public function setDefault($handler);
 
     /**
      * Returns handler for given shortcode name or default if it was set before.
