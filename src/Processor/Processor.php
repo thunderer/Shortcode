@@ -2,7 +2,7 @@
 namespace Thunder\Shortcode\Processor;
 
 use Thunder\Shortcode\Extractor\ExtractorInterface;
-use Thunder\Shortcode\Extractor\ExtractorMatch;
+use Thunder\Shortcode\Match\MatchInterface;
 use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Shortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
@@ -147,7 +147,7 @@ final class Processor implements ProcessorInterface
             }, $text);
         }
 
-    private function processMatch(ExtractorMatch $match, ProcessorContext $context)
+    private function processMatch(MatchInterface $match, ProcessorContext $context)
         {
         $shortcode = $this->parser->parse($match->getString());
         $context->position++;

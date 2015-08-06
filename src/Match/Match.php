@@ -1,12 +1,15 @@
 <?php
-namespace Thunder\Shortcode\Extractor;
+namespace Thunder\Shortcode\Match;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class ExtractorMatch
-    {
+final class Match implements MatchInterface
+{
+    /** @var int */
     private $position;
+
+    /** @var string */
     private $string;
 
     public function __construct($position, $string)

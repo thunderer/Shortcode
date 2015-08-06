@@ -1,6 +1,8 @@
 <?php
 namespace Thunder\Shortcode\Extractor;
 
+use Thunder\Shortcode\Match\Match;
+use Thunder\Shortcode\Match\MatchInterface;
 use Thunder\Shortcode\Syntax\Syntax;
 use Thunder\Shortcode\Syntax\SyntaxInterface;
 use Thunder\Shortcode\Utility\RegexBuilderUtility;
@@ -19,14 +21,15 @@ final class RegexExtractor implements ExtractorInterface
 
     /**
      * @param string $text
-     * @return ExtractorMatch[]
+     *
+     * @return MatchInterface[]
      */
     public function extract($text)
         {
         preg_match_all($this->regex, $text, $matches, PREG_OFFSET_CAPTURE);
 
         return array_map(function(array $matches) {
-            return new ExtractorMatch($matches[1], $matches[0]);
+            return new Match($matches[1], $matches[0]);
             }, $matches[0]);
         }
     }
