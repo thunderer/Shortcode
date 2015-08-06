@@ -17,7 +17,7 @@ final class HandlerContainerTest extends \PHPUnit_Framework_TestCase
         $handlers->addHandler('name', function() {});
         }
 
-    public function testSomething()
+    public function testHandlerContainer()
         {
         $x = function() {};
         $y = function() {};
@@ -31,5 +31,12 @@ final class HandlerContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($handler->hasHandler('y'));
         $this->assertSame($x, $handler->getHandler('x'));
         $this->assertSame($y, $handler->getHandler('z'));
+        }
+
+    public function testInvalidHandler()
+        {
+        $handlers = new HandlerContainer();
+        $this->setExpectedException('RuntimeException');
+        $handlers->addHandler('invalid', new \stdClass());
         }
     }
