@@ -5,6 +5,7 @@ use Thunder\Shortcode\Extractor\RegexExtractor;
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegexParser;
 use Thunder\Shortcode\Processor\Processor;
+use Thunder\Shortcode\Processor\ProcessorContext;
 use Thunder\Shortcode\Serializer\TextSerializer;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 use Thunder\Shortcode\Shortcode\Shortcode;
@@ -67,8 +68,20 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
     public function testProcessedShortcode()
         {
         $processor = new Processor(new RegexExtractor(), new RegexParser(), new HandlerContainer());
-        $shortcode = new Shortcode('code', array('arg' => 'val'), 'content');
-        $processed = new ProcessedShortcode($shortcode, null, 20, 10, ' [code] ', 1, '[code]', 1, 0, $processor);
+
+        $context = new ProcessorContext();
+        $context->shortcode = new Shortcode('code', array('arg' => 'val'), 'content');
+        $context->processor = $processor;
+        $context->position = 20;
+        $context->namePosition = array('code' => 10);
+        $context->text = ' [code] ';
+        $context->textMatch = '[code]';
+        $context->textPosition = 1;
+        $context->iterationNumber = 1;
+        $context->recursionLevel = 0;
+        $context->parent = null;
+
+        $processed = ProcessedShortcode::createFromContext($context);
 
         $this->assertSame('code', $processed->getName());
         $this->assertSame(array('arg' => 'val'), $processed->getParameters());

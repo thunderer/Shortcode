@@ -102,8 +102,8 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame('123', $processor->process('[n][n][n]'), '3n');
         $this->assertSame('123', $processor->process('[p][p][p]'), '3p');
-        $this->assertSame('113253', $processor->process('[p][n][p][n][p][n]'));
-        $this->assertSame('1231567', $processor->process('[p][p][p][n][p][p][p]'));
+        $this->assertSame('113253', $processor->process('[p][n][p][n][p][n]'), 'pnpnpn');
+        $this->assertSame('1231567', $processor->process('[p][p][p][n][p][p][p]'), 'pppnppp');
         }
 
     public function testProcessorIterative()

@@ -5,7 +5,7 @@ use Thunder\Shortcode\Extractor\ExtractorInterface;
 use Thunder\Shortcode\HandlerContainer\HandlerContainerInterface;
 use Thunder\Shortcode\Match\MatchInterface;
 use Thunder\Shortcode\Parser\ParserInterface;
-use Thunder\Shortcode\Shortcode;
+use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 /**
@@ -27,15 +27,8 @@ final class Processor implements ProcessorInterface
         $this->parser = $parser;
         $this->handlers = $handlers;
 
-        $this->shortcodeBuilder = function(ProcessorContext $c) {
-            $namePosition = array_key_exists($c->shortcode->getName(), $c->namePosition)
-                ? $c->namePosition[$c->shortcode->getName()]
-                : 1;
-
-            return new Shortcode\ProcessedShortcode($c->shortcode, $c->parent,
-                $c->position, $namePosition,
-                $c->text, $c->textPosition, $c->textMatch,
-                $c->iterationNumber, $c->recursionLevel, $c->processor);
+        $this->shortcodeBuilder = function(ProcessorContext $context) {
+            return ProcessedShortcode::createFromContext($context);
             };
         }
 
