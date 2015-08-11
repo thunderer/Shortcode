@@ -94,7 +94,7 @@ final class Processor implements ProcessorInterface
 
         /** @var $shortcode ShortcodeInterface */
         $context->shortcode = $shortcode;
-        $shortcode = call_user_func_array($this->shortcodeBuilder, array($context));
+        $shortcode = call_user_func_array($this->shortcodeBuilder, array(clone $context));
         if($this->autoProcessContent && $shortcode->hasContent())
             {
             $context->recursionLevel++;
