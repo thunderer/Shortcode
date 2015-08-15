@@ -54,6 +54,9 @@ final class ProcessedShortcode extends AbstractShortcode
         return $self;
         }
 
+    /**
+     * @return ShortcodeInterface
+     */
     public function getParent()
         {
         return $this->parent;

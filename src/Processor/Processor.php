@@ -5,6 +5,7 @@ use Thunder\Shortcode\Extractor\ExtractorInterface;
 use Thunder\Shortcode\HandlerContainer\HandlerContainerInterface;
 use Thunder\Shortcode\Match\MatchInterface;
 use Thunder\Shortcode\Parser\ParserInterface;
+use Thunder\Shortcode\Serializer\TextSerializer;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
@@ -107,10 +108,15 @@ final class Processor implements ProcessorInterface
             $context->recursionLevel--;
             }
 
+        $position = $match->getPosition();
+        $length = mb_strlen($match->getString());
+
         $has = $this->handlers->has($shortcode->getName());
         if(!$has && !$this->defaultHandler)
             {
-            return null;
+            $textSerializer = new TextSerializer();
+
+            return array($textSerializer->serialize($shortcode), $position, $length);
             }
 
         $handler = $has
@@ -118,7 +124,7 @@ final class Processor implements ProcessorInterface
             : $this->defaultHandler;
         $replace = call_user_func_array($handler, array($shortcode));
 
-        return array($replace, $match->getPosition(), mb_strlen($match->getString()));
+        return array($replace, $position, $length);
         }
 
     /**

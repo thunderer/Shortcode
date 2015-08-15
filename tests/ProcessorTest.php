@@ -83,6 +83,20 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('x a-[name][/name]-b y', $result);
         }
 
+    public function testProcessContentIfHasChildHandlerButNotParent()
+        {
+        $handlers = new HandlerContainer();
+        $handlers->add('valid', function(ShortcodeInterface $s) { return $s->getName(); });
+
+        $text = 'x [invalid   ] [valid /] [/invalid] y';
+        $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+
+        $processor->setAutoProcessContent(true);
+        $this->assertSame('x [invalid] valid [/invalid] y', $processor->process($text));
+        $processor->setAutoProcessContent(false);
+        $this->assertSame('x [invalid] [valid /] [/invalid] y', $processor->process($text));
+        }
+
     public function testProcessorWithoutContentAutoProcessing()
         {
         $processor = $this
