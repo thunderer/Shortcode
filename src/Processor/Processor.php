@@ -23,11 +23,24 @@ final class Processor implements ProcessorInterface
     private $autoProcessContent = true; // automatically process shortcode content
     private $shortcodeBuilder;
 
-    public function __construct(ExtractorInterface $extractor, ParserInterface $parser, HandlerContainerInterface $handlers, callable $defaultHandler = null)
+    /**
+     * Creates Processor instance.
+     *
+     * @param ExtractorInterface $extractor
+     * @param ParserInterface $parser
+     * @param HandlerContainerInterface $handlers
+     * @param callable $defaultHandler
+     */
+    public function __construct(ExtractorInterface $extractor, ParserInterface $parser, HandlerContainerInterface $handlers, $defaultHandler = null)
         {
         $this->extractor = $extractor;
         $this->parser = $parser;
         $this->handlers = $handlers;
+
+        if(null !== $defaultHandler && !is_callable($defaultHandler))
+            {
+            throw new \InvalidArgumentException('Default shortcode handler must be callable!');
+            }
         $this->defaultHandler = $defaultHandler;
 
         $this->shortcodeBuilder = function(ProcessorContext $context) {

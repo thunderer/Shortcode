@@ -183,4 +183,10 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $processor->process('[other]');
         $processor->process('[random]');
         }
+
+    public function testExceptionWhenDefaultShortcodeHandlerIsNotCallable()
+        {
+        $this->setExpectedException('InvalidArgumentException');
+        new Processor(new RegexExtractor(), new RegexParser(), new HandlerContainer(), new \stdClass());
+        }
     }
