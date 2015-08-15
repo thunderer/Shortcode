@@ -143,13 +143,13 @@ final class Processor implements ProcessorInterface
     /**
      * Recursion depth level, null means infinite, any integer greater than or
      * equal to zero sets value (number of recursion levels). Zero disables
-     * recursion.
+     * recursion. Defaults to null.
      *
      * @param int|null $depth
      *
      * @return self
      */
-    public function setRecursionDepth($depth)
+    public function withRecursionDepth($depth)
         {
         if(null !== $depth && !(is_int($depth) && $depth >= 0))
             {
@@ -157,21 +157,23 @@ final class Processor implements ProcessorInterface
             throw new \InvalidArgumentException($msg);
             }
 
-        $this->recursionDepth = $depth;
+        $self = clone $this;
+        $self->recursionDepth = $depth;
 
-        return $this;
+        return $self;
         }
 
     /**
      * Maximum number of iterations, null means infinite, any integer greater
      * than zero sets value. Zero is invalid because there must be at least one
-     * iteration.
+     * iteration. Defaults to 1. Loop breaks if result of two consequent
+     * iterations shows no change in processed text.
      *
      * @param int|null $iterations
      *
      * @return self
      */
-    public function setMaxIterations($iterations)
+    public function withMaxIterations($iterations)
         {
         if(null !== $iterations && !(is_int($iterations) && $iterations > 0))
             {
@@ -179,24 +181,26 @@ final class Processor implements ProcessorInterface
             throw new \InvalidArgumentException($msg);
             }
 
-        $this->maxIterations = $iterations;
+        $self = clone $this;
+        $self->maxIterations = $iterations;
 
-        return $this;
+        return $self;
         }
 
     /**
      * Whether shortcode content will be automatically processed and handler
      * already receives shortcode with processed content. If false, every
-     * shortcode handler needs to process content on its own.
+     * shortcode handler needs to process content on its own. Default true.
      *
      * @param bool $flag True if enabled (default), false otherwise
      *
      * @return self
      */
-    public function setAutoProcessContent($flag)
+    public function withAutoProcessContent($flag)
         {
-        $this->autoProcessContent = (bool)$flag;
+        $self = clone $this;
+        $self->autoProcessContent = (bool)$flag;
 
-        return $this;
+        return $self;
         }
     }

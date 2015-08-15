@@ -75,11 +75,11 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
 
     public function testProcessorWithoutRecursion()
         {
-        $processor = $this
+        $result = $this
             ->getProcessor()
-            ->setRecursionDepth(0);
+            ->withRecursionDepth(0)
+            ->process('x [content]a-[name][/name]-b[/content] y');
 
-        $result = $processor->process('x [content]a-[name][/name]-b[/content] y');
         $this->assertSame('x a-[name][/name]-b y', $result);
         }
 
@@ -91,19 +91,17 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $text = 'x [invalid   ] [valid /] [/invalid] y';
         $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
 
-        $processor->setAutoProcessContent(true);
-        $this->assertSame('x [invalid] valid [/invalid] y', $processor->process($text));
-        $processor->setAutoProcessContent(false);
-        $this->assertSame('x [invalid] [valid /] [/invalid] y', $processor->process($text));
+        $this->assertSame('x [invalid] valid [/invalid] y', $processor->withAutoProcessContent(true)->process($text));
+        $this->assertSame('x [invalid] [valid /] [/invalid] y', $processor->withAutoProcessContent(false)->process($text));
         }
 
     public function testProcessorWithoutContentAutoProcessing()
         {
-        $processor = $this
+        $result = $this
             ->getProcessor()
-            ->setAutoProcessContent(false);
+            ->withAutoProcessContent(false)
+            ->process('x [content]a-[name][/name]-b[/content] y');
 
-        $result = $processor->process('x [content]a-[name][/name]-b[/content] y');
         $this->assertSame('x a-[name][/name]-b y', $result);
         }
 
@@ -131,14 +129,14 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             ->addAlias('d', 'c')
             ->addAlias('e', 'c');
         $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
-        $processor->setRecursionDepth(0);
 
-        $processor->setMaxIterations(2);
+        /** @var $processor Processor */
+        $processor = $processor->withRecursionDepth(0)->withMaxIterations(2);
         $this->assertSame('x a y', $processor->process('x [c]a[/c] y'));
         $this->assertSame('x abc y', $processor->process('x [c]a[d]b[/d]c[/c] y'));
         $this->assertSame('x ab[e]c[/e]de y', $processor->process('x [c]a[d]b[e]c[/e]d[/d]e[/c] y'));
 
-        $processor->setMaxIterations(null);
+        $processor = $processor->withMaxIterations(null);
         $this->assertSame('x abcde y', $processor->process('x [c]a[d]b[e]c[/e]d[/d]e[/c] y'));
         }
 
@@ -146,14 +144,14 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         {
         $processor = $this->getProcessor();
         $this->setExpectedException('InvalidArgumentException');
-        $processor->setRecursionDepth(new \stdClass());
+        $processor->withRecursionDepth(new \stdClass());
         }
 
     public function testExceptionOnInvalidMaxIterations()
         {
         $processor = $this->getProcessor();
         $this->setExpectedException('InvalidArgumentException');
-        $processor->setMaxIterations(new \stdClass());
+        $processor->withMaxIterations(new \stdClass());
         }
 
     public function testDefaultHandler()
@@ -177,7 +175,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             ->add('other', function() { return '[self]'; })
             ->add('random', function() { return '[various]'; });
         $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
-        $processor->setMaxIterations(null);
+        $processor->withMaxIterations(null);
 
         $processor->process('[self]');
         $processor->process('[other]');
