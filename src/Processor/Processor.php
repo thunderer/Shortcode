@@ -96,7 +96,10 @@ final class Processor implements ProcessorInterface
         $replaces = array_reverse(array_filter($replaces));
 
         return array_reduce($replaces, function($state, array $item) {
-            return substr_replace($state, $item[0], $item[1], $item[2]);
+            /** @var $match MatchInterface */
+            $match = $item[1];
+
+            return substr_replace($state, $item[0], $match->getPosition(), mb_strlen($match->getString()));
             }, $text);
         }
 
@@ -108,36 +111,44 @@ final class Processor implements ProcessorInterface
             ? $context->namePosition[$shortcode->getName()] + 1
             : 1;
 
-        /** @var $shortcode ShortcodeInterface */
         $context->shortcode = $shortcode;
         $shortcode = call_user_func_array($this->shortcodeBuilder, array(clone $context));
+        $shortcode = $this->processRecursion($shortcode, $context);
+
+        return array($this->processShortcode($match, $shortcode), $match);
+        }
+
+    private function processShortcode(MatchInterface $match, ShortcodeInterface $shortcode)
+        {
+        $hasHandler = $this->handlers->has($shortcode->getName());
+        if(!$hasHandler && !$this->defaultHandler)
+            {
+            $textSerializer = new TextSerializer();
+
+            return array($textSerializer->serialize($shortcode), $match);
+            }
+
+        $handler = $hasHandler
+            ? $this->handlers->get($shortcode->getName())
+            : $this->defaultHandler;
+
+        return call_user_func_array($handler, array($shortcode));
+        }
+
+    private function processRecursion(ShortcodeInterface $shortcode, ProcessorContext $context)
+        {
         if($this->autoProcessContent && $shortcode->hasContent())
             {
             $context->recursionLevel++;
             $context->parent = $shortcode;
             $content = $this->processIteration($shortcode->getContent(), $context);
-            $shortcode = $shortcode->withContent($content);
             $context->parent = null;
             $context->recursionLevel--;
+
+            return $shortcode->withContent($content);
             }
 
-        $position = $match->getPosition();
-        $length = mb_strlen($match->getString());
-
-        $has = $this->handlers->has($shortcode->getName());
-        if(!$has && !$this->defaultHandler)
-            {
-            $textSerializer = new TextSerializer();
-
-            return array($textSerializer->serialize($shortcode), $position, $length);
-            }
-
-        $handler = $has
-            ? $this->handlers->get($shortcode->getName())
-            : $this->defaultHandler;
-        $replace = call_user_func_array($handler, array($shortcode));
-
-        return array($replace, $position, $length);
+        return $shortcode;
         }
 
     /**
