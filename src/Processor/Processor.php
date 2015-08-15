@@ -14,6 +14,7 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 final class Processor implements ProcessorInterface
     {
     private $handlers;
+    private $defaultHandler;
     private $extractor;
     private $parser;
     private $recursionDepth = null; // infinite recursion
@@ -21,11 +22,12 @@ final class Processor implements ProcessorInterface
     private $autoProcessContent = true; // automatically process shortcode content
     private $shortcodeBuilder;
 
-    public function __construct(ExtractorInterface $extractor, ParserInterface $parser, HandlerContainerInterface $handlers)
+    public function __construct(ExtractorInterface $extractor, ParserInterface $parser, HandlerContainerInterface $handlers, callable $defaultHandler = null)
         {
         $this->extractor = $extractor;
         $this->parser = $parser;
         $this->handlers = $handlers;
+        $this->defaultHandler = $defaultHandler;
 
         $this->shortcodeBuilder = function(ProcessorContext $context) {
             return ProcessedShortcode::createFromContext($context);
@@ -105,12 +107,15 @@ final class Processor implements ProcessorInterface
             $context->recursionLevel--;
             }
 
-        $handler = $this->handlers->getHandler($shortcode->getName());
-        if(!$handler)
+        $has = $this->handlers->has($shortcode->getName());
+        if(!$has && !$this->defaultHandler)
             {
             return null;
             }
 
+        $handler = $has
+            ? $this->handlers->get($shortcode->getName())
+            : $this->defaultHandler;
         $replace = call_user_func_array($handler, array($shortcode));
 
         return array($replace, $match->getPosition(), mb_strlen($match->getString()));

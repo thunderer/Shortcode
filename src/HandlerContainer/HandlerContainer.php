@@ -8,18 +8,15 @@ class HandlerContainer implements HandlerContainerInterface
     /** @var callable[] */
     private $handlers = array();
 
-    /** @var callable */
-    private $defaultHandler = null;
-
     public function __construct()
         {
         }
 
-    public function addHandler($name, $handler)
+    public function add($name, $handler)
         {
         $this->guardHandler($handler);
 
-        if(!$name || $this->hasHandler($name))
+        if(!$name || $this->has($name))
             {
             $msg = 'Invalid name or duplicate shortcode handler for %s!';
             throw new \RuntimeException(sprintf($msg, $name));
@@ -32,30 +29,26 @@ class HandlerContainer implements HandlerContainerInterface
 
     public function addAlias($alias, $name)
         {
-        $handler = $this->getHandler($name);
+        $handler = $this->get($name);
 
-        $this->addHandler($alias, function(ShortcodeInterface $shortcode) use($handler) {
+        $this->add($alias, function(ShortcodeInterface $shortcode) use($handler) {
             return call_user_func_array($handler, array($shortcode));
             });
 
         return $this;
         }
 
-    public function setDefault($handler)
+    public function get($name)
         {
-        $this->guardHandler($handler);
+        if(!$this->has($name))
+            {
+            throw new \RuntimeException(sprintf('Handler for name %s does not exist!', $name));
+            }
 
-        $this->defaultHandler = $handler;
+        return $this->handlers[$name];
         }
 
-    public function getHandler($name)
-        {
-        return $this->hasHandler($name)
-            ? $this->handlers[$name]
-            : ($this->defaultHandler ? $this->defaultHandler : null);
-        }
-
-    public function hasHandler($name)
+    public function has($name)
         {
         return array_key_exists($name, $this->handlers);
         }

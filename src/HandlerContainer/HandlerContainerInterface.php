@@ -11,7 +11,7 @@ interface HandlerContainerInterface
      *
      * @return self
      */
-    public function addHandler($name, $handler);
+    public function add($name, $handler);
 
     /**
      * Registers handler alias for given shortcode name, which means that
@@ -25,22 +25,13 @@ interface HandlerContainerInterface
     public function addAlias($alias, $name);
 
     /**
-     * Default library behavior is to ignore and return matches of shortcodes
-     * without handler just like they were found. With this callable being set,
-     * all matched shortcodes without registered handler will be passed to it.
-     *
-     * @param callable $handler Handler for shortcodes without registered name handler
-     */
-    public function setDefault($handler);
-
-    /**
      * Returns handler for given shortcode name or default if it was set before.
      *
      * @param string $name Shortcode name
      *
      * @return callable
      */
-    public function getHandler($name);
+    public function get($name);
 
     /**
      * Whether handler for given shortcode name was registered. Default handler
@@ -50,5 +41,5 @@ interface HandlerContainerInterface
      *
      * @return bool
      */
-    public function hasHandler($name);
+    public function has($name);
     }
