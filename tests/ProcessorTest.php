@@ -156,8 +156,9 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
 
     public function testDefaultHandler()
         {
-        $default = function(ShortcodeInterface $s) { return $s->getName(); };
-        $processor = new Processor(new RegexExtractor(), new RegexParser(), new HandlerContainer(), $default);
+        $handlers = new HandlerContainer();
+        $handlers->setDefault(function(ShortcodeInterface $s) { return $s->getName(); });
+        $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
 
         $this->assertSame('namerandom', $processor->process('[name][other][/name][random]'));
         }
@@ -180,11 +181,5 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $processor->process('[self]');
         $processor->process('[other]');
         $processor->process('[random]');
-        }
-
-    public function testExceptionWhenDefaultShortcodeHandlerIsNotCallable()
-        {
-        $this->setExpectedException('InvalidArgumentException');
-        new Processor(new RegexExtractor(), new RegexParser(), new HandlerContainer(), new \stdClass());
         }
     }

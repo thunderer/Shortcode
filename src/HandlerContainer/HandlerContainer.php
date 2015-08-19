@@ -8,6 +8,9 @@ class HandlerContainer implements HandlerContainerInterface
     /** @var callable[] */
     private $handlers = array();
 
+    /** @var callable */
+    private $default;
+
     public function __construct()
         {
         }
@@ -60,5 +63,24 @@ class HandlerContainer implements HandlerContainerInterface
             $msg = 'Shortcode handler must be callable!';
             throw new \RuntimeException(sprintf($msg));
             }
+        }
+
+    public function setDefault($handler)
+        {
+        $this->guardHandler($handler);
+
+        $this->default = $handler;
+
+        return $this;
+        }
+
+    public function getDefault()
+        {
+        return $this->default;
+        }
+
+    public function hasDefault()
+        {
+        return (bool)$this->default;
         }
     }

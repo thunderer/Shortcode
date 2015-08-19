@@ -42,4 +42,27 @@ interface HandlerContainerInterface
      * @return bool
      */
     public function has($name);
+
+    /**
+     * Set default shortcode handler.
+     *
+     * @param callable $handler
+     *
+     * @return self
+     */
+    public function setDefault($handler);
+
+    /**
+     * Returns default shortcode handler.
+     *
+     * @return callable
+     */
+    public function getDefault();
+
+    /**
+     * Whether default shortcode handler was set.
+     *
+     * @return bool
+     */
+    public function hasDefault();
     }

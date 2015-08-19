@@ -52,17 +52,13 @@ and run `composer install` or `composer update` afterwards. If you're not using 
 There is a facade that contains shortcuts to all features in the library. You can instantiate it by using named constructor `ShortcodeFacade::create()` and pass optional `Syntax` object and arrays of shortcode handlers and aliases:
 
 ```php
-use Thunder\Shortcode\ShortcodeFacade;
-use Thunder\Shortcode\Shortcode\Shortcode;
+$handlers = (new HandlerContainer())
+    ->add('name', function(ShortcodeInterface $s) { return $s->getName(); })
+    ->add('content', function(ShortcodeInterface $s) { return $s->getContent(); })
+    ->addAlias('n', 'name')
+    ->addAlias('c', 'content');
+$facade = ShortcodeFacade::create($handlers, new CommonSyntax());
 
-$facade = ShortcodeFacade::create(null, array(
-    'name' => function(Shortcode $s) { return $s->getName(); },
-    'content' => function(Shortcode $s) { return $s->getContent(); },
-    ), array(
-    'c' => 'content',
-    'n' => 'name',
-    ));
-    
 $matches = $facade->extract('[c]');
 $shortcode = $facade->parse('[c]');
 $result = $facade->process('[c]');
@@ -78,67 +74,68 @@ All those calls are equivalent to the examples below. If you want to change the 
 
 **Replacement**
 
-Create `Processor` class instance, register required shortcodes handlers and use `process()` method to dynamically replace found matches using registered callbacks:
+Create `Processor` class instance with required shortcodes handlers and use `process()` method to dynamically replace found matches using registered callbacks:
 
 ```php
-use Thunder\Shortcode\Extractor\RegexExtractor;
-use Thunder\Shortcode\Parser\RegexParser;
-use Thunder\Shortcode\Processor\Processor;
-use Thunder\Shortcode\Shortcode\Shortcode;
-use Thunder\Shortcode\Serializer\JsonSerializer;
+$handlers = new HandlerContainer();
+$handlers->add('sample', function(ShortcodeInterface $s) {    
+   return (new JsonSerializer())->serialize($s);
+   });
+$processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
 
-$processor = new Processor(new RegexExtractor(), new RegexParser());
-$processor->addHandler('sample', function(Shortcode $s) {    
-    return (new JsonSerializer())->serialize($s);
-    });
-assert('x {"name":"sample","args":{"arg":"val"},"content":"cnt"} y'
-    === $processor->process('x [sample arg=val]cnt[/sample] y');
+$text = 'x [sample arg=val]cnt[/sample] y';
+$result = 'x {"name":"sample","args":{"arg":"val"},"content":"cnt"} y';
+assert($result === $processor->process($text);
 ```
 
 Default handler can be set to catch any unsupported shortcodes:
 
 ```php
-$processor->setDefaultHandler('sample', function(Shortcode $s) {    
+$default = function(ShortcodeInterface $s) {    
     return sprintf('[Invalid shortcode %s!]', $s->getName());
-    });
-assert('something [Invalid shortcode x!] other' 
-    === $processor->process('something [x arg=val]content[/x] other');
+    };
+$processor = new Processor(new RegexExtractor(), new RegexParser(), new HandlerContainer(), $default);
+
+$text = 'something [x arg=val]content[/x] other';
+$result = 'something [Invalid shortcode x!] other';
+assert($result === $processor->process($text);
 ```
 
 Shortcodes can be aliased to reuse same handler:
 
 ```php
 $processor->addHandlerAlias('spl', 'sample');
-assert('sth {"name":"spl","parameters":{"arg":"val"},"content":"cnt"} end'
-    === $processor->process('sth [spl arg=val]cnt[/spl] end');
+
+$text = 'sth [spl arg=val]cnt[/spl] end';
+$result = 'sth {"name":"spl","parameters":{"arg":"val"},"content":"cnt"} end';
+assert($result === $processor->process($text);
 ```
 
-Recursive shortcode processing is enabled by default, use `Processor::setRecursion($status)` and `Processor::setRecursionDepth($depth)` to control that behavior:
+Recursive shortcode processing is enabled by default, use `Processor::withRecursionDepth($depth)` to control that behavior:
 
 ```php
-$processor->addHandler('c', function(Shortcode $s) { return $s->getContent() })
+$processor->addHandler('c', function(Shortcode $s) { return $s->getContent() });
+
 $processor->addHandlerAlias('d', 'c');
 assert("xyz" === $processor->process('[c]x[d]y[/d]z[/c]'));
-$processor->setRecursion(false);
+
+$processor->withRecursionDepth(false);
 assert('x[d]y[/d]z' === $processor->process('[c]x[d]y[/d]z[/c]'))
 ```
 
 Default number of iterations is `1`, but this can be controlled using `Processor::setMaxIterations()`:
 
 ```php
-$processor->addHandler('c', function(Shortcode $s) { return $s->getContent() })
-$processor->addHandlerAlias('d', 'c');
-$processor->addHandlerAlias('e', 'c');
-$processor->setRecursionDepth(0);
+$handlers = new HandlerContainer();
+$handlers->add('c', function(Shortcode $s) { return $s->getContent() })
+$handlers->addAlias('d', 'c');
+$handlers->addAlias('e', 'c');
+$processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+$processor = $processor->withRecursionDepth(0);
 
-$processor->setMaxIterations(1);
-assert("ab[d]cd[/d]e" === $processor->process('a[c]b[d]c[/c]d[/d]e'));
-
-$processor->setMaxIterations(2);
-assert("ab[e]c[/e]de" === $processor->process('[c]a[d]b[e]c[/e]d[/d]e[/c]'));
-
-$processor->setMaxIterations(null);
-assert('abcde' === $processor->process('[c]a[d]b[e]c[/e]d[/d]e[/c]'));
+assert("ab[d]cd[/d]e" === $processor->withMaxIterations(1)->process('a[c]b[d]c[/c]d[/d]e'));
+assert("ab[e]c[/e]de" === $processor->withMaxIterations(2)->process('[c]a[d]b[e]c[/e]d[/d]e[/c]'));
+assert('abcde' === $processor->withMaxIterations(null)->process('[c]a[d]b[e]c[/e]d[/d]e[/c]'));
 ```
 
 **Extraction**
@@ -146,8 +143,6 @@ assert('abcde' === $processor->process('[c]a[d]b[e]c[/e]d[/d]e[/c]'));
 Create instance of class `Extractor` and use its `extract()` method to get array of shortcode matches:
 
 ```php
-use Thunder\Shortcode\Extractor\RegexExtractor;
-
 $extractor = new RegexExtractor();
 $matches = $extractor->extract('something [x] other [random]sth[/random] other');
 
@@ -160,22 +155,18 @@ var_dump($matches);
 Create instance of `Parser` class and use its `parse()` method to parse single shortcode string match into `Shortcode` instance with easy access to its name, parameters, and content (null if none present):
 
 ```php
-use Thunder\Shortcode\Parser\RegexParser;
-
 $parser = new RegexParser();
 $shortcode = $parser->parse('[code arg=value]something[/code]');
 
 // will contain name "code", one argument and "something" as content.
 var_dump($shortcode);
 ```
+
 **Syntax**
 
-Both `Parser` and `Extractor` classes provide configurable shortcode syntax capabilities which can be achieved by passing `Syntax` object as their first argument. There are two syntax variants: liberal that allows extra whitespace (for example `[  code  arg  = val]content[ / code  ]`) and strict which requires no extra whitespace between shortcode fragments (like in the examples at the beginning of this README).
+Both `Parser` and `Extractor` classes provide configurable shortcode syntax capabilities which can be achieved by passing `Syntax` object as their first argument:
 
 ```php
-use Thunder\Shortcode\Syntax\Syntax;
-use Thunder\Shortcode\Syntax\SyntaxBuilder;
-
 // all of these are equivalent, builder is more verbose
 $syntax = new Syntax('[[', ']]', '//', '==', '""');
 $syntax = (new SyntaxBuilder())
@@ -184,7 +175,6 @@ $syntax = (new SyntaxBuilder())
     ->setClosingTagMarker('//')
     ->setParameterValueSeparator('==')
     ->setParameterValueDelimiter('""')
-    ->setStrict(true) // if true then strict syntax will be created
     ->getSyntax();
 
 // create both objects as usual, if nothing is passed defaults are assumed

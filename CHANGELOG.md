@@ -1,5 +1,17 @@
 # Changelog
 
+## Version 1.*
+
+* v1.0.0 (xx.yy.2015)
+
+  * introduced `MatchInterface` and its default implementation `Match`,
+  * extracted `HandlerContainerInterface` and its default implementation `HandlerContainer` from `Processor`,
+  * removed `HandlerInterface`, from now on handlers can be only closures and classes with `__invoke()`,
+  * introduced `ProcessorContext` to store internal state when processing text,
+  * introduced `AbstractShortcode`, restored `final` on regular `Shortcode`,
+  * `ProcessedShortcode` can be now created with static method `createFromContext()` using instance of `ProcessorContext`,
+  * fixed bug which caused shortcode content to be returned without modification when auto processing was enabled, there was no handler for that shortcode, but there were handlers for inner shortcodes.
+
 ## Version 0.*
 
 * v0.4.0 (15.07.2015)

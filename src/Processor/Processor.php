@@ -15,7 +15,6 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 final class Processor implements ProcessorInterface
     {
     private $handlers;
-    private $defaultHandler;
     private $extractor;
     private $parser;
     private $recursionDepth = null; // infinite recursion
@@ -23,25 +22,11 @@ final class Processor implements ProcessorInterface
     private $autoProcessContent = true; // automatically process shortcode content
     private $shortcodeBuilder;
 
-    /**
-     * Creates Processor instance.
-     *
-     * @param ExtractorInterface $extractor
-     * @param ParserInterface $parser
-     * @param HandlerContainerInterface $handlers
-     * @param callable $defaultHandler
-     */
-    public function __construct(ExtractorInterface $extractor, ParserInterface $parser, HandlerContainerInterface $handlers, $defaultHandler = null)
+    public function __construct(ExtractorInterface $extractor, ParserInterface $parser, HandlerContainerInterface $handlers)
         {
         $this->extractor = $extractor;
         $this->parser = $parser;
         $this->handlers = $handlers;
-
-        if(null !== $defaultHandler && !is_callable($defaultHandler))
-            {
-            throw new \InvalidArgumentException('Default shortcode handler must be callable!');
-            }
-        $this->defaultHandler = $defaultHandler;
 
         $this->shortcodeBuilder = function(ProcessorContext $context) {
             return ProcessedShortcode::createFromContext($context);
@@ -91,7 +76,8 @@ final class Processor implements ProcessorInterface
             {
             $context->textMatch = $match->getString();
             $context->textPosition = $match->getPosition();
-            $replaces[] = $this->processMatch($match, $context);
+            $replace = $this->processMatch($this->parser->parse($match->getString()), $context);
+            $replaces[] = array($replace, $match);
             }
         $replaces = array_reverse(array_filter($replaces));
 
@@ -103,9 +89,8 @@ final class Processor implements ProcessorInterface
             }, $text);
         }
 
-    private function processMatch(MatchInterface $match, ProcessorContext $context)
+    private function processMatch(ShortcodeInterface $shortcode, ProcessorContext $context)
         {
-        $shortcode = $this->parser->parse($match->getString());
         $context->position++;
         $context->namePosition[$shortcode->getName()] = array_key_exists($shortcode->getName(), $context->namePosition)
             ? $context->namePosition[$shortcode->getName()] + 1
@@ -115,22 +100,22 @@ final class Processor implements ProcessorInterface
         $shortcode = call_user_func_array($this->shortcodeBuilder, array(clone $context));
         $shortcode = $this->processRecursion($shortcode, $context);
 
-        return array($this->processShortcode($match, $shortcode), $match);
+        return $this->processShortcode($shortcode);
         }
 
-    private function processShortcode(MatchInterface $match, ShortcodeInterface $shortcode)
+    private function processShortcode(ShortcodeInterface $shortcode)
         {
         $hasHandler = $this->handlers->has($shortcode->getName());
-        if(!$hasHandler && !$this->defaultHandler)
+        if(!$hasHandler && !$this->handlers->hasDefault())
             {
             $textSerializer = new TextSerializer();
 
-            return array($textSerializer->serialize($shortcode), $match);
+            return $textSerializer->serialize($shortcode);
             }
 
         $handler = $hasHandler
             ? $this->handlers->get($shortcode->getName())
-            : $this->defaultHandler;
+            : $this->handlers->getDefault();
 
         return call_user_func_array($handler, array($shortcode));
         }
