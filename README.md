@@ -27,13 +27,13 @@ No required dependencies, only PHP >=5.3
 
 ## Installation
 
-To install it from Packagist execute
+This library is available in Composer as `thunderer/shortcode`, to install it execute:
 
 ```
 composer require thunderer/shortcode
 ```
 
-in your terminal or manually update your `composer.json` with
+or manually update your `composer.json` with:
 
 ```
 (...)
@@ -49,7 +49,7 @@ and run `composer install` or `composer update` afterwards. If you're not using 
 
 **Facade**
 
-There is a facade that contains shortcuts to all features in the library. You can instantiate it by using named constructor `ShortcodeFacade::create()` and pass optional `Syntax` object and arrays of shortcode handlers and aliases:
+There is a facade that contains shortcuts to all features in the library. You can instantiate it by using named constructor `ShortcodeFacade::create()` and pass `HandlerContainer` and `Syntax` objects:
 
 ```php
 $handlers = (new HandlerContainer())
@@ -64,13 +64,15 @@ $shortcode = $facade->parse('[c]');
 $result = $facade->process('[c]');
 
 $s = new Shortcode('c', array(), null);
+$json = '{"name":"c","parameters":[],"content":null}';
+
 $text = $facade->serializeToText($s);
 $shortcode = $facade->unserializeFromText('[c]');
 $json = $facade->serializeToJson($s);
-$shortcode = $facade->unserializeFromJson('{"name":"c","parameters":[],"content":null}');
+$shortcode = $facade->unserializeFromJson($json);
 ```
 
-All those calls are equivalent to the examples below. If you want to change the dependencies, extend `ShortcodeFacade` class and replace them by overloading protected `create*` methods.
+All those calls are equivalent to the examples below. If you want to change its behavior, extend `ShortcodeFacade` class and replace necessary parts by overloading protected `create*` methods.
 
 **Replacement**
 
@@ -88,7 +90,7 @@ $result = 'x {"name":"sample","args":{"arg":"val"},"content":"cnt"} y';
 assert($result === $processor->process($text);
 ```
 
-Default handler can be set to catch any unsupported shortcodes:
+Default handler can be set to catch any shortcode without registered handler:
 
 ```php
 $handlers = new HandlerContainer();
@@ -102,7 +104,7 @@ $result = 'something [Invalid shortcode x!] other';
 assert($result === $processor->process($text);
 ```
 
-Shortcodes can be aliased to reuse same handler:
+Shortcodes can be aliased to reuse the same handler:
 
 ```php
 $handlers = new HandlerContainer();
@@ -117,7 +119,7 @@ $result = 'sth {"name":"spl","parameters":{"arg":"val"},"content":"cnt"} end';
 assert($result === $processor->process($text));
 ```
 
-Recursive shortcode processing is enabled by default with unlimited levels, use `Processor::withRecursionDepth($depth)` to control that behavior:
+Recursive shortcode processing is enabled by default with unlimited recursion levels, use `Processor::withRecursionDepth($depth)` to control that behavior:
 
 ```php
 $handlers = (new HandlerContainer())
@@ -125,17 +127,18 @@ $handlers = (new HandlerContainer())
     ->addHandlerAlias('d', 'c');
 $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
 
-assert('xyz' === $processor->process('[c]x[d]y[/d]z[/c]'));
-assert('x[d]y[/d]z' === $processor->withRecursionDepth(false)->process('[c]x[d]y[/d]z[/c]'))
+$text = '[c]x[d]y[/d]z[/c]';
+assert('xyz' === $processor->process($text));
+assert('x[d]y[/d]z' === $processor->withRecursionDepth(false)->process($text));
 ```
 
-Default number of iterations is `1`, but this can be controlled using `Processor::setMaxIterations()`:
+Default number of iterations is `1`, but this can be controlled using `Processor::setMaxIterations($number)`:
 
 ```php
-$handlers = new HandlerContainer();
-$handlers->add('c', function(Shortcode $s) { return $s->getContent() })
-$handlers->addAlias('d', 'c');
-$handlers->addAlias('e', 'c');
+$handlers = (new HandlerContainer())
+    ->add('c', function(Shortcode $s) { return $s->getContent() })
+    ->addAlias('d', 'c')
+    ->addAlias('e', 'd');
 $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
 $processor = $processor->withRecursionDepth(0);
 
@@ -159,13 +162,16 @@ var_dump($matches); // array(Match(10, '[x]'), Match(20, '[sth]sth[/sth]'))
 
 **Parsing**
 
-Create instance of `Parser` class and use its `parse()` method to parse single shortcode string match into `Shortcode` instance with easy access to its name, parameters, and content (null if none present):
+Create instance of `Parser` class and use its `parse()` method to convert single shortcode string match into `Shortcode` instance with easy access to its name, parameters, and content (null if none present):
 
 ```php
 $parser = new RegexParser();
 $shortcode = $parser->parse('[code arg=value]something[/code]');
 
-var_dump($shortcode); // Shortcode('code', array('arg' => 'value'), 'something')
+assert('code' === $shortcode->getName());
+assert(array('arg' => 'val') === $shortcode->getArguments());
+assert('val' === $shortcode->getArgument('arg'));
+assert('something' === $shortcode->getContent());
 ```
 
 **Syntax**
@@ -213,6 +219,7 @@ Looking for contribution ideas? Here you are:
 * example handlers for common shortcodes (`[b]`, `[i]`, `[url]`),
 * specialized parameter values (`array=value,value`, `map=key:value,key:value`),
 * events fired at various stages of text processing,
+* BBCode syntax `[code="argument" arg=val]content[/code]`,
 * ...your idea?
 
 ## License
