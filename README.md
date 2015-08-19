@@ -91,10 +91,11 @@ assert($result === $processor->process($text);
 Default handler can be set to catch any unsupported shortcodes:
 
 ```php
-$default = function(ShortcodeInterface $s) {    
+$handlers = new HandlerContainer();
+$handlers->setDefault(function(ShortcodeInterface $s) {
     return sprintf('[Invalid shortcode %s!]', $s->getName());
-    };
-$processor = new Processor(new RegexExtractor(), new RegexParser(), new HandlerContainer(), $default);
+    });
+$processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
 
 $text = 'something [x arg=val]content[/x] other';
 $result = 'something [Invalid shortcode x!] other';
@@ -104,23 +105,28 @@ assert($result === $processor->process($text);
 Shortcodes can be aliased to reuse same handler:
 
 ```php
-$processor->addHandlerAlias('spl', 'sample');
+$handlers = new HandlerContainer();
+$handlers->add('sample', function(ShortcodeInterface $s) {
+   return (new JsonSerializer())->serialize($s);
+   });
+$handlers->addAlias('spl', 'sample');
+$processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
 
 $text = 'sth [spl arg=val]cnt[/spl] end';
 $result = 'sth {"name":"spl","parameters":{"arg":"val"},"content":"cnt"} end';
-assert($result === $processor->process($text);
+assert($result === $processor->process($text));
 ```
 
-Recursive shortcode processing is enabled by default, use `Processor::withRecursionDepth($depth)` to control that behavior:
+Recursive shortcode processing is enabled by default with unlimited levels, use `Processor::withRecursionDepth($depth)` to control that behavior:
 
 ```php
-$processor->addHandler('c', function(Shortcode $s) { return $s->getContent() });
+$handlers = (new HandlerContainer())
+    ->addHandler('c', function(Shortcode $s) { return $s->getContent() })
+    ->addHandlerAlias('d', 'c');
+$processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
 
-$processor->addHandlerAlias('d', 'c');
-assert("xyz" === $processor->process('[c]x[d]y[/d]z[/c]'));
-
-$processor->withRecursionDepth(false);
-assert('x[d]y[/d]z' === $processor->process('[c]x[d]y[/d]z[/c]'))
+assert('xyz' === $processor->process('[c]x[d]y[/d]z[/c]'));
+assert('x[d]y[/d]z' === $processor->withRecursionDepth(false)->process('[c]x[d]y[/d]z[/c]'))
 ```
 
 Default number of iterations is `1`, but this can be controlled using `Processor::setMaxIterations()`:
@@ -133,21 +139,22 @@ $handlers->addAlias('e', 'c');
 $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
 $processor = $processor->withRecursionDepth(0);
 
-assert("ab[d]cd[/d]e" === $processor->withMaxIterations(1)->process('a[c]b[d]c[/c]d[/d]e'));
-assert("ab[e]c[/e]de" === $processor->withMaxIterations(2)->process('[c]a[d]b[e]c[/e]d[/d]e[/c]'));
-assert('abcde' === $processor->withMaxIterations(null)->process('[c]a[d]b[e]c[/e]d[/d]e[/c]'));
+$text = '[c]a[d]b[e]c[/e]d[/d]e[/c]';
+assert('a[d]b[e]c[/e]d[/d]e' === $processor->withMaxIterations(1)->process($text));
+assert('ab[e]c[/e]de' === $processor->withMaxIterations(2)->process($text));
+assert('abcde' === $processor->withMaxIterations(3)->process($text));
+assert('abcde' === $processor->withMaxIterations(null)->process($text));
 ```
 
 **Extraction**
 
-Create instance of class `Extractor` and use its `extract()` method to get array of shortcode matches:
+Create instance of class `Extractor` and use its `extract()` method to get array of shortcode matches that contain the matched string and its position:
 
 ```php
 $extractor = new RegexExtractor();
-$matches = $extractor->extract('something [x] other [random]sth[/random] other');
+$matches = $extractor->extract('something [x] other [sth]sth[/sth] other');
 
-// array(Match(10, '[x]'), Match(20, '[random]sth[/random]'))
-var_dump($matches);
+var_dump($matches); // array(Match(10, '[x]'), Match(20, '[sth]sth[/sth]'))
 ```
 
 **Parsing**
@@ -158,8 +165,7 @@ Create instance of `Parser` class and use its `parse()` method to parse single s
 $parser = new RegexParser();
 $shortcode = $parser->parse('[code arg=value]something[/code]');
 
-// will contain name "code", one argument and "something" as content.
-var_dump($shortcode);
+var_dump($shortcode); // Shortcode('code', array('arg' => 'value'), 'something')
 ```
 
 **Syntax**
@@ -182,20 +188,20 @@ $parser = new Parser($syntax);
 $extractor = new Extractor($syntax);
 
 // will contain one matched shortcode string 
-$matches = $extractor->extract('x [[code arg==""value random""]]content[[//code]] y');
+$matches = $extractor->extract('x [[code arg==""value other""]]content[[//code]] y');
 
 // will contain correctly parsed shortcode inside passed string
-$shortcode = $parser->parse('[[code arg==""value random""]]content[[//code]]');
+$shortcode = $parser->parse('[[code arg==""value other""]]content[[//code]]');
 ```
 
 Different syntaxes can be passed to both objects but that will result in an unpredictable behavior if used for example inside `Processor` class or passing extracted matches into parser manually. Do that only when researching and on your own risk.
 
 ## Edge cases
 
-* unsupported shortcodes (no registered handler) will be ignored and left as they are,
-* mismatching closing shortcode (`[code]content[/codex]`) will be ignored, opening tag will be interpreted as self-closing shortcode,
-* overlapping shortcodes (`[code]content[inner][/code]content[/inner]`) are not supported and will be interpreted as self-closing, second closing tag will be ignored,
-* nested shortcodes with the same name are also considered overlapping, which means that (assume that shortcode `[c]` returns its content) string `[c]x[c]y[/c]z[/c]` will be interpreted as `xyz[/c]` (first closing tag was matched to first opening tag). This can be solved by aliasing given shortcode handler name, because for example `[c]x[d]y[/d]z[/c]` will be processed "correctly".
+* unsupported shortcodes (no registered handler or default handler) will be ignored and left as they are,
+* mismatching closing shortcode (`[code]content[/codex]`) will be ignored, opening tag will be interpreted as self-closing shortcode, eg. `[code /]`,
+* overlapping shortcodes (`[code]content[inner][/code]content[/inner]`) are not supported and will be interpreted as self-closing, eg. `[code]content[inner /][/code]`, second closing tag will be ignored,
+* nested shortcodes with the same name are also considered overlapping, which means that (assume that shortcode `[c]` returns its content) string `[c]x[c]y[/c]z[/c]` will be interpreted as `xyz[/c]` (first closing tag was matched to first opening tag). This can be solved by aliasing given shortcode handler name, because for example `[c]x[d]y[/d]z[/c]` will be processed correctly.
 
 ## Ideas
 
@@ -204,9 +210,9 @@ Looking for contribution ideas? Here you are:
 * XML serializer,
 * YAML serializer,
 * specialized exceptions classes,
-* library facade for easier usage,
 * example handlers for common shortcodes (`[b]`, `[i]`, `[url]`),
 * specialized parameter values (`array=value,value`, `map=key:value,key:value`),
+* events fired at various stages of text processing,
 * ...your idea?
 
 ## License
