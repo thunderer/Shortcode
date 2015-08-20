@@ -100,24 +100,14 @@ final class Processor implements ProcessorInterface
         $shortcode = call_user_func_array($this->shortcodeBuilder, array(clone $context));
         $shortcode = $this->processRecursion($shortcode, $context);
 
-        return $this->processShortcode($shortcode);
+        return $this->processShortcode($shortcode, $this->handlers->get($shortcode->getName()));
         }
 
-    private function processShortcode(ShortcodeInterface $shortcode)
+    private function processShortcode(ShortcodeInterface $shortcode, $handler)
         {
-        $hasHandler = $this->handlers->has($shortcode->getName());
-        if(!$hasHandler && !$this->handlers->hasDefault())
-            {
-            $textSerializer = new TextSerializer();
-
-            return $textSerializer->serialize($shortcode);
-            }
-
-        $handler = $hasHandler
-            ? $this->handlers->get($shortcode->getName())
-            : $this->handlers->getDefault();
-
-        return call_user_func_array($handler, array($shortcode));
+        return $handler
+            ? call_user_func_array($handler, array($shortcode))
+            : (new TextSerializer())->serialize($shortcode);
         }
 
     private function processRecursion(ShortcodeInterface $shortcode, ProcessorContext $context)

@@ -3,18 +3,8 @@ namespace Thunder\Shortcode\HandlerContainer;
 
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
-class HandlerContainer implements HandlerContainerInterface
+final class HandlerContainer extends AbstractHandlerContainer
     {
-    /** @var callable[] */
-    private $handlers = array();
-
-    /** @var callable */
-    private $default;
-
-    public function __construct()
-        {
-        }
-
     public function add($name, $handler)
         {
         $this->guardHandler($handler);
@@ -41,30 +31,6 @@ class HandlerContainer implements HandlerContainerInterface
         return $this;
         }
 
-    public function get($name)
-        {
-        if(!$this->has($name))
-            {
-            throw new \RuntimeException(sprintf('Handler for name %s does not exist!', $name));
-            }
-
-        return $this->handlers[$name];
-        }
-
-    public function has($name)
-        {
-        return array_key_exists($name, $this->handlers);
-        }
-
-    private function guardHandler($handler)
-        {
-        if(!is_callable($handler))
-            {
-            $msg = 'Shortcode handler must be callable!';
-            throw new \RuntimeException(sprintf($msg));
-            }
-        }
-
     public function setDefault($handler)
         {
         $this->guardHandler($handler);
@@ -72,15 +38,5 @@ class HandlerContainer implements HandlerContainerInterface
         $this->default = $handler;
 
         return $this;
-        }
-
-    public function getDefault()
-        {
-        return $this->default;
-        }
-
-    public function hasDefault()
-        {
-        return (bool)$this->default;
         }
     }
