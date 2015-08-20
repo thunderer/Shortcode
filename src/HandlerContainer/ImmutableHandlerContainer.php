@@ -1,8 +1,10 @@
 <?php
 namespace Thunder\Shortcode\HandlerContainer;
 
-final class ImmutableHandlerContainer extends AbstractHandlerContainer
+final class ImmutableHandlerContainer implements HandlerContainerInterface
     {
+    private $handlers;
+
     public function __construct(array $handlers, array $aliases, $defaultHandler = null)
         {
         $this->handlers = new HandlerContainer();
