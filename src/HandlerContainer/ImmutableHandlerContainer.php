@@ -5,21 +5,9 @@ final class ImmutableHandlerContainer implements HandlerContainerInterface
     {
     private $handlers;
 
-    public function __construct(array $handlers, array $aliases, $defaultHandler = null)
+    public function __construct(HandlerContainer $handlers)
         {
-        $this->handlers = new HandlerContainer();
-
-        foreach($handlers as $name => $handler)
-            {
-            $this->handlers->add($name, $handler);
-            }
-
-        foreach($aliases as $alias => $name)
-            {
-            $this->handlers->addAlias($alias, $name);
-            }
-
-        !$defaultHandler ?: $this->handlers->setDefault($defaultHandler);
+        $this->handlers = $handlers;
         }
 
     public function get($name)

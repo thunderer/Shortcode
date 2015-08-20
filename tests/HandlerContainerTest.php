@@ -46,17 +46,18 @@ final class HandlerContainerTest extends \PHPUnit_Framework_TestCase
 
     public function testImmutableHandlerContainer()
         {
-        $handlers = new ImmutableHandlerContainer(array(
-            'code' => function() {},
-            ), array(
-            'c' => 'code'
-            ));
+        $handlers = new HandlerContainer();
+        $handlers->add('code', function() {});
+        $handlers->addAlias('c', 'code');
+        $handlers = new ImmutableHandlerContainer($handlers);
 
         $this->assertNull($handlers->get('missing'));
         $this->assertNotNull($handlers->get('code'));
         $this->assertNotNull($handlers->get('c'));
 
-        $defaultHandlers = new ImmutableHandlerContainer(array(), array(), function() {});
+        $defaultHandlers = new HandlerContainer();
+        $defaultHandlers->setDefault(function() {});
+        $defaultHandlers = new ImmutableHandlerContainer($defaultHandlers);
         $this->assertNotNull($defaultHandlers->get('missing'));
         }
     }
