@@ -6,6 +6,7 @@
 
   * introduced `MatchInterface` and its default implementation `Match`,
   * extracted `HandlerContainerInterface` and its default implementation `HandlerContainer` from `Processor`,
+  * introduced `ImmutableHandlerContainer` as an alternative implementation,
   * removed `HandlerInterface`, from now on handlers can be only closures and classes with `__invoke()`,
   * introduced `ProcessorContext` to store internal state when processing text,
   * introduced `AbstractShortcode`, restored `final` on regular `Shortcode`,

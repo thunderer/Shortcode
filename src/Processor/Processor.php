@@ -105,9 +105,14 @@ final class Processor implements ProcessorInterface
 
     private function processShortcode(ShortcodeInterface $shortcode, $handler)
         {
-        return $handler
-            ? call_user_func_array($handler, array($shortcode))
-            : (new TextSerializer())->serialize($shortcode);
+        if(!$handler)
+            {
+            $serializer = new TextSerializer();
+
+            return $serializer->serialize($shortcode);
+            }
+
+        return call_user_func_array($handler, array($shortcode));
         }
 
     private function processRecursion(ShortcodeInterface $shortcode, ProcessorContext $context)
