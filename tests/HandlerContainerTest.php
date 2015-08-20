@@ -44,6 +44,13 @@ final class HandlerContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertNotNull($handlers->get('missing'));
         }
 
+    public function testExceptionIfAliasingNonExistentHandler()
+        {
+        $handlers = new HandlerContainer();
+        $this->setExpectedException('InvalidArgumentException');
+        $handlers->addAlias('m', 'missing');
+        }
+
     public function testImmutableHandlerContainer()
         {
         $handlers = new HandlerContainer();

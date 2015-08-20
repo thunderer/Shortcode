@@ -132,7 +132,7 @@ assert('xyz' === $processor->process($text));
 assert('x[d]y[/d]z' === $processor->withRecursionDepth(false)->process($text));
 ```
 
-Default number of iterations is `1`, but this can be controlled using `Processor::setMaxIterations($number)`:
+Default number of iterations is `1`, but this can be controlled using `Processor::withMaxIterations($number)`:
 
 ```php
 $handlers = (new HandlerContainer())
