@@ -56,6 +56,19 @@ final class TextSerializer implements SerializerInterface
         {
         $parser = new RegexParser();
 
-        return $parser->parse($text);
+        $shortcodes = $parser->parse($text);
+
+        if(empty($shortcodes))
+            {
+            $msg = 'Failed to unserialize shortcode from text %s!';
+            throw new \InvalidArgumentException(sprintf($msg, $text));
+            }
+        if(count($shortcodes) > 1)
+            {
+            $msg = 'Provided text %s contains more than one shortcode!';
+            throw new \InvalidArgumentException(sprintf($msg, $text));
+            }
+
+        return array_shift($shortcodes);
         }
     }

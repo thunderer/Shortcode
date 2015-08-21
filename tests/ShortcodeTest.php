@@ -1,12 +1,12 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
-use Thunder\Shortcode\Extractor\RegexExtractor;
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegexParser;
 use Thunder\Shortcode\Processor\Processor;
 use Thunder\Shortcode\Processor\ProcessorContext;
 use Thunder\Shortcode\Serializer\TextSerializer;
+use Thunder\Shortcode\Shortcode\ParsedShortcode;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 use Thunder\Shortcode\Shortcode\Shortcode;
 
@@ -67,7 +67,7 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
 
     public function testProcessedShortcode()
         {
-        $processor = new Processor(new RegexExtractor(), new RegexParser(), new HandlerContainer());
+        $processor = new Processor(new RegexParser(), new HandlerContainer());
 
         $context = new ProcessorContext();
         $context->shortcode = new Shortcode('code', array('arg' => 'val'), 'content');
@@ -96,5 +96,20 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(0, $processed->getRecursionLevel());
         $this->assertSame(null, $processed->getParent());
         $this->assertSame($processor, $processed->getProcessor());
+        }
+
+    public function testMatchedShortcode()
+        {
+        $shortcode = new ParsedShortcode('name', array('arg' => 'val'), 'content', 'text', 12);
+
+        $this->assertSame('name', $shortcode->getName());
+        $this->assertSame(array('arg' => 'val'), $shortcode->getParameters());
+        $this->assertSame('content', $shortcode->getContent());
+        $this->assertSame('text', $shortcode->getText());
+        $this->assertSame(12, $shortcode->getPosition());
+        $this->assertSame(true, $shortcode->hasContent());
+
+        $this->assertSame(false, $shortcode->withContent(null)->hasContent());
+        $this->assertSame('another', $shortcode->withContent('another')->getContent());
         }
     }

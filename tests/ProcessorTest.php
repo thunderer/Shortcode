@@ -1,8 +1,6 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
-
-use Thunder\Shortcode\Extractor\RegexExtractor;
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegexParser;
 use Thunder\Shortcode\Processor\Processor;
@@ -25,7 +23,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             ->addAlias('c', 'content')
             ->addAlias('n', 'name');
 
-        return new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+        return new Processor(new RegexParser(), $handlers);
         }
 
     /**
@@ -65,7 +63,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $handlers->addAlias('inner', 'outer');
         $handlers->addAlias('level', 'outer');
 
-        $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+        $processor = new Processor(new RegexParser(), $handlers);
 
         $text = 'x [outer]a [inner]c [level]x[/level] d[/inner] b[/outer] y';
         $result = 'x root[a outer[c inner[x] d] b] y';
@@ -89,7 +87,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $handlers->add('valid', function(ShortcodeInterface $s) { return $s->getName(); });
 
         $text = 'x [invalid   ] [valid /] [/invalid] y';
-        $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+        $processor = new Processor(new RegexParser(), $handlers);
 
         $this->assertSame('x [invalid] valid [/invalid] y', $processor->withAutoProcessContent(true)->process($text));
         $this->assertSame('x [invalid] [valid /] [/invalid] y', $processor->withAutoProcessContent(false)->process($text));
@@ -110,7 +108,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $handlers = new HandlerContainer();
         $handlers->add('p', function(ProcessedShortcode $s) { return $s->getPosition(); });
         $handlers->add('n', function(ProcessedShortcode $s) { return $s->getNamePosition(); });
-        $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+        $processor = new Processor(new RegexParser(), $handlers);
 
         $this->assertSame('123', $processor->process('[n][n][n]'), '3n');
         $this->assertSame('123', $processor->process('[p][p][p]'), '3p');
@@ -128,7 +126,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             ->addAlias('n', 'name')
             ->addAlias('d', 'c')
             ->addAlias('e', 'c');
-        $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+        $processor = new Processor(new RegexParser(), $handlers);
 
         /** @var $processor Processor */
         $processor = $processor->withRecursionDepth(0)->withMaxIterations(2);
@@ -158,7 +156,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         {
         $handlers = new HandlerContainer();
         $handlers->setDefault(function(ShortcodeInterface $s) { return $s->getName(); });
-        $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+        $processor = new Processor(new RegexParser(), $handlers);
 
         $this->assertSame('namerandom', $processor->process('[name][other][/name][random]'));
         }
@@ -175,7 +173,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             ->add('self', function() { return '[self]'; })
             ->add('other', function() { return '[self]'; })
             ->add('random', function() { return '[various]'; });
-        $processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+        $processor = new Processor(new RegexParser(), $handlers);
         $processor->withMaxIterations(null);
 
         $processor->process('[self]');

@@ -1,8 +1,6 @@
 <?php
 namespace Thunder\Shortcode;
 
-use Thunder\Shortcode\Extractor\ExtractorInterface;
-use Thunder\Shortcode\Extractor\RegexExtractor;
 use Thunder\Shortcode\HandlerContainer\HandlerContainerInterface;
 use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Parser\RegexParser;
@@ -21,8 +19,6 @@ use Thunder\Shortcode\Syntax\SyntaxInterface;
 class ShortcodeFacade
     {
     private $syntax;
-    /** @var ExtractorInterface */
-    private $extractor;
     /** @var ParserInterface */
     private $parser;
     /** @var ProcessorInterface */
@@ -37,7 +33,6 @@ class ShortcodeFacade
         {
         $this->syntax = $syntax ?: new Syntax();
 
-        $this->createExtractor();
         $this->createParser();
         $this->createProcessor($handlers);
 
@@ -50,11 +45,6 @@ class ShortcodeFacade
         return new self($handlers, $syntax);
         }
 
-    protected function createExtractor()
-        {
-        $this->extractor = new RegexExtractor($this->syntax);
-        }
-
     protected function createParser()
         {
         $this->parser = new RegexParser($this->syntax);
@@ -62,7 +52,7 @@ class ShortcodeFacade
 
     protected function createProcessor(HandlerContainerInterface $handlers)
         {
-        $this->processor = new Processor($this->extractor, $this->parser, $handlers);
+        $this->processor = new Processor($this->parser, $handlers);
         }
 
     protected function createTextSerializer()
@@ -73,11 +63,6 @@ class ShortcodeFacade
     protected function createJsonSerializer()
         {
         $this->jsonSerializer = new JsonSerializer();
-        }
-
-    final public function extract($text)
-        {
-        return $this->extractor->extract($text);
         }
 
     final public function parse($code)

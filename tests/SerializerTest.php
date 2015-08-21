@@ -51,4 +51,18 @@ final class SerializerTest extends \PHPUnit_Framework_TestCase
         $this->setExpectedException('RuntimeException');
         $serializer->unserialize('{}');
         }
+
+    public function testExceptionMalformedText()
+        {
+        $serializer = new TextSerializer();
+        $this->setExpectedException('InvalidArgumentException');
+        $serializer->unserialize('[/sc]');
+        }
+
+    public function testExceptionMultipleText()
+        {
+        $serializer = new TextSerializer();
+        $this->setExpectedException('InvalidArgumentException');
+        $serializer->unserialize('[sc /] c [xx]');
+        }
     }

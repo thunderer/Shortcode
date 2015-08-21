@@ -1,13 +1,11 @@
 <?php
 namespace Thunder\Shortcode\Processor;
 
-use Thunder\Shortcode\Extractor\ExtractorInterface;
 use Thunder\Shortcode\HandlerContainer\HandlerContainerInterface;
-use Thunder\Shortcode\Match\MatchInterface;
 use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Serializer\TextSerializer;
+use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
-use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -15,16 +13,14 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 final class Processor implements ProcessorInterface
     {
     private $handlers;
-    private $extractor;
     private $parser;
     private $recursionDepth = null; // infinite recursion
     private $maxIterations = 1; // one iteration
     private $autoProcessContent = true; // automatically process shortcode content
     private $shortcodeBuilder;
 
-    public function __construct(ExtractorInterface $extractor, ParserInterface $parser, HandlerContainerInterface $handlers)
+    public function __construct(ParserInterface $parser, HandlerContainerInterface $handlers)
         {
-        $this->extractor = $extractor;
         $this->parser = $parser;
         $this->handlers = $handlers;
 
@@ -70,26 +66,22 @@ final class Processor implements ProcessorInterface
             }
 
         $context->text = $text;
-        $matches = $this->extractor->extract($text);
+        $shortcodes = $this->parser->parse($text);
         $replaces = array();
-        foreach($matches as $match)
+        foreach($shortcodes as $shortcode)
             {
-            $context->textMatch = $match->getString();
-            $context->textPosition = $match->getPosition();
-            $replace = $this->processMatch($this->parser->parse($match->getString()), $context);
-            $replaces[] = array($replace, $match);
+            $context->textMatch = $shortcode->getText();
+            $context->textPosition = $shortcode->getPosition();
+            $replaces[] = array($this->processMatch($shortcode, $context), $shortcode->getPosition(), mb_strlen($shortcode->getText()));
             }
         $replaces = array_reverse(array_filter($replaces));
 
         return array_reduce($replaces, function($state, array $item) {
-            /** @var $match MatchInterface */
-            $match = $item[1];
-
-            return substr_replace($state, $item[0], $match->getPosition(), mb_strlen($match->getString()));
+            return substr_replace($state, $item[0], $item[1], $item[2]);
             }, $text);
         }
 
-    private function processMatch(ShortcodeInterface $shortcode, ProcessorContext $context)
+    private function processMatch(ParsedShortcodeInterface $shortcode, ProcessorContext $context)
         {
         $context->position++;
         $context->namePosition[$shortcode->getName()] = array_key_exists($shortcode->getName(), $context->namePosition)
@@ -103,7 +95,7 @@ final class Processor implements ProcessorInterface
         return $this->processShortcode($shortcode, $this->handlers->get($shortcode->getName()));
         }
 
-    private function processShortcode(ShortcodeInterface $shortcode, $handler)
+    private function processShortcode(ParsedShortcodeInterface $shortcode, $handler)
         {
         if(!$handler)
             {
@@ -115,9 +107,9 @@ final class Processor implements ProcessorInterface
         return call_user_func_array($handler, array($shortcode));
         }
 
-    private function processRecursion(ShortcodeInterface $shortcode, ProcessorContext $context)
+    private function processRecursion(ParsedShortcodeInterface $shortcode, ProcessorContext $context)
         {
-        if($this->autoProcessContent && $shortcode->hasContent())
+        if($this->autoProcessContent && null !== $shortcode->getContent())
             {
             $context->recursionLevel++;
             $context->parent = $shortcode;

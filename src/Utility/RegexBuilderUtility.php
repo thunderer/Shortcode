@@ -47,7 +47,7 @@ final class RegexBuilderUtility
         // lookahead test for space, closing tag, self-closing tag or end of string
         $empty = '(?=\s|'.$close.'|'.$slash.$ws.$close.'|$)';
         // equals sign and alphanumeric value
-        $simple = $ws.$equals.$ws.'(?:[^\s'.$close.']+)';
+        $simple = $ws.$equals.$ws.'(?!=(?:\s*|'.$close.'|'.$slash.$close.'))'; // '(?:[^\s'.$close.']+)';
         // equals sign and value without unescaped string delimiters enclosed in them
         $complex = $ws.$equals.$ws.$string.'(?:[^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*)'.$string;
         // complete parameters matching regex

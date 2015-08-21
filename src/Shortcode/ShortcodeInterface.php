@@ -16,13 +16,6 @@ interface ShortcodeInterface
     public function withContent($content);
 
     /**
-     * Whether current shortcode has content (was not self-closing)
-     *
-     * @return bool
-     */
-    public function hasContent();
-
-    /**
      * Returns shortcode name
      *
      * @return string
@@ -37,22 +30,6 @@ interface ShortcodeInterface
     public function getParameters();
 
     /**
-     * Whether current shortcode contained parameter with given name
-     *
-     * @param string $name
-     *
-     * @return bool
-     */
-    public function hasParameter($name);
-
-    /**
-     * Whether current shortcode has any parameters
-     *
-     * @return bool
-     */
-    public function hasParameters();
-
-    /**
      * Returns parameter value using its name, will return null for parameter
      * without value
      *
@@ -64,18 +41,9 @@ interface ShortcodeInterface
     public function getParameter($name, $default = null);
 
     /**
-     * Returns name for position-based parameter, null if there was no parameter
-     * at given position
-     *
-     * @param $index
-     *
-     * @return string|null
-     */
-    public function getParameterAt($index);
-
-    /**
-     * Returns shortcode content (data between opening and closing tag). Returns
-     * empty string if content was empty or null if shortcode has no closing tag
+     * Returns shortcode content (data between opening and closing tag). Null
+     * means that shortcode had no content (was self closing), do not confuse
+     * that with empty string (hint: use strict comparison operator ===).
      *
      * @return string|null
      */

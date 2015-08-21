@@ -49,7 +49,7 @@ and run `composer install` or `composer update` afterwards. If you're not using 
 
 **Facade**
 
-There is a facade that contains shortcuts to all features in the library. You can instantiate it by using named constructor `ShortcodeFacade::create()` and pass `HandlerContainer` and `Syntax` objects:
+There is a facade that contains shortcuts to all features in the library. Instantiate it using named constructor `ShortcodeFacade::create()` with `HandlerContainer` and `Syntax` objects:
 
 ```php
 $handlers = (new HandlerContainer())
@@ -59,7 +59,6 @@ $handlers = (new HandlerContainer())
     ->addAlias('c', 'content');
 $facade = ShortcodeFacade::create($handlers, new CommonSyntax());
 
-$matches = $facade->extract('[c]');
 $shortcode = $facade->parse('[c]');
 $result = $facade->process('[c]');
 
@@ -83,7 +82,7 @@ $handlers = new HandlerContainer();
 $handlers->add('sample', function(ShortcodeInterface $s) {    
    return (new JsonSerializer())->serialize($s);
    });
-$processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+$processor = new Processor(new RegexParser(), $handlers);
 
 $text = 'x [sample arg=val]cnt[/sample] y';
 $result = 'x {"name":"sample","args":{"arg":"val"},"content":"cnt"} y';
@@ -97,7 +96,7 @@ $handlers = new HandlerContainer();
 $handlers->setDefault(function(ShortcodeInterface $s) {
     return sprintf('[Invalid shortcode %s!]', $s->getName());
     });
-$processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+$processor = new Processor(new RegexParser(), $handlers);
 
 $text = 'something [x arg=val]content[/x] other';
 $result = 'something [Invalid shortcode x!] other';
@@ -112,7 +111,7 @@ $handlers->add('sample', function(ShortcodeInterface $s) {
    return (new JsonSerializer())->serialize($s);
    });
 $handlers->addAlias('spl', 'sample');
-$processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+$processor = new Processor(new RegexParser(), $handlers);
 
 $text = 'sth [spl arg=val]cnt[/spl] end';
 $result = 'sth {"name":"spl","parameters":{"arg":"val"},"content":"cnt"} end';
@@ -125,7 +124,7 @@ Recursive shortcode processing is enabled by default with unlimited recursion le
 $handlers = (new HandlerContainer())
     ->addHandler('c', function(Shortcode $s) { return $s->getContent() })
     ->addHandlerAlias('d', 'c');
-$processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+$processor = new Processor(new RegexParser(), $handlers);
 
 $text = '[c]x[d]y[/d]z[/c]';
 assert('xyz' === $processor->process($text));
@@ -139,7 +138,7 @@ $handlers = (new HandlerContainer())
     ->add('c', function(Shortcode $s) { return $s->getContent() })
     ->addAlias('d', 'c')
     ->addAlias('e', 'd');
-$processor = new Processor(new RegexExtractor(), new RegexParser(), $handlers);
+$processor = new Processor(new RegexParser(), $handlers);
 $processor = $processor->withRecursionDepth(0);
 
 $text = '[c]a[d]b[e]c[/e]d[/d]e[/c]';
@@ -147,17 +146,6 @@ assert('a[d]b[e]c[/e]d[/d]e' === $processor->withMaxIterations(1)->process($text
 assert('ab[e]c[/e]de' === $processor->withMaxIterations(2)->process($text));
 assert('abcde' === $processor->withMaxIterations(3)->process($text));
 assert('abcde' === $processor->withMaxIterations(null)->process($text));
-```
-
-**Extraction**
-
-Create instance of class `Extractor` and use its `extract()` method to get array of shortcode matches that contain the matched string and its position:
-
-```php
-$extractor = new RegexExtractor();
-$matches = $extractor->extract('something [x] other [sth]sth[/sth] other');
-
-var_dump($matches); // array(Match(10, '[x]'), Match(20, '[sth]sth[/sth]'))
 ```
 
 **Parsing**
@@ -176,7 +164,7 @@ assert('something' === $shortcode->getContent());
 
 **Syntax**
 
-Both `Parser` and `Extractor` classes provide configurable shortcode syntax capabilities which can be achieved by passing `Syntax` object as their first argument:
+`Parser` allows configurable shortcode syntax capabilities which can be achieved by passing `Syntax` object as their first argument:
 
 ```php
 // all of these are equivalent, builder is more verbose
@@ -191,16 +179,10 @@ $syntax = (new SyntaxBuilder())
 
 // create both objects as usual, if nothing is passed defaults are assumed
 $parser = new Parser($syntax);
-$extractor = new Extractor($syntax);
-
-// will contain one matched shortcode string 
-$matches = $extractor->extract('x [[code arg==""value other""]]content[[//code]] y');
 
 // will contain correctly parsed shortcode inside passed string
 $shortcode = $parser->parse('[[code arg==""value other""]]content[[//code]]');
 ```
-
-Different syntaxes can be passed to both objects but that will result in an unpredictable behavior if used for example inside `Processor` class or passing extracted matches into parser manually. Do that only when researching and on your own risk.
 
 ## Edge cases
 

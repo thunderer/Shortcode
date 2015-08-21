@@ -26,10 +26,7 @@ final class FacadeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('n', $facade->process('[n]'));
         $this->assertSame('c', $facade->process('[c]c[/c]'));
 
-        $this->assertCount(1, $facade->extract('[x]'));
-        $this->assertCount(2, $facade->extract('[x]x[y]'));
-
-        $this->assertInstanceOf('Thunder\\Shortcode\\Shortcode\\Shortcode', $facade->parse('[b]'));
+        $this->assertInstanceOf('Thunder\\Shortcode\\Shortcode\\ShortcodeInterface', $facade->parse('[b]')[0]);
 
         $s = new Shortcode('c', array(), null);
         $this->assertSame('[c]', $facade->serializeToText($s));

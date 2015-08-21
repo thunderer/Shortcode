@@ -7,7 +7,7 @@ use Thunder\Shortcode\Processor\ProcessorInterface;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class ProcessedShortcode extends AbstractShortcode
+final class ProcessedShortcode extends AbstractShortcode implements ParsedShortcodeInterface
     {
     private $parent;
     private $position;
@@ -19,10 +19,18 @@ final class ProcessedShortcode extends AbstractShortcode
     private $recursionLevel;
     private $processor;
 
+    private function __construct()
+        {
+        }
+
     public static function createFromContext(ProcessorContext $context)
         {
+        $self = new self();
+
         $s = $context->shortcode;
-        $self = new self($s->getName(), $s->getParameters(), $s->getContent());
+        $self->name = $s->getName();
+        $self->parameters = $s->getParameters();
+        $self->content = $s->getContent();
 
         $self->parent = $context->parent;
         $self->position = $context->position;
@@ -39,7 +47,11 @@ final class ProcessedShortcode extends AbstractShortcode
 
     public function withContent($content)
         {
-        $self = new self($this->getName(), $this->getParameters(), $content);
+        $self = new self();
+
+        $self->name = $this->getName();
+        $self->parameters = $this->getParameters();
+        $self->content = $content;
 
         $self->parent = $this->parent;
         $self->position = $this->position;

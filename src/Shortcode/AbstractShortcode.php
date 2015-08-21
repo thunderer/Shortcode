@@ -4,18 +4,11 @@ namespace Thunder\Shortcode\Shortcode;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-abstract class AbstractShortcode implements ShortcodeInterface
+abstract class AbstractShortcode
     {
     protected $name;
-    protected $parameters;
+    protected $parameters = array();
     protected $content;
-
-    public function __construct($name, array $parameters, $content)
-        {
-        $this->name = $name;
-        $this->parameters = $parameters;
-        $this->content = $content;
-        }
 
     public function hasContent()
         {
