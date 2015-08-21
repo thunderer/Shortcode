@@ -98,7 +98,7 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($processor, $processed->getProcessor());
         }
 
-    public function testMatchedShortcode()
+    public function testParsedShortcode()
         {
         $shortcode = new ParsedShortcode('name', array('arg' => 'val'), 'content', 'text', 12);
 

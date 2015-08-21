@@ -10,18 +10,18 @@ final class RegexBuilderUtility
     {
     public static function buildShortcodeRegex(SyntaxInterface $syntax)
         {
-        return '~('.static::createShortcodeRegexContent($syntax).')~us';
+        return '~('.self::createShortcodeRegexContent($syntax).')~us';
         }
 
     public static function buildSingleShortcodeRegex(SyntaxInterface $syntax)
         {
-        return '~(\A'.static::createShortcodeRegexContent($syntax).'\Z)~us';
+        return '~(\A'.self::createShortcodeRegexContent($syntax).'\Z)~us';
         }
 
     public static function buildArgumentsRegex(SyntaxInterface $syntax)
         {
-        $equals = static::quote($syntax->getParameterValueSeparator());
-        $string = static::quote($syntax->getParameterValueDelimiter());
+        $equals = self::quote($syntax->getParameterValueSeparator());
+        $string = self::quote($syntax->getParameterValueDelimiter());
 
         $ws = '\s*';
         // lookahead test for either space or end of string
@@ -36,18 +36,18 @@ final class RegexBuilderUtility
 
     private static function createShortcodeRegexContent(SyntaxInterface $syntax)
         {
-        $open = static::quote($syntax->getOpeningTag());
-        $slash = static::quote($syntax->getClosingTagMarker());
-        $close = static::quote($syntax->getClosingTag());
-        $equals = static::quote($syntax->getParameterValueSeparator());
-        $string = static::quote($syntax->getParameterValueDelimiter());
+        $open = self::quote($syntax->getOpeningTag());
+        $slash = self::quote($syntax->getClosingTagMarker());
+        $close = self::quote($syntax->getClosingTag());
+        $equals = self::quote($syntax->getParameterValueSeparator());
+        $string = self::quote($syntax->getParameterValueDelimiter());
 
         $ws = '\s*';
 
         // lookahead test for space, closing tag, self-closing tag or end of string
         $empty = '(?=\s|'.$close.'|'.$slash.$ws.$close.'|$)';
         // equals sign and alphanumeric value
-        $simple = $ws.$equals.$ws.'(?!=(?:\s*|'.$close.'|'.$slash.$close.'))'; // '(?:[^\s'.$close.']+)';
+        $simple = $ws.$equals.$ws.'(?!=(?:\s*|'.$close.'|'.$slash.$close.'))';
         // equals sign and value without unescaped string delimiters enclosed in them
         $complex = $ws.$equals.$ws.$string.'(?:[^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*)'.$string;
         // complete parameters matching regex
