@@ -3,7 +3,7 @@ namespace Thunder\Shortcode\Tests\Fake;
 
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
-class ReverseShortcode
+final class ReverseShortcode
     {
     public function __invoke(ShortcodeInterface $s)
         {

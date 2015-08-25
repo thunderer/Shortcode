@@ -150,16 +150,20 @@ assert('abcde' === $processor->withMaxIterations(null)->process($text));
 
 **Parsing**
 
-Create instance of `Parser` class and use its `parse()` method to convert single shortcode string match into `Shortcode` instance with easy access to its name, parameters, and content (null if none present):
+Create instance of `Parser` class and use its `parse()` method to convert string with shortcodes into array of `ParsedShortcode` instances with easy access to its name, parameters, content (null if none present), position and exact text fragment:
 
 ```php
 $parser = new RegexParser();
-$shortcode = $parser->parse('[code arg=value]something[/code]');
+$shortcodes = $parser->parse('[code arg=value]something[/code]');
+assert(1 === count($shortcodes));
 
+$shortcode = $shortcodes[0];
 assert('code' === $shortcode->getName());
 assert(array('arg' => 'val') === $shortcode->getArguments());
 assert('val' === $shortcode->getArgument('arg'));
 assert('something' === $shortcode->getContent());
+assert(0 === $shortcode->getPosition());
+assert('[code arg=value]something[/code]' === $shortcode->getText());
 ```
 
 **Syntax**

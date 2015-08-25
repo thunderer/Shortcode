@@ -4,27 +4,27 @@
 
 * v1.0.0 (xx.yy.2015)
 
-  * extracted `HandlerContainerInterface` and its default implementation `HandlerContainer` from `Processor`,
-  * introduced `ImmutableHandlerContainer` as an alternative implementation,
-  * removed `HandlerInterface`, from now on handlers can be only closures and classes with `__invoke()`,
-  * introduced `ProcessorContext` to store internal state when processing text,
-  * introduced `AbstractShortcode`, restored `final` on regular `Shortcode`,
-  * `ProcessedShortcode` can be now created with static method `createFromContext()` using instance of `ProcessorContext`,
   * fixed bug which caused shortcode content to be returned without modification when auto processing was enabled, there was no handler for that shortcode, but there were handlers for inner shortcodes.
   * removed classes and methods deprecated in previous releases,
+  * removed `RegexExtractor` and `ExtractorInterface`, its functionality was moved to `Parser` - now it returns instances of `ParsedShortcodeInterface`,
+  * removed `Match` and `MatchInterface`,
+  * removed `HandlerInterface`, from now on handlers can be only closures and classes with `__invoke()` (`callable` typehint),
   * removed all handler-related methods from `Processor` (extracted to `HandlerContainer`):
     * `addHandler()`,
     * `addHandlerAlias()`,
     * `setDefaultHandler()`.
-  * `Processor` now requires instance of `HandlerContainer`,
   * refactored `ShortcodeFacade` to also use `HandlerContainer`, also `SyntaxInterface` parameter is now required,
   * `Processor` is now immutable, options setters were refactored to return reconfigured clones:
     * `setRecursionDepth()` &raquo; `withRecursionDepth()`,
     * `setMaxIterations()` &raquo; `withMaxIterations()`,
     * `setAutoProcessContent()` &raquo; `withAutoProcessContent()`,
-  * removed `Match` and `MatchInterface`,
-  * introduced `ParsedShortcode` and `ParsedShortcodeInterface` that extends `ShortcodeInterface` with position and exact text match,
-  * removed `RegexExtractor` and `ExtractorInterface`, `Parser` now return instances of `ParsedShortcodeInterface`.
+  * extracted `HandlerContainerInterface` and its default implementation `HandlerContainer` from `Processor`,
+  * `Processor` now requires instance of `HandlerContainer`,
+  * introduced `ImmutableHandlerContainer` as an alternative implementation,
+  * introduced `ProcessorContext` to store internal state when processing text,
+  * introduced `AbstractShortcode`, restored `final` on regular `Shortcode`,
+  * `ProcessedShortcode` can be now created with static method `createFromContext()` using instance of `ProcessorContext`,
+  * introduced `ParsedShortcode` and `ParsedShortcodeInterface` that extends `ShortcodeInterface` with position and exact text match.
 
 ## Version 0.*
 
@@ -44,7 +44,7 @@
     * `SyntaxBuilder` &raquo; `Syntax\SyntaxBuilder`,
   * next version of this library will remove all files marked as deprecated (listed above) and will introduce backward incompatible changes to allow finishing refactorings for version 1.0. Sneak peek:
     * `Extractor` abstraction will be removed and its functionality will be merged with `Parser`,
-    * processing shortcode's content will be moved to its handler,
+    * processing shortcode content will be moved to its handler,
     * `ProcessedShortcode` will be aware of `ProcessorInterface` instance that is processing it,
     * `HandlerContainer` will be refactored outside `Processor` to remove SRP violation,
     * various methods will lose their ability to accept nullable parameters to enforce visibility of dependencies,
