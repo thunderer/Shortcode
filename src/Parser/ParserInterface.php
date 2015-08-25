@@ -1,7 +1,7 @@
 <?php
 namespace Thunder\Shortcode\Parser;
 
-use Thunder\Shortcode\Shortcode;
+use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -13,7 +13,7 @@ interface ParserInterface
      *
      * @param string $text
      *
-     * @return Shortcode
+     * @return ParsedShortcodeInterface[]
      */
     public function parse($text);
     }

@@ -1,8 +1,17 @@
 <?php
 namespace Thunder\Shortcode;
 
+use Thunder\Shortcode\HandlerContainer\HandlerContainerInterface;
+use Thunder\Shortcode\Parser\ParserInterface;
+use Thunder\Shortcode\Parser\RegexParser;
+use Thunder\Shortcode\Processor\Processor;
+use Thunder\Shortcode\Processor\ProcessorInterface;
 use Thunder\Shortcode\Serializer\JsonSerializer;
+use Thunder\Shortcode\Serializer\SerializerInterface;
 use Thunder\Shortcode\Serializer\TextSerializer;
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
+use Thunder\Shortcode\Syntax\Syntax;
+use Thunder\Shortcode\Syntax\SyntaxInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -10,8 +19,6 @@ use Thunder\Shortcode\Serializer\TextSerializer;
 class ShortcodeFacade
     {
     private $syntax;
-    /** @var ExtractorInterface */
-    private $extractor;
     /** @var ParserInterface */
     private $parser;
     /** @var ProcessorInterface */
@@ -22,45 +29,30 @@ class ShortcodeFacade
     /** @var SerializerInterface */
     private $textSerializer;
 
-    protected function __construct(Syntax $syntax = null, array $handlers = array(), array $aliases = array())
+    protected function __construct(HandlerContainerInterface $handlers, SyntaxInterface $syntax)
         {
         $this->syntax = $syntax ?: new Syntax();
 
-        $this->createExtractor();
         $this->createParser();
-        $this->createProcessor($handlers, $aliases);
+        $this->createProcessor($handlers);
 
         $this->createTextSerializer();
         $this->createJsonSerializer();
         }
 
-    public static function create(Syntax $syntax = null, array $handlers = array(), array $aliases = array())
+    public static function create(HandlerContainerInterface $handlers, SyntaxInterface $syntax)
         {
-        return new self($syntax, $handlers, $aliases);
-        }
-
-    protected function createExtractor()
-        {
-        $this->extractor = new Extractor($this->syntax);
+        return new self($handlers, $syntax);
         }
 
     protected function createParser()
         {
-        $this->parser = new Parser($this->syntax);
+        $this->parser = new RegexParser($this->syntax);
         }
 
-    protected function createProcessor(array $handlers, array $aliases)
+    protected function createProcessor(HandlerContainerInterface $handlers)
         {
-        $this->processor = new Processor($this->extractor, $this->parser);
-
-        foreach($handlers as $name => $handler)
-            {
-            $this->processor->addHandler($name, $handler);
-            }
-        foreach($aliases as $alias => $name)
-            {
-            $this->processor->addHandlerAlias($alias, $name);
-            }
+        $this->processor = new Processor($this->parser, $handlers);
         }
 
     protected function createTextSerializer()
@@ -73,11 +65,6 @@ class ShortcodeFacade
         $this->jsonSerializer = new JsonSerializer();
         }
 
-    final public function extract($text)
-        {
-        return $this->extractor->extract($text);
-        }
-
     final public function parse($code)
         {
         return $this->parser->parse($code);
@@ -88,7 +75,7 @@ class ShortcodeFacade
         return $this->processor->process($text);
         }
 
-    final public function serializeToText(Shortcode $shortcode)
+    final public function serializeToText(ShortcodeInterface $shortcode)
         {
         return $this->textSerializer->serialize($shortcode);
         }
@@ -98,7 +85,7 @@ class ShortcodeFacade
         return $this->textSerializer->unserialize($text);
         }
 
-    final public function serializeToJson(Shortcode $shortcode)
+    final public function serializeToJson(ShortcodeInterface $shortcode)
         {
         return $this->jsonSerializer->serialize($shortcode);
         }

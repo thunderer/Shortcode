@@ -1,9 +1,9 @@
 <?php
 namespace Thunder\Shortcode\Parser;
 
-use Thunder\Shortcode\ParserInterface;
-use Thunder\Shortcode\Shortcode;
-use Thunder\Shortcode\Syntax;
+use Thunder\Shortcode\Shortcode\ParsedShortcode;
+use Thunder\Shortcode\Syntax\Syntax;
+use Thunder\Shortcode\Syntax\SyntaxInterface;
 use Thunder\Shortcode\Utility\RegexBuilderUtility;
 
 /**
@@ -11,47 +11,56 @@ use Thunder\Shortcode\Utility\RegexBuilderUtility;
  */
 final class RegexParser implements ParserInterface
     {
-    /** @var Syntax */
+    /** @var SyntaxInterface */
     private $syntax;
     private $shortcodeRegex;
+    private $singleShortcodeRegex;
     private $argumentsRegex;
 
-    public function __construct(Syntax $syntax = null)
+    public function __construct(SyntaxInterface $syntax = null)
         {
         $this->syntax = $syntax ?: new Syntax();
-        $this->shortcodeRegex = RegexBuilderUtility::buildSingleShortcodeRegex($this->syntax);
+        $this->shortcodeRegex = RegexBuilderUtility::buildShortcodeRegex($this->syntax);
+        $this->singleShortcodeRegex = RegexBuilderUtility::buildSingleShortcodeRegex($this->syntax);
         $this->argumentsRegex = RegexBuilderUtility::buildArgumentsRegex($this->syntax);
         }
 
+    /**
+     * @param string $text
+     *
+     * @return ParsedShortcode[]
+     */
     public function parse($text)
         {
-        $count = preg_match($this->shortcodeRegex, $text, $matches);
+        preg_match_all($this->shortcodeRegex, $text, $matches, PREG_OFFSET_CAPTURE);
 
-        if(!$count)
-            {
-            $msg = 'Failed to match single shortcode in text "%s"!';
-            throw new \RuntimeException(sprintf($msg, $text));
-            }
+        return array_map(array($this, 'parseSingle'), $matches[0]);
+        }
+
+    private function parseSingle(array $match)
+        {
+        $text = $match[0];
+        $position = $match[1];
+
+        preg_match($this->singleShortcodeRegex, $text, $matches);
 
         $name = $matches[2];
         $parameters = isset($matches[3]) ? $this->parseParameters($matches[3]) : array();
         $content = isset($matches[4]) ? $matches[4] : null;
 
-        return new Shortcode($name, $parameters, $content);
+        return new ParsedShortcode($name, $parameters, $content, $text, $position);
         }
 
     private function parseParameters($text)
         {
         preg_match_all($this->argumentsRegex, $text, $argsMatches);
 
-        $return = array();
-        foreach($argsMatches[1] as $item)
-            {
+        return array_reduce($argsMatches[1], function(array $state, $item) {
             $parts = explode($this->syntax->getParameterValueSeparator(), $item, 2);
-            $return[trim($parts[0])] = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
-            }
+            $state[trim($parts[0])] = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
 
-        return $return;
+            return $state;
+            }, array());
         }
 
     private function parseValue($value)

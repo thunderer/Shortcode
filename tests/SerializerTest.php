@@ -2,9 +2,9 @@
 namespace Thunder\Shortcode\Tests;
 
 use Thunder\Shortcode\Serializer\JsonSerializer;
+use Thunder\Shortcode\Serializer\SerializerInterface;
 use Thunder\Shortcode\Serializer\TextSerializer;
-use Thunder\Shortcode\SerializerInterface;
-use Thunder\Shortcode\Shortcode;
+use Thunder\Shortcode\Shortcode\Shortcode;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -27,11 +27,16 @@ final class SerializerTest extends \PHPUnit_Framework_TestCase
 
     public function provideShortcodes()
         {
+        $empty = new Shortcode('x', array('arg' => 'val'), null);
+        $nullArgument = new Shortcode('x', array('arg' => null), null);
+        $content = new Shortcode('x', array('arg' => 'val'), 'cnt');
+
         return array(
-            array(new TextSerializer(), '[x arg=val]', new Shortcode('x', array('arg' => 'val'), null)),
-            array(new TextSerializer(), '[x arg=val]cnt[/x]', new Shortcode('x', array('arg' => 'val'), 'cnt')),
-            array(new JsonSerializer(), '{"name":"x","parameters":{"arg":"val"},"content":"cnt"}',
-                new Shortcode('x', array('arg' => 'val'), 'cnt')),
+            array(new TextSerializer(), '[x arg=val]', $empty),
+            array(new TextSerializer(), '[x arg]', $nullArgument),
+            array(new TextSerializer(), '[x arg=val]cnt[/x]', $content),
+            array(new JsonSerializer(), '{"name":"x","parameters":{"arg":"val"},"content":null}', $empty),
+            array(new JsonSerializer(), '{"name":"x","parameters":{"arg":"val"},"content":"cnt"}', $content),
             );
         }
 
@@ -47,5 +52,19 @@ final class SerializerTest extends \PHPUnit_Framework_TestCase
         $serializer = new JsonSerializer();
         $this->setExpectedException('RuntimeException');
         $serializer->unserialize('{}');
+        }
+
+    public function testExceptionMalformedText()
+        {
+        $serializer = new TextSerializer();
+        $this->setExpectedException('InvalidArgumentException');
+        $serializer->unserialize('[/sc]');
+        }
+
+    public function testExceptionMultipleText()
+        {
+        $serializer = new TextSerializer();
+        $this->setExpectedException('InvalidArgumentException');
+        $serializer->unserialize('[sc /] c [xx]');
         }
     }

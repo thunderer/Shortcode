@@ -1,12 +1,13 @@
 <?php
 namespace Thunder\Shortcode\Shortcode;
 
-use Thunder\Shortcode\ProcessorInterface;
+use Thunder\Shortcode\Processor\ProcessorContext;
+use Thunder\Shortcode\Processor\ProcessorInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class ProcessedShortcode extends Shortcode
+final class ProcessedShortcode extends AbstractShortcode implements ParsedShortcodeInterface
     {
     private $parent;
     private $position;
@@ -18,34 +19,56 @@ final class ProcessedShortcode extends Shortcode
     private $recursionLevel;
     private $processor;
 
-    public function __construct(ShortcodeInterface $s, ShortcodeInterface $parent = null,
-                                $position, $namePosition,
-                                $text, $textPosition, $textMatch,
-                                $iterationNumber, $recursionLevel, ProcessorInterface $processor)
+    private function __construct()
         {
-        parent::__construct($s->getName(), $s->getParameters(), $s->getContent());
+        }
 
-        $this->parent = $parent;
-        $this->position = $position;
-        $this->namePosition = $namePosition;
-        $this->text = $text;
-        $this->textPosition = $textPosition;
-        $this->textMatch = $textMatch;
-        $this->iterationNumber = $iterationNumber;
-        $this->recursionLevel = $recursionLevel;
-        $this->processor = $processor;
+    public static function createFromContext(ProcessorContext $context)
+        {
+        $self = new self();
+
+        $s = $context->shortcode;
+        $self->name = $s->getName();
+        $self->parameters = $s->getParameters();
+        $self->content = $s->getContent();
+
+        $self->parent = $context->parent;
+        $self->position = $context->position;
+        $self->namePosition = $context->namePosition[$s->getName()];
+        $self->text = $context->text;
+        $self->textPosition = $context->textPosition;
+        $self->textMatch = $context->textMatch;
+        $self->iterationNumber = $context->iterationNumber;
+        $self->recursionLevel = $context->recursionLevel;
+        $self->processor = $context->processor;
+
+        return $self;
         }
 
     public function withContent($content)
         {
-        $s = new Shortcode($this->getName(), $this->getParameters(), $content);
+        $self = new self();
 
-        return new self($s, $this->parent,
-            $this->position, $this->namePosition,
-            $this->text, $this->textPosition, $this->textMatch,
-            $this->iterationNumber, $this->recursionLevel, $this->processor);
+        $self->name = $this->getName();
+        $self->parameters = $this->getParameters();
+        $self->content = $content;
+
+        $self->parent = $this->parent;
+        $self->position = $this->position;
+        $self->namePosition = $this->namePosition;
+        $self->text = $this->text;
+        $self->textPosition = $this->textPosition;
+        $self->textMatch = $this->textMatch;
+        $self->iterationNumber = $this->iterationNumber;
+        $self->recursionLevel = $this->recursionLevel;
+        $self->processor = $this->processor;
+
+        return $self;
         }
 
+    /**
+     * @return ShortcodeInterface
+     */
     public function getParent()
         {
         return $this->parent;
