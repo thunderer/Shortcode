@@ -15,18 +15,18 @@ final class TextSerializer implements SerializerInterface
         $this->syntax = $syntax ?: new Syntax();
     }
 
-    public function serialize(ShortcodeInterface $s)
+    public function serialize(ShortcodeInterface $shortcode)
     {
         $open = $this->syntax->getOpeningTag();
         $close = $this->syntax->getClosingTag();
         $marker = $this->syntax->getClosingTagMarker();
 
-        $parameters = $this->serializeParameters($s->getParameters());
-        $return = $open.$s->getName().$parameters.$close;
+        $parameters = $this->serializeParameters($shortcode->getParameters());
+        $return = $open.$shortcode->getName().$parameters.$close;
 
-        return null === $s->getContent()
+        return null === $shortcode->getContent()
             ? $return
-            : $return.$s->getContent().$open.$marker.$s->getName().$close;
+            : $return.$shortcode->getContent().$open.$marker.$shortcode->getName().$close;
     }
 
     private function serializeParameters(array $parameters)

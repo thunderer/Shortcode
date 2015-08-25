@@ -11,11 +11,11 @@ interface SerializerInterface
     /**
      * Serializes Shortcode class instance into given format
      *
-     * @param ShortcodeInterface $s Instance to serialize
+     * @param ShortcodeInterface $shortcode Instance to serialize
      *
      * @return string
      */
-    public function serialize(ShortcodeInterface $s);
+    public function serialize(ShortcodeInterface $shortcode);
 
     /**
      * Loads back Shortcode instance from serialized format

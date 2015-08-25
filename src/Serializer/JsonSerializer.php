@@ -6,12 +6,12 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 final class JsonSerializer implements SerializerInterface
 {
-    public function serialize(ShortcodeInterface $s)
+    public function serialize(ShortcodeInterface $shortcode)
     {
         return json_encode(array(
-            'name' => $s->getName(),
-            'parameters' => $s->getParameters(),
-            'content' => $s->getContent(),
+            'name' => $shortcode->getName(),
+            'parameters' => $shortcode->getParameters(),
+            'content' => $shortcode->getContent(),
             ));
     }
 

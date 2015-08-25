@@ -19,35 +19,35 @@ final class Syntax implements SyntaxInterface
         $parameterValueSeparator = null,
         $parameterValueDelimiter = null
     ) {
-        $this->openingTag = $openingTag ?: '[';
-        $this->closingTag = $closingTag ?: ']';
-        $this->closingTagMarker = $closingTagMarker ?: '/';
-        $this->parameterValueSeparator = $parameterValueSeparator ?: '=';
-        $this->parameterValueDelimiter = $parameterValueDelimiter ?: '"';
+        $this->openingTag = $openingTag;
+        $this->closingTag = $closingTag;
+        $this->closingTagMarker = $closingTagMarker;
+        $this->parameterValueSeparator = $parameterValueSeparator;
+        $this->parameterValueDelimiter = $parameterValueDelimiter;
     }
 
     public function getOpeningTag()
     {
-        return $this->openingTag;
+        return $this->openingTag ?: '[';
     }
 
     public function getClosingTag()
     {
-        return $this->closingTag;
+        return $this->closingTag ?: ']';
     }
 
     public function getClosingTagMarker()
     {
-        return $this->closingTagMarker;
+        return $this->closingTagMarker ?: '/';
     }
 
     public function getParameterValueSeparator()
     {
-        return $this->parameterValueSeparator;
+        return $this->parameterValueSeparator ?: '=';
     }
 
     public function getParameterValueDelimiter()
     {
-        return $this->parameterValueDelimiter;
+        return $this->parameterValueDelimiter ?: '"';
     }
 }

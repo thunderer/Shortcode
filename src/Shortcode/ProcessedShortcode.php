@@ -27,14 +27,14 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
     {
         $self = new self();
 
-        $s = $context->shortcode;
-        $self->name = $s->getName();
-        $self->parameters = $s->getParameters();
-        $self->content = $s->getContent();
+        $shortcode = $context->shortcode;
+        $self->name = $shortcode->getName();
+        $self->parameters = $shortcode->getParameters();
+        $self->content = $shortcode->getContent();
 
         $self->parent = $context->parent;
         $self->position = $context->position;
-        $self->namePosition = $context->namePosition[$s->getName()];
+        $self->namePosition = $context->namePosition[$shortcode->getName()];
         $self->text = $context->text;
         $self->textPosition = $context->textPosition;
         $self->textMatch = $context->textMatch;

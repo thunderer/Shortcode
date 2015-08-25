@@ -23,13 +23,13 @@ final class RegexBuilderUtility
         $equals = self::quote($syntax->getParameterValueSeparator());
         $string = self::quote($syntax->getParameterValueDelimiter());
 
-        $ws = '\s*';
+        $space = '\s*';
         // lookahead test for either space or end of string
         $empty = '(?=\s|$)';
         // equals sign and alphanumeric value
-        $simple = $ws.$equals.$ws.'[^\s]+';
+        $simple = $space.$equals.$space.'[^\s]+';
         // equals sign and value without unescaped string delimiters enclosed in them
-        $complex = $ws.$equals.$ws.$string.'([^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*?)'.$string;
+        $complex = $space.$equals.$space.$string.'([^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*?)'.$string;
 
         return '~(?:\s*(\w+(?:'.$complex.'|'.$simple.'|'.$empty.')))~us';
     }
@@ -42,14 +42,14 @@ final class RegexBuilderUtility
         $equals = self::quote($syntax->getParameterValueSeparator());
         $string = self::quote($syntax->getParameterValueDelimiter());
 
-        $ws = '\s*';
+        $space = '\s*';
 
         // lookahead test for space, closing tag, self-closing tag or end of string
-        $empty = '(?=\s|'.$close.'|'.$slash.$ws.$close.'|$)';
+        $empty = '(?=\s|'.$close.'|'.$slash.$space.$close.'|$)';
         // equals sign and alphanumeric value
-        $simple = $ws.$equals.$ws.'(?!=(?:\s*|'.$close.'|'.$slash.$close.'))';
+        $simple = $space.$equals.$space.'(?!=(?:\s*|'.$close.'|'.$slash.$close.'))';
         // equals sign and value without unescaped string delimiters enclosed in them
-        $complex = $ws.$equals.$ws.$string.'(?:[^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*)'.$string;
+        $complex = $space.$equals.$space.$string.'(?:[^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*)'.$string;
         // complete parameters matching regex
         $parameters = '((?:\s*(?:\w+(?:'.$complex.'|'.$simple.'|'.$empty.')))*)';
 
@@ -59,12 +59,12 @@ final class RegexBuilderUtility
         $content = '(.*?)';
 
         // equal beginning for each variant: open tag, name and parameters
-        $common = $open.$ws.$name.$parameters.$ws;
+        $common = $open.$space.$name.$parameters.$space;
         // closing tag variants: just closing tag, self closing tag or content
         // and closing block with backreference name validation
         $justClosed = $close;
-        $selfClosed  = $slash.$ws.$close;
-        $withContent = $close.$content.$open.$ws.$slash.$ws.'(\2)'.$ws.$close;
+        $selfClosed  = $slash.$space.$close;
+        $withContent = $close.$content.$open.$space.$slash.$space.'(\2)'.$space.$close;
 
         return '(?:'.$common.'(?:'.$withContent.'|'.$justClosed.'|'.$selfClosed.'))';
     }
