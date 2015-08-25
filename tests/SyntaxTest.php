@@ -4,69 +4,47 @@ namespace Thunder\Shortcode\Tests;
 use Thunder\Shortcode\Syntax\Syntax;
 use Thunder\Shortcode\Syntax\CommonSyntax;
 use Thunder\Shortcode\Syntax\SyntaxBuilder;
+use Thunder\Shortcode\Syntax\SyntaxInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 final class SyntaxTest extends \PHPUnit_Framework_TestCase
     {
-    public function testSyntax()
+    /**
+     * @dataProvider provideSyntaxes
+     */
+    public function testSyntax(SyntaxInterface $syntax, $open, $close, $slash, $parameter, $value)
         {
-        $syntax = new Syntax();
-
-        $this->assertSame('[', $syntax->getOpeningTag());
-        $this->assertSame(']', $syntax->getClosingTag());
-        $this->assertSame('/', $syntax->getClosingTagMarker());
-        $this->assertSame('=', $syntax->getParameterValueSeparator());
-        $this->assertSame('"', $syntax->getParameterValueDelimiter());
+        $this->assertSame($open, $syntax->getOpeningTag());
+        $this->assertSame($close, $syntax->getClosingTag());
+        $this->assertSame($slash, $syntax->getClosingTagMarker());
+        $this->assertSame($parameter, $syntax->getParameterValueSeparator());
+        $this->assertSame($value, $syntax->getParameterValueDelimiter());
         }
 
-    public function testStandardSyntax()
+    public function provideSyntaxes()
         {
-        $syntax = new CommonSyntax();
-
-        $this->assertSame('[', $syntax->getOpeningTag());
-        $this->assertSame(']', $syntax->getClosingTag());
-        $this->assertSame('/', $syntax->getClosingTagMarker());
-        $this->assertSame('=', $syntax->getParameterValueSeparator());
-        $this->assertSame('"', $syntax->getParameterValueDelimiter());
-        }
-
-    public function testCustomSyntax()
-        {
-        $syntax = new Syntax('[[', ']]', '//', '==', '""');
-
-        $this->assertSame('[[', $syntax->getOpeningTag());
-        $this->assertSame(']]', $syntax->getClosingTag());
-        $this->assertSame('//', $syntax->getClosingTagMarker());
-        $this->assertSame('==', $syntax->getParameterValueSeparator());
-        $this->assertSame('""', $syntax->getParameterValueDelimiter());
+        return array(
+            array(new Syntax(), '[', ']', '/', '=', '"'),
+            array(new Syntax('[[', ']]', '//', '==', '""'), '[[', ']]', '//', '==', '""'),
+            array(new CommonSyntax(), '[', ']', '/', '=', '"')
+            );
         }
 
     public function testBuilder()
         {
         $builder = new SyntaxBuilder();
-        $syntax = $builder->getSyntax();
-
-        $this->assertSame('[', $syntax->getOpeningTag());
-        $this->assertSame(']', $syntax->getClosingTag());
-        $this->assertSame('/', $syntax->getClosingTagMarker());
-        $this->assertSame('=', $syntax->getParameterValueSeparator());
-        $this->assertSame('"', $syntax->getParameterValueDelimiter());
+        $this->testSyntax($builder->getSyntax(), '[', ']', '/', '=', '"');
 
         $builder = new SyntaxBuilder();
-        $syntax = $builder
+        $doubleBuiltSyntax = $builder
             ->setOpeningTag('[[')
             ->setClosingTag(']]')
             ->setClosingTagMarker('//')
             ->setParameterValueSeparator('==')
             ->setParameterValueDelimiter('""')
             ->getSyntax();
-
-        $this->assertSame('[[', $syntax->getOpeningTag());
-        $this->assertSame(']]', $syntax->getClosingTag());
-        $this->assertSame('//', $syntax->getClosingTagMarker());
-        $this->assertSame('==', $syntax->getParameterValueSeparator());
-        $this->assertSame('""', $syntax->getParameterValueDelimiter());
+        $this->testSyntax($doubleBuiltSyntax, '[[', ']]', '//', '==', '""');
         }
     }
