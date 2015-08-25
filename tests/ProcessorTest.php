@@ -118,9 +118,9 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
 
     public function testProcessorDeclare()
         {
-        $processor = $this->getProcessor();
-        $processor->addHandler('declare', function(Shortcode\ShortcodeInterface $s) use($processor) {
-            $processor->addHandler($s->getParameterAt(0), function(Shortcode\ShortcodeInterface $x) use($s) {
+        $handlers = new HandlerContainer();
+        $handlers->add('declare', function(ProcessedShortcode $s) use($handlers) {
+            $handlers->add($s->getParameterAt(0), function(ShortcodeInterface $x) use($s) {
                 $keys = array_map(function($item) {
                     return '%'.$item.'%';
                     }, array_keys($x->getParameters()));
@@ -129,6 +129,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
                 return str_replace($keys, $values, $s->getContent());
                 });
             });
+        $processor = new Processor(new RegexParser(), $handlers);
 
         $this->assertSame('You are 18 years old.', trim($processor->process('
             [declare age]You are %age% years old.[/declare]
