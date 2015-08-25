@@ -24,32 +24,36 @@ final class TextSerializer implements SerializerInterface
         $parameters = $this->serializeParameters($s->getParameters());
         $return = $open.$s->getName().$parameters.$close;
 
-        if(null !== $s->getContent())
+        return null === $s->getContent()
+            ? $return
+            : $return.$s->getContent().$open.$marker.$s->getName().$close;
+        }
+
+    private function serializeParameters(array $parameters)
+        {
+        // unfortunately array_reduce() does not support keys
+        $return = '';
+        foreach($parameters as $key => $value)
             {
-            $return .= $s->getContent().$open.$marker.$s->getName().$close;
+            $return .= ' '.$key.$this->serializeParameter($value);
             }
 
         return $return;
         }
 
-    private function serializeParameters(array $parameters)
+    private function serializeParameter($value)
         {
-        $return = '';
-        foreach($parameters as $key => $value)
+        if(null === $value)
             {
-            $return .= ' '.$key;
-            if(null !== $value)
-                {
-                $delimiter = $this->syntax->getParameterValueDelimiter();
-                $separator = $this->syntax->getParameterValueSeparator();
-
-                $return .= $separator.(preg_match('/^\w+$/us', $value)
-                    ? $value
-                    : $delimiter.$value.$delimiter);
-                }
+            return '';
             }
 
-        return $return;
+        $delimiter = $this->syntax->getParameterValueDelimiter();
+        $separator = $this->syntax->getParameterValueSeparator();
+
+        return $separator.(preg_match('/^\w+$/us', $value)
+            ? $value
+            : $delimiter.$value.$delimiter);
         }
 
     public function unserialize($text)

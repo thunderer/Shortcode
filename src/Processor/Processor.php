@@ -17,16 +17,11 @@ final class Processor implements ProcessorInterface
     private $recursionDepth = null; // infinite recursion
     private $maxIterations = 1; // one iteration
     private $autoProcessContent = true; // automatically process shortcode content
-    private $shortcodeBuilder;
 
     public function __construct(ParserInterface $parser, HandlerContainerInterface $handlers)
         {
         $this->parser = $parser;
         $this->handlers = $handlers;
-
-        $this->shortcodeBuilder = function(ProcessorContext $context) {
-            return ProcessedShortcode::createFromContext($context);
-            };
         }
 
     /**
@@ -70,9 +65,10 @@ final class Processor implements ProcessorInterface
         $replaces = array();
         foreach($shortcodes as $shortcode)
             {
-            $context->textMatch = $shortcode->getText();
-            $context->textPosition = $shortcode->getPosition();
-            $replaces[] = array($this->processMatch($shortcode, $context), $shortcode->getPosition(), mb_strlen($shortcode->getText()));
+            $replace = $this->processMatch($shortcode, $context);
+            $length = mb_strlen($shortcode->getText());
+
+            $replaces[] = array($replace, $shortcode->getPosition(), $length);
             }
         $replaces = array_reverse(array_filter($replaces));
 
@@ -83,16 +79,20 @@ final class Processor implements ProcessorInterface
 
     private function processMatch(ParsedShortcodeInterface $shortcode, ProcessorContext $context)
         {
-        $context->position++;
-        $context->namePosition[$shortcode->getName()] = array_key_exists($shortcode->getName(), $context->namePosition)
-            ? $context->namePosition[$shortcode->getName()] + 1
-            : 1;
+        $name = $shortcode->getName();
 
+        $context->textMatch = $shortcode->getText();
+        $context->textPosition = $shortcode->getPosition();
+        $context->position++;
+        $context->namePosition[$name] = array_key_exists($name, $context->namePosition)
+            ? $context->namePosition[$name] + 1
+            : 1;
         $context->shortcode = $shortcode;
-        $shortcode = call_user_func_array($this->shortcodeBuilder, array(clone $context));
+
+        $shortcode = ProcessedShortcode::createFromContext(clone $context);
         $shortcode = $this->processRecursion($shortcode, $context);
 
-        return $this->processShortcode($shortcode, $this->handlers->get($shortcode->getName()));
+        return $this->processShortcode($shortcode, $this->handlers->get($name));
         }
 
     private function processShortcode(ParsedShortcodeInterface $shortcode, $handler)
@@ -181,6 +181,12 @@ final class Processor implements ProcessorInterface
      */
     public function withAutoProcessContent($flag)
         {
+        if(!is_bool($flag))
+            {
+            $msg = 'Auto processing flag must be a boolean value!';
+            throw new \InvalidArgumentException($msg);
+            }
+
         $self = clone $this;
         $self->autoProcessContent = (bool)$flag;
 

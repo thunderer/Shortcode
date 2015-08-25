@@ -39,27 +39,28 @@ final class RegexParser implements ParserInterface
 
     private function parseSingle(array $match)
         {
-        preg_match($this->singleShortcodeRegex, $match[0], $matches);
+        $text = $match[0];
+        $position = $match[1];
+
+        preg_match($this->singleShortcodeRegex, $text, $matches);
 
         $name = $matches[2];
         $parameters = isset($matches[3]) ? $this->parseParameters($matches[3]) : array();
         $content = isset($matches[4]) ? $matches[4] : null;
 
-        return new ParsedShortcode($name, $parameters, $content, $match[0], $match[1]);
+        return new ParsedShortcode($name, $parameters, $content, $text, $position);
         }
 
     private function parseParameters($text)
         {
         preg_match_all($this->argumentsRegex, $text, $argsMatches);
 
-        $return = array();
-        foreach($argsMatches[1] as $item)
-            {
+        return array_reduce($argsMatches[1], function(array $state, $item) {
             $parts = explode($this->syntax->getParameterValueSeparator(), $item, 2);
-            $return[trim($parts[0])] = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
-            }
+            $state[trim($parts[0])] = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
 
-        return $return;
+            return $state;
+            }, array());
         }
 
     private function parseValue($value)

@@ -152,6 +152,13 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $processor->withMaxIterations(new \stdClass());
         }
 
+    public function testExceptionOnInvalidAutoProcessFlag()
+        {
+        $processor = $this->getProcessor();
+        $this->setExpectedException('InvalidArgumentException');
+        $processor->withAutoProcessContent(new \stdClass());
+        }
+
     public function testDefaultHandler()
         {
         $handlers = new HandlerContainer();
