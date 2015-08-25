@@ -5,7 +5,7 @@ namespace Thunder\Shortcode\Syntax;
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 interface SyntaxInterface
-    {
+{
     public function getOpeningTag();
 
     public function getClosingTag();
@@ -15,4 +15,4 @@ interface SyntaxInterface
     public function getParameterValueSeparator();
 
     public function getParameterValueDelimiter();
-    }
+}

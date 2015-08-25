@@ -14,12 +14,12 @@ use Thunder\Shortcode\Shortcode\Shortcode;
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 final class ShortcodeTest extends \PHPUnit_Framework_TestCase
-    {
+{
     /**
      * @dataProvider provideShortcodes
      */
     public function testShortcode($expected, $name, array $args, $content)
-        {
+    {
         $s = new Shortcode($name, $args, $content);
         $textSerializer = new TextSerializer();
 
@@ -29,20 +29,20 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expected, $textSerializer->serialize($s));
         $this->assertSame('arg', $s->getParameterAt(0));
         $this->assertTrue($s->hasParameters());
-        }
+    }
 
     public function provideShortcodes()
-        {
+    {
         return array(
             array('[x arg=val]', 'x', array('arg' => 'val'), null),
             array('[x arg=val][/x]', 'x', array('arg' => 'val'), ''),
             array('[x arg=val]inner[/x]', 'x', array('arg' => 'val'), 'inner'),
             array('[x arg="val val"]inner[/x]', 'x', array('arg' => 'val val'), 'inner'),
             );
-        }
+    }
 
     public function testObject()
-        {
+    {
         $shortcode = new Shortcode('random', array(
             'arg' => 'value',
             'none' => null,
@@ -56,17 +56,17 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(42, $shortcode->getParameter('invalid', 42));
 
         $this->assertNotSame($shortcode, $shortcode->withContent('x'));
-        }
+    }
 
     public function testExceptionOnMissingParameterWithNoDefaultValue()
-        {
+    {
         $shortcode = new Shortcode('name', array(), null);
         $this->setExpectedException('RuntimeException');
         $shortcode->getParameter('invalid');
-        }
+    }
 
     public function testProcessedShortcode()
-        {
+    {
         $processor = new Processor(new RegexParser(), new HandlerContainer());
 
         $context = new ProcessorContext();
@@ -96,10 +96,10 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(0, $processed->getRecursionLevel());
         $this->assertSame(null, $processed->getParent());
         $this->assertSame($processor, $processed->getProcessor());
-        }
+    }
 
     public function testParsedShortcode()
-        {
+    {
         $shortcode = new ParsedShortcode('name', array('arg' => 'val'), 'content', 'text', 12);
 
         $this->assertSame('name', $shortcode->getName());
@@ -111,5 +111,5 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(false, $shortcode->withContent(null)->hasContent());
         $this->assertSame('another', $shortcode->withContent('another')->getContent());
-        }
     }
+}

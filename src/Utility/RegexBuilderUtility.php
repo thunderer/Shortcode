@@ -7,19 +7,19 @@ use Thunder\Shortcode\Syntax\SyntaxInterface;
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 final class RegexBuilderUtility
-    {
+{
     public static function buildShortcodeRegex(SyntaxInterface $syntax)
-        {
+    {
         return '~('.self::createShortcodeRegexContent($syntax).')~us';
-        }
+    }
 
     public static function buildSingleShortcodeRegex(SyntaxInterface $syntax)
-        {
+    {
         return '~(\A'.self::createShortcodeRegexContent($syntax).'\Z)~us';
-        }
+    }
 
     public static function buildArgumentsRegex(SyntaxInterface $syntax)
-        {
+    {
         $equals = self::quote($syntax->getParameterValueSeparator());
         $string = self::quote($syntax->getParameterValueDelimiter());
 
@@ -32,10 +32,10 @@ final class RegexBuilderUtility
         $complex = $ws.$equals.$ws.$string.'([^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*?)'.$string;
 
         return '~(?:\s*(\w+(?:'.$complex.'|'.$simple.'|'.$empty.')))~us';
-        }
+    }
 
     private static function createShortcodeRegexContent(SyntaxInterface $syntax)
-        {
+    {
         $open = self::quote($syntax->getOpeningTag());
         $slash = self::quote($syntax->getClosingTagMarker());
         $close = self::quote($syntax->getClosingTag());
@@ -67,10 +67,10 @@ final class RegexBuilderUtility
         $withContent = $close.$content.$open.$ws.$slash.$ws.'(\2)'.$ws.$close;
 
         return '(?:'.$common.'(?:'.$withContent.'|'.$justClosed.'|'.$selfClosed.'))';
-        }
+    }
 
     private static function quote($text)
-        {
+    {
         return preg_replace('/(.)/us', '\\\\$0', $text);
-        }
     }
+}

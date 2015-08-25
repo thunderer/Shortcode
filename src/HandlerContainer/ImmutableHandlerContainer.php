@@ -2,16 +2,16 @@
 namespace Thunder\Shortcode\HandlerContainer;
 
 final class ImmutableHandlerContainer implements HandlerContainerInterface
-    {
+{
     private $handlers;
 
     public function __construct(HandlerContainer $handlers)
-        {
-        $this->handlers = $handlers;
-        }
+    {
+        $this->handlers = clone $handlers;
+    }
 
     public function get($name)
-        {
+    {
         return $this->handlers->get($name);
-        }
     }
+}

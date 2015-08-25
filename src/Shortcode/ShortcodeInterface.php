@@ -5,7 +5,7 @@ namespace Thunder\Shortcode\Shortcode;
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 interface ShortcodeInterface
-    {
+{
     /**
      * Returns new instance of given shortcode with changed content
      *
@@ -48,4 +48,4 @@ interface ShortcodeInterface
      * @return string|null
      */
     public function getContent();
-    }
+}

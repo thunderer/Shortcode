@@ -5,7 +5,7 @@ namespace Thunder\Shortcode\Shortcode;
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 interface ParsedShortcodeInterface extends ShortcodeInterface
-    {
+{
     /**
      * Returns string position in the parent text
      *
@@ -19,4 +19,4 @@ interface ParsedShortcodeInterface extends ShortcodeInterface
      * @return string
      */
     public function getText();
-    }
+}

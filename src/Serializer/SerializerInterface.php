@@ -7,7 +7,7 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 interface SerializerInterface
-    {
+{
     /**
      * Serializes Shortcode class instance into given format
      *
@@ -25,4 +25,4 @@ interface SerializerInterface
      * @return ShortcodeInterface
      */
     public function unserialize($text);
-    }
+}

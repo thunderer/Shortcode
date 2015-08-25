@@ -7,7 +7,7 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 final class ProcessorContext
-    {
+{
     /** @var ShortcodeInterface */
     public $shortcode = null;
 
@@ -24,4 +24,4 @@ final class ProcessorContext
     public $textMatch = '';
     public $iterationNumber = 0;
     public $recursionLevel = 0;
-    }
+}

@@ -10,30 +10,30 @@ use Thunder\Shortcode\Syntax\SyntaxInterface;
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 final class SyntaxTest extends \PHPUnit_Framework_TestCase
-    {
+{
     /**
      * @dataProvider provideSyntaxes
      */
     public function testSyntax(SyntaxInterface $syntax, $open, $close, $slash, $parameter, $value)
-        {
+    {
         $this->assertSame($open, $syntax->getOpeningTag());
         $this->assertSame($close, $syntax->getClosingTag());
         $this->assertSame($slash, $syntax->getClosingTagMarker());
         $this->assertSame($parameter, $syntax->getParameterValueSeparator());
         $this->assertSame($value, $syntax->getParameterValueDelimiter());
-        }
+    }
 
     public function provideSyntaxes()
-        {
+    {
         return array(
             array(new Syntax(), '[', ']', '/', '=', '"'),
             array(new Syntax('[[', ']]', '//', '==', '""'), '[[', ']]', '//', '==', '""'),
             array(new CommonSyntax(), '[', ']', '/', '=', '"')
             );
-        }
+    }
 
     public function testBuilder()
-        {
+    {
         $builder = new SyntaxBuilder();
         $this->testSyntax($builder->getSyntax(), '[', ']', '/', '=', '"');
 
@@ -46,5 +46,5 @@ final class SyntaxTest extends \PHPUnit_Framework_TestCase
             ->setParameterValueDelimiter('""')
             ->getSyntax();
         $this->testSyntax($doubleBuiltSyntax, '[[', ']]', '//', '==', '""');
-        }
     }
+}
