@@ -55,12 +55,14 @@ final class RegexParser implements ParserInterface
         {
         preg_match_all($this->argumentsRegex, $text, $argsMatches);
 
-        return array_reduce($argsMatches[1], function(array $state, $item) {
+        $return = array();
+        foreach($argsMatches[1] as $item)
+            {
             $parts = explode($this->syntax->getParameterValueSeparator(), $item, 2);
-            $state[trim($parts[0])] = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
+            $return[trim($parts[0])] = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
+            };
 
-            return $state;
-            }, array());
+        return $return;
         }
 
     private function parseValue($value)
