@@ -38,7 +38,7 @@ or manually update your `composer.json` with:
 ```
 (...)
 "require": {
-    "thunderer/shortcode": "dev-master"
+    "thunderer/shortcode": "~1.0"
 }
 (...)
 ```

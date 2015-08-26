@@ -2,7 +2,7 @@
 
 ## Version 1.*
 
-* v1.0.0 (xx.yy.2015)
+* v1.0.0 (26.08.2015)
 
   * fixed bug which caused shortcode content to be returned without modification when auto processing was enabled, there was no handler for that shortcode, but there were handlers for inner shortcodes.
   * removed classes and methods deprecated in previous releases,

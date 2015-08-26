@@ -59,7 +59,7 @@ final class RegexParser implements ParserInterface
         foreach ($argsMatches[1] as $item) {
             $parts = explode($this->syntax->getParameterValueSeparator(), $item, 2);
             $return[trim($parts[0])] = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
-        };
+        }
 
         return $return;
     }

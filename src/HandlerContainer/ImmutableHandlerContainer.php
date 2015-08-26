@@ -1,6 +1,9 @@
 <?php
 namespace Thunder\Shortcode\HandlerContainer;
 
+/**
+ * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
+ */
 final class ImmutableHandlerContainer implements HandlerContainerInterface
 {
     private $handlers;
