@@ -58,13 +58,6 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertNotSame($shortcode, $shortcode->withContent('x'));
     }
 
-    public function testExceptionOnMissingParameterWithNoDefaultValue()
-    {
-        $shortcode = new Shortcode('name', array(), null);
-        $this->setExpectedException('RuntimeException');
-        $shortcode->getParameter('invalid');
-    }
-
     public function testProcessedShortcode()
     {
         $processor = new Processor(new RegexParser(), new HandlerContainer());

@@ -37,15 +37,7 @@ abstract class AbstractShortcode
 
     public function getParameter($name, $default = null)
     {
-        if ($this->hasParameter($name)) {
-            return $this->parameters[$name];
-        }
-        if (null !== $default) {
-            return $default;
-        }
-
-        $msg = 'Shortcode parameter %s not found and no default value was set!';
-        throw new \RuntimeException(sprintf($msg, $name));
+        return $this->hasParameter($name) ? $this->parameters[$name] : $default;
     }
 
     public function getParameterAt($index)
