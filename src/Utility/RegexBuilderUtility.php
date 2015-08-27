@@ -63,7 +63,7 @@ final class RegexBuilderUtility
         // closing tag variants: just closing tag, self closing tag or content
         // and closing block with backreference name validation
         $justClosed = $close;
-        $selfClosed  = $slash.$space.$close;
+        $selfClosed  = '(['.$slash.'])'.$space.$close;
         $withContent = $close.$content.$open.$space.$slash.$space.'(\2)'.$space.$close;
 
         return '(?:'.$common.'(?:'.$withContent.'|'.$justClosed.'|'.$selfClosed.'))';

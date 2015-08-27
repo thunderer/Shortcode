@@ -2,6 +2,7 @@
 namespace Thunder\Shortcode\Parser;
 
 use Thunder\Shortcode\Shortcode\ParsedShortcode;
+use Thunder\Shortcode\Shortcode\Shortcode;
 use Thunder\Shortcode\Syntax\Syntax;
 use Thunder\Shortcode\Syntax\SyntaxInterface;
 use Thunder\Shortcode\Utility\RegexBuilderUtility;
@@ -34,21 +35,29 @@ final class RegexParser implements ParserInterface
     {
         preg_match_all($this->shortcodeRegex, $text, $matches, PREG_OFFSET_CAPTURE);
 
-        return array_map(array($this, 'parseSingle'), $matches[0]);
+        $shortcodes = array();
+        foreach($matches[0] as $match) {
+            $shortcodes[] = $this->parseSingle($match[0], $match[1]);
+        }
+
+        return $shortcodes;
     }
 
-    private function parseSingle(array $match)
+    private function parseSingle($text, $offset)
     {
-        $text = $match[0];
-        $position = $match[1];
+        preg_match($this->singleShortcodeRegex, $text, $matches, PREG_OFFSET_CAPTURE);
 
-        preg_match($this->singleShortcodeRegex, $text, $matches);
+        $name = $matches[2][0];
+        $parameters = isset($matches[3][0]) ? $this->parseParameters($matches[3][0]) : array();
+        $content = isset($matches[4][0]) && $matches[4][1] !== -1 ? $matches[4][0] : null;
+        $offsets = array(
+            'name' => $matches[2][1],
+            'parameters' => isset($matches[3][1]) ? $matches[3][1] : null,
+            'content' => isset($matches[4][1]) ? $matches[4][1] : null,
+            'slash' => isset($matches[6][1]) ? $matches[6][1] : null,
+        );
 
-        $name = $matches[2];
-        $parameters = isset($matches[3]) ? $this->parseParameters($matches[3]) : array();
-        $content = isset($matches[4]) ? $matches[4] : null;
-
-        return new ParsedShortcode($name, $parameters, $content, $text, $position);
+        return new ParsedShortcode(new Shortcode($name, $parameters, $content), $text, $offset, $offsets);
     }
 
     private function parseParameters($text)

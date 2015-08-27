@@ -29,7 +29,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider provideTexts
      */
-    public function testProcessor($text, $result)
+    public function testProcessorProcess($text, $result)
     {
         $this->assertSame($result, $this->getProcessor()->process($text));
     }
@@ -89,8 +89,8 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $text = 'x [invalid   ] [valid /] [/invalid] y';
         $processor = new Processor(new RegexParser(), $handlers);
 
-        $this->assertSame('x [invalid] valid [/invalid] y', $processor->withAutoProcessContent(true)->process($text));
-        $this->assertSame('x [invalid] [valid /] [/invalid] y', $processor->withAutoProcessContent(false)->process($text));
+        $this->assertSame('x [invalid   ] valid [/invalid] y', $processor->withAutoProcessContent(true)->process($text));
+        $this->assertSame('x [invalid   ] [valid /] [/invalid] y', $processor->withAutoProcessContent(false)->process($text));
     }
 
     public function testProcessorWithoutContentAutoProcessing()

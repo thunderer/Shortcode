@@ -4,6 +4,7 @@ namespace Thunder\Shortcode\Tests;
 use Thunder\Shortcode\Parser\RegexParser;
 use Thunder\Shortcode\Shortcode\ParsedShortcode;
 use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
+use Thunder\Shortcode\Shortcode\Shortcode;
 use Thunder\Shortcode\Syntax\Syntax;
 
 /**
@@ -29,64 +30,64 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
             $this->assertSame($shortcodes[$i]->getParameters(), $codes[$i]->getParameters());
             $this->assertSame($shortcodes[$i]->getContent(), $codes[$i]->getContent());
             $this->assertSame($shortcodes[$i]->getText(), $codes[$i]->getText());
-            $this->assertSame($shortcodes[$i]->getPosition(), $codes[$i]->getPosition());
+            $this->assertSame($shortcodes[$i]->getOffset(), $codes[$i]->getOffset());
         }
     }
 
     public function provideShortcodes()
     {
         return array(
-            array('[sc]', array(new ParsedShortcode('sc', array(), null, '[sc]', 0))),
-            array('[sc]', array(new ParsedShortcode('sc', array(), null, '[sc]', 0))),
-            array('[sc arg=val]', array(new ParsedShortcode('sc', array('arg' => 'val'), null, '[sc arg=val]', 0))),
-            array('[sc novalue arg="complex value"]', array(new ParsedShortcode('sc', array('novalue' => null, 'arg' => 'complex value'), null, '[sc novalue arg="complex value"]', 0))),
-            array('[sc x="ąćęłńóśżź ĄĆĘŁŃÓŚŻŹ"]', array(new ParsedShortcode('sc', array('x' => 'ąćęłńóśżź ĄĆĘŁŃÓŚŻŹ'), null, '[sc x="ąćęłńóśżź ĄĆĘŁŃÓŚŻŹ"]', 0))),
-            array('[sc x="multi'."\n".'line"]', array(new ParsedShortcode('sc', array('x' => 'multi'."\n".'line'), null, '[sc x="multi'."\n".'line"]', 0))),
-            array('[sc noval x="val" y]content[/sc]', array(new ParsedShortcode('sc', array('noval' => null, 'x' => 'val', 'y' => null), 'content', '[sc noval x="val" y]content[/sc]', 0))),
-            array('[sc x="{..}"]', array(new ParsedShortcode('sc', array('x' => '{..}'), null, '[sc x="{..}"]', 0))),
-            array('[sc a="x y" b="x" c=""]', array(new ParsedShortcode('sc', array('a' => 'x y', 'b' => 'x', 'c' => ''), null, '[sc a="x y" b="x" c=""]', 0))),
-            array('[sc a="a \"\" b"]', array(new ParsedShortcode('sc', array('a' => 'a \"\" b'), null, '[sc a="a \"\" b"]', 0))),
-            array('[sc/]', array(new ParsedShortcode('sc', array(), null, '[sc/]', 0))),
-            array('[sc    /]', array(new ParsedShortcode('sc', array(), null, '[sc    /]', 0))),
-            array('[sc arg=val cmp="a b"/]', array(new ParsedShortcode('sc', array('arg' => 'val', 'cmp' => 'a b'), null, '[sc arg=val cmp="a b"/]', 0))),
-            array('[sc x y   /]', array(new ParsedShortcode('sc', array('x' => null, 'y' => null), null, '[sc x y   /]', 0))),
-            array('[sc x="\ "   /]', array(new ParsedShortcode('sc', array('x' => '\ '), null, '[sc x="\ "   /]', 0))),
-            array('[   sc   x =  "\ "   y =   value  z   /    ]', array(new ParsedShortcode('sc', array('x' => '\ ', 'y' => 'value', 'z' => null), null, '[   sc   x =  "\ "   y =   value  z   /    ]', 0))),
-            array('[ sc   x=  "\ "   y    =value   ] vv [ /  sc  ]', array(new ParsedShortcode('sc', array('x' => '\ ', 'y' => 'value'), ' vv ', '[ sc   x=  "\ "   y    =value   ] vv [ /  sc  ]', 0))),
-            array('[sc url="http://giggle.com/search" /]', array(new ParsedShortcode('sc', array('url' => 'http://giggle.com/search'), null, '[sc url="http://giggle.com/search" /]', 0))),
+            array('[sc]', array(new ParsedShortcode(new Shortcode('sc', array(), null), '[sc]', 0))),
+            array('[sc]', array(new ParsedShortcode(new Shortcode('sc', array(), null), '[sc]', 0))),
+            array('[sc arg=val]', array(new ParsedShortcode(new Shortcode('sc', array('arg' => 'val'), null), '[sc arg=val]', 0))),
+            array('[sc novalue arg="complex value"]', array(new ParsedShortcode(new Shortcode('sc', array('novalue' => null, 'arg' => 'complex value'), null), '[sc novalue arg="complex value"]', 0))),
+            array('[sc x="ąćęłńóśżź ĄĆĘŁŃÓŚŻŹ"]', array(new ParsedShortcode(new Shortcode('sc', array('x' => 'ąćęłńóśżź ĄĆĘŁŃÓŚŻŹ'), null), '[sc x="ąćęłńóśżź ĄĆĘŁŃÓŚŻŹ"]', 0))),
+            array('[sc x="multi'."\n".'line"]', array(new ParsedShortcode(new Shortcode('sc', array('x' => 'multi'."\n".'line'), null), '[sc x="multi'."\n".'line"]', 0))),
+            array('[sc noval x="val" y]content[/sc]', array(new ParsedShortcode(new Shortcode('sc', array('noval' => null, 'x' => 'val', 'y' => null), 'content'), '[sc noval x="val" y]content[/sc]', 0))),
+            array('[sc x="{..}"]', array(new ParsedShortcode(new Shortcode('sc', array('x' => '{..}'), null), '[sc x="{..}"]', 0))),
+            array('[sc a="x y" b="x" c=""]', array(new ParsedShortcode(new Shortcode('sc', array('a' => 'x y', 'b' => 'x', 'c' => ''), null), '[sc a="x y" b="x" c=""]', 0))),
+            array('[sc a="a \"\" b"]', array(new ParsedShortcode(new Shortcode('sc', array('a' => 'a \"\" b'), null), '[sc a="a \"\" b"]', 0))),
+            array('[sc/]', array(new ParsedShortcode(new Shortcode('sc', array(), null), '[sc/]', 0))),
+            array('[sc    /]', array(new ParsedShortcode(new Shortcode('sc', array(), null), '[sc    /]', 0))),
+            array('[sc arg=val cmp="a b"/]', array(new ParsedShortcode(new Shortcode('sc', array('arg' => 'val', 'cmp' => 'a b'), null), '[sc arg=val cmp="a b"/]', 0))),
+            array('[sc x y   /]', array(new ParsedShortcode(new Shortcode('sc', array('x' => null, 'y' => null), null), '[sc x y   /]', 0))),
+            array('[sc x="\ "   /]', array(new ParsedShortcode(new Shortcode('sc', array('x' => '\ '), null), '[sc x="\ "   /]', 0))),
+            array('[   sc   x =  "\ "   y =   value  z   /    ]', array(new ParsedShortcode(new Shortcode('sc', array('x' => '\ ', 'y' => 'value', 'z' => null), null), '[   sc   x =  "\ "   y =   value  z   /    ]', 0))),
+            array('[ sc   x=  "\ "   y    =value   ] vv [ /  sc  ]', array(new ParsedShortcode(new Shortcode('sc', array('x' => '\ ', 'y' => 'value'), ' vv '), '[ sc   x=  "\ "   y    =value   ] vv [ /  sc  ]', 0))),
+            array('[sc url="http://giggle.com/search" /]', array(new ParsedShortcode(new Shortcode('sc', array('url' => 'http://giggle.com/search'), null), '[sc url="http://giggle.com/search" /]', 0))),
 
             array('Lorem [ipsum] random [code-code arg=val] which is here', array(
-                new ParsedShortcode('ipsum', array(), null, '[ipsum]', 6),
-                new ParsedShortcode('code-code', array('arg' => 'val'), null, '[code-code arg=val]', 21),
+                new ParsedShortcode(new Shortcode('ipsum', array(), null), '[ipsum]', 6),
+                new ParsedShortcode(new Shortcode('code-code', array('arg' => 'val'), null), '[code-code arg=val]', 21),
                 )),
             array('x [aa] x [aa] x', array(
-                new ParsedShortcode('aa', array(), null, '[aa]', 2),
-                new ParsedShortcode('aa', array(), null, '[aa]', 9),
+                new ParsedShortcode(new Shortcode('aa', array(), null), '[aa]', 2),
+                new ParsedShortcode(new Shortcode('aa', array(), null), '[aa]', 9),
                 )),
             array('x [x]a[/x] x [x]a[/x] x', array(
-                new ParsedShortcode('x', array(), 'a', '[x]a[/x]', 2),
-                new ParsedShortcode('x', array(), 'a', '[x]a[/x]', 13),
+                new ParsedShortcode(new Shortcode('x', array(), 'a'), '[x]a[/x]', 2),
+                new ParsedShortcode(new Shortcode('x', array(), 'a'), '[x]a[/x]', 13),
                 )),
             array('x [x x y=z a="b c"]a[/x] x [x x y=z a="b c"]a[/x] x', array(
-                new ParsedShortcode('x', array('x' => null, 'y' => 'z', 'a' => 'b c'), 'a', '[x x y=z a="b c"]a[/x]', 2),
-                new ParsedShortcode('x', array('x' => null, 'y' => 'z', 'a' => 'b c'), 'a', '[x x y=z a="b c"]a[/x]', 27),
+                new ParsedShortcode(new Shortcode('x', array('x' => null, 'y' => 'z', 'a' => 'b c'), 'a'), '[x x y=z a="b c"]a[/x]', 2),
+                new ParsedShortcode(new Shortcode('x', array('x' => null, 'y' => 'z', 'a' => 'b c'), 'a'), '[x x y=z a="b c"]a[/x]', 27),
                 )),
             array('x [code /] y [code]z[/code] x [code] y [code/] a', array(
-                new ParsedShortcode('code', array(), null, '[code /]', 2),
-                new ParsedShortcode('code', array(), 'z', '[code]z[/code]', 13),
-                new ParsedShortcode('code', array(), null, '[code]', 30),
-                new ParsedShortcode('code', array(), null, '[code/]', 39),
+                new ParsedShortcode(new Shortcode('code', array(), null), '[code /]', 2),
+                new ParsedShortcode(new Shortcode('code', array(), 'z'), '[code]z[/code]', 13),
+                new ParsedShortcode(new Shortcode('code', array(), null), '[code]', 30),
+                new ParsedShortcode(new Shortcode('code', array(), null), '[code/]', 39),
                 )),
             array('x [code arg=val /] y [code cmp="xx"/] x [code x=y/] a', array(
-                new ParsedShortcode('code', array('arg' => 'val'), null, '[code arg=val /]', 2),
-                new ParsedShortcode('code', array('cmp' => 'xx'), null, '[code cmp="xx"/]', 21),
-                new ParsedShortcode('code', array('x' => 'y'), null, '[code x=y/]', 40),
+                new ParsedShortcode(new Shortcode('code', array('arg' => 'val'), null), '[code arg=val /]', 2),
+                new ParsedShortcode(new Shortcode('code', array('cmp' => 'xx'), null), '[code cmp="xx"/]', 21),
+                new ParsedShortcode(new Shortcode('code', array('x' => 'y'), null), '[code x=y/]', 40),
                 )),
             array('x [    code arg=val /]a[ code/]c[x    /    ] m [ y ] c [   /   y]', array(
-                new ParsedShortcode('code', array('arg' => 'val'), null, '[    code arg=val /]', 2),
-                new ParsedShortcode('code', array(), null, '[ code/]', 23),
-                new ParsedShortcode('x', array(), null, '[x    /    ]', 32),
-                new ParsedShortcode('y', array(), ' c ', '[ y ] c [   /   y]', 47),
+                new ParsedShortcode(new Shortcode('code', array('arg' => 'val'), null), '[    code arg=val /]', 2),
+                new ParsedShortcode(new Shortcode('code', array(), null), '[ code/]', 23),
+                new ParsedShortcode(new Shortcode('x', array(), null), '[x    /    ]', 32),
+                new ParsedShortcode(new Shortcode('y', array(), ' c '), '[ y ] c [   /   y]', 47),
                 )),
             );
     }

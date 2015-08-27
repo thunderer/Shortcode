@@ -6,40 +6,49 @@ namespace Thunder\Shortcode\Shortcode;
  */
 final class ParsedShortcode extends AbstractShortcode implements ParsedShortcodeInterface
 {
-    private $position;
     private $text;
+    private $offset;
+    private $offsets = array(
+        'name' => null,
+        'parameters' => null,
+        'content' => null,
+        'slash' => null,
+        );
 
-    public function __construct($name, array $parameters, $content, $text, $position)
+    public function __construct(ShortcodeInterface $shortcode, $text, $offset, array $offsets = array())
     {
-        $this->name = $name;
-        $this->parameters = $parameters;
-        $this->content = $content;
+        $this->name = $shortcode->getName();
+        $this->parameters = $shortcode->getParameters();
+        $this->content = $shortcode->getContent();
         $this->text = $text;
-        $this->position = $position;
+        $this->offset = $offset;
+
+        if(array_diff_key($offsets, $this->offsets)) {
+            throw new \InvalidArgumentException('Invalid positions data!');
+        }
+        $this->offsets = array_merge($this->offsets, $offsets);
     }
 
     public function withContent($content)
     {
-        return new self($this->getName(), $this->getParameters(), $content, $this->getText(), $this->getPosition());
+        $self = clone $this;
+        $self->content = $content;
+
+        return $self;
     }
 
-    /**
-     * Returns position in text
-     *
-     * @return int
-     */
-    public function getPosition()
-    {
-        return $this->position;
-    }
-
-    /**
-     * Returns exact text match
-     *
-     * @return string
-     */
     public function getText()
     {
         return $this->text;
+    }
+
+    public function getOffset()
+    {
+        return $this->offset;
+    }
+
+    public function getContentOffset()
+    {
+        return $this->offsets['content'];
     }
 }

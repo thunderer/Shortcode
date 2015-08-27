@@ -68,8 +68,8 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $context->position = 20;
         $context->namePosition = array('code' => 10);
         $context->text = ' [code] ';
-        $context->textMatch = '[code]';
-        $context->textPosition = 1;
+        $context->shortcodeText = '[code]';
+        $context->textOffset = 1;
         $context->iterationNumber = 1;
         $context->recursionLevel = 0;
         $context->parent = null;
@@ -83,8 +83,8 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(20, $processed->getPosition());
         $this->assertSame(10, $processed->getNamePosition());
         $this->assertSame(' [code] ', $processed->getText());
-        $this->assertSame(1, $processed->getTextPosition());
-        $this->assertSame('[code]', $processed->getTextMatch());
+        $this->assertSame(1, $processed->getOffset());
+        $this->assertSame('[code]', $processed->getShortcodeText());
         $this->assertSame(1, $processed->getIterationNumber());
         $this->assertSame(0, $processed->getRecursionLevel());
         $this->assertSame(null, $processed->getParent());
@@ -93,16 +93,27 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
 
     public function testParsedShortcode()
     {
-        $shortcode = new ParsedShortcode('name', array('arg' => 'val'), 'content', 'text', 12);
+        $shortcode = new ParsedShortcode(new Shortcode('name', array('arg' => 'val'), 'content'), 'text', 12, array(
+            'name' => 15,
+            'content' => 7,
+            'slash' => 30,
+            'parameters' => 9,
+        ));
 
         $this->assertSame('name', $shortcode->getName());
         $this->assertSame(array('arg' => 'val'), $shortcode->getParameters());
         $this->assertSame('content', $shortcode->getContent());
         $this->assertSame('text', $shortcode->getText());
-        $this->assertSame(12, $shortcode->getPosition());
+        $this->assertSame(12, $shortcode->getOffset());
         $this->assertSame(true, $shortcode->hasContent());
 
         $this->assertSame(false, $shortcode->withContent(null)->hasContent());
         $this->assertSame('another', $shortcode->withContent('another')->getContent());
+    }
+
+    public function testExceptionOnInvalidParsedShortcodePositionsData()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        new ParsedShortcode(new Shortcode('name', array(), null), null, 0, array('invalid' => null));
     }
 }

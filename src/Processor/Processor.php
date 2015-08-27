@@ -3,7 +3,6 @@ namespace Thunder\Shortcode\Processor;
 
 use Thunder\Shortcode\HandlerContainer\HandlerContainerInterface;
 use Thunder\Shortcode\Parser\ParserInterface;
-use Thunder\Shortcode\Serializer\TextSerializer;
 use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 
@@ -61,10 +60,10 @@ final class Processor implements ProcessorInterface
         $shortcodes = $this->parser->parse($text);
         $replaces = array();
         foreach ($shortcodes as $shortcode) {
-            $replace = $this->processMatch($shortcode, $context);
+            $replace = $this->processShortcode($shortcode, $context);
             $length = mb_strlen($shortcode->getText());
 
-            $replaces[] = array($replace, $shortcode->getPosition(), $length);
+            $replaces[] = array($replace, $shortcode->getOffset(), $length);
         }
         $replaces = array_reverse(array_filter($replaces));
 
@@ -73,33 +72,29 @@ final class Processor implements ProcessorInterface
         }, $text);
     }
 
-    private function processMatch(ParsedShortcodeInterface $shortcode, ProcessorContext $context)
+    private function processShortcode(ParsedShortcodeInterface $shortcode, ProcessorContext $context)
     {
         $name = $shortcode->getName();
 
-        $context->textMatch = $shortcode->getText();
-        $context->textPosition = $shortcode->getPosition();
+        $context->shortcodeText = $shortcode->getText();
+        $context->textOffset = $shortcode->getOffset();
         $context->position++;
         $context->namePosition[$name] = array_key_exists($name, $context->namePosition)
             ? $context->namePosition[$name] + 1
             : 1;
         $context->shortcode = $shortcode;
 
-        $shortcode = ProcessedShortcode::createFromContext(clone $context);
-        $shortcode = $this->processRecursion($shortcode, $context);
-
-        return $this->processShortcode($shortcode, $this->handlers->get($name));
+        return $this->processHandler($shortcode, $context, $this->handlers->get($name));
     }
 
-    private function processShortcode(ParsedShortcodeInterface $shortcode, $handler)
+    private function processHandler(ParsedShortcodeInterface $parsed, ProcessorContext $context, $handler)
     {
-        if (!$handler) {
-            $serializer = new TextSerializer();
+        $processed = ProcessedShortcode::createFromContext(clone $context);
+        $processed = $this->processRecursion($processed, $context);
 
-            return $serializer->serialize($shortcode);
-        }
-
-        return call_user_func_array($handler, array($shortcode));
+        return $handler
+            ? call_user_func_array($handler, array($processed))
+            : substr_replace($parsed->getText(), $processed->getContent(), $parsed->getContentOffset(), mb_strlen($parsed->getContent()));
     }
 
     private function processRecursion(ParsedShortcodeInterface $shortcode, ProcessorContext $context)

@@ -20,8 +20,9 @@ final class ProcessorContext
     public $position = 0;
     public $namePosition = array();
     public $text = '';
-    public $textPosition = 0;
-    public $textMatch = '';
+    public $shortcodeText = '';
     public $iterationNumber = 0;
     public $recursionLevel = 0;
+    public $textOffset = null;
+    public $contentOffset = null;
 }

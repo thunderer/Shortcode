@@ -13,11 +13,13 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
     private $position;
     private $namePosition;
     private $text;
-    private $textPosition;
-    private $textMatch;
+    private $textOffset;
+    private $shortcodeText;
     private $iterationNumber;
     private $recursionLevel;
+    /** @var ProcessorInterface */
     private $processor;
+    private $contentOffset;
 
     private function __construct()
     {
@@ -27,128 +29,83 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
     {
         $self = new self();
 
-        $shortcode = $context->shortcode;
-        $self->name = $shortcode->getName();
-        $self->parameters = $shortcode->getParameters();
-        $self->content = $shortcode->getContent();
+        // basic properties
+        $self->name = $context->shortcode->getName();
+        $self->parameters = $context->shortcode->getParameters();
+        $self->content = $context->shortcode->getContent();
 
+        // runtime context
         $self->parent = $context->parent;
         $self->position = $context->position;
-        $self->namePosition = $context->namePosition[$shortcode->getName()];
+        $self->namePosition = $context->namePosition[$self->name];
         $self->text = $context->text;
-        $self->textPosition = $context->textPosition;
-        $self->textMatch = $context->textMatch;
+        $self->shortcodeText = $context->shortcodeText;
+
+        // processor state
         $self->iterationNumber = $context->iterationNumber;
         $self->recursionLevel = $context->recursionLevel;
         $self->processor = $context->processor;
+
+        // text context
+        $self->textOffset = $context->textOffset;
+        $self->contentOffset = $context->contentOffset;
 
         return $self;
     }
 
     public function withContent($content)
     {
-        $self = new self();
-
-        $self->name = $this->getName();
-        $self->parameters = $this->getParameters();
+        $self = clone $this;
         $self->content = $content;
-
-        $self->parent = $this->parent;
-        $self->position = $this->position;
-        $self->namePosition = $this->namePosition;
-        $self->text = $this->text;
-        $self->textPosition = $this->textPosition;
-        $self->textMatch = $this->textMatch;
-        $self->iterationNumber = $this->iterationNumber;
-        $self->recursionLevel = $this->recursionLevel;
-        $self->processor = $this->processor;
 
         return $self;
     }
 
-    /**
-     * @return ShortcodeInterface
-     */
     public function getParent()
     {
         return $this->parent;
     }
 
-    /**
-     * Return position in sequence of shortcodes in the whole text
-     *
-     * @return int
-     */
     public function getPosition()
     {
         return $this->position;
     }
 
-    /**
-     * Return position in sequence of shortcodes with given name
-     *
-     * @return int
-     */
     public function getNamePosition()
     {
         return $this->namePosition;
     }
 
-    /**
-     * Returns text in which shortcode was found
-     *
-     * @return string
-     */
     public function getText()
     {
         return $this->text;
     }
 
-    /**
-     * Returns position at which shortcode was found in text
-     *
-     * @return int
-     */
-    public function getTextPosition()
+    public function getShortcodeText()
     {
-        return $this->textPosition;
+        return $this->shortcodeText;
     }
 
-    /**
-     * Returns exact match, ie. exact string that was found in text
-     *
-     * @return string
-     */
-    public function getTextMatch()
+    public function getOffset()
     {
-        return $this->textMatch;
+        return $this->textOffset;
     }
 
-    /**
-     * Returns number of current iteration
-     *
-     * @return int
-     */
+    public function getContentOffset()
+    {
+        return $this->contentOffset;
+    }
+
     public function getIterationNumber()
     {
         return $this->iterationNumber;
     }
 
-    /**
-     * Returns current level of recursive processing
-     *
-     * @return int
-     */
     public function getRecursionLevel()
     {
         return $this->recursionLevel;
     }
 
-    /**
-     * Returns instance of processor processing the text
-     *
-     * @return ProcessorInterface
-     */
     public function getProcessor()
     {
         return $this->processor;

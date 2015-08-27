@@ -7,16 +7,23 @@ namespace Thunder\Shortcode\Shortcode;
 interface ParsedShortcodeInterface extends ShortcodeInterface
 {
     /**
-     * Returns string position in the parent text
-     *
-     * @return int
-     */
-    public function getPosition();
-
-    /**
      * Returns exact shortcode text
      *
      * @return string
      */
     public function getText();
+
+    /**
+     * Returns string position in the parent text
+     *
+     * @return int
+     */
+    public function getOffset();
+
+    /**
+     * Returns position of content in shortcode text, null if no content
+     *
+     * @return int
+     */
+    public function getContentOffset();
 }
