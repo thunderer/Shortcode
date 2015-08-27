@@ -49,6 +49,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             // array('x [html b]bold[/html] y [html code]code[/html] z', 'x <b>bold</b> y <code>code</code> z'),
             array('x [html]bold[/html] z', 'x [html]bold[/html] z'),
             array('x [reverse]abc xyz[/reverse] z', 'x zyx cba z'),
+            array('x [i /][i]i[/i][i /][i]i[/i][i /] z', 'x [i /][i]i[/i][i /][i]i[/i][i /] z'),
             );
     }
 

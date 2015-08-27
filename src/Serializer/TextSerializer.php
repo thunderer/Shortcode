@@ -2,6 +2,7 @@
 namespace Thunder\Shortcode\Serializer;
 
 use Thunder\Shortcode\Parser\RegexParser;
+use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 use Thunder\Shortcode\Syntax\Syntax;
 use Thunder\Shortcode\Syntax\SyntaxInterface;
@@ -22,11 +23,11 @@ final class TextSerializer implements SerializerInterface
         $marker = $this->syntax->getClosingTagMarker();
 
         $parameters = $this->serializeParameters($shortcode->getParameters());
-        $return = $open.$shortcode->getName().$parameters.$close;
+        $return = $open.$shortcode->getName().$parameters;
 
         return null === $shortcode->getContent()
-            ? $return
-            : $return.$shortcode->getContent().$open.$marker.$shortcode->getName().$close;
+            ? $return.($shortcode instanceof ParsedShortcodeInterface && $shortcode->getSlashOffset() ? ' '.$marker : '').$close
+            : $return.$close.$shortcode->getContent().$open.$marker.$shortcode->getName().$close;
     }
 
     private function serializeParameters(array $parameters)

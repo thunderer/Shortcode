@@ -4,7 +4,9 @@ namespace Thunder\Shortcode\Tests;
 use Thunder\Shortcode\Serializer\JsonSerializer;
 use Thunder\Shortcode\Serializer\SerializerInterface;
 use Thunder\Shortcode\Serializer\TextSerializer;
+use Thunder\Shortcode\Shortcode\ParsedShortcode;
 use Thunder\Shortcode\Shortcode\Shortcode;
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -14,7 +16,7 @@ final class SerializerTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider provideShortcodes
      */
-    public function testSerializer(SerializerInterface $serializer, $text, Shortcode $shortcode)
+    public function testSerializer(SerializerInterface $serializer, $text, ShortcodeInterface $shortcode)
     {
         $serialized = $serializer->serialize($shortcode);
         $this->assertSame($text, $serialized);
@@ -35,6 +37,8 @@ final class SerializerTest extends \PHPUnit_Framework_TestCase
             array(new TextSerializer(), '[x arg=val]', $empty),
             array(new TextSerializer(), '[x arg]', $nullArgument),
             array(new TextSerializer(), '[x arg=val]cnt[/x]', $content),
+            array(new TextSerializer(), '[self-closed /]', new ParsedShortcode(new Shortcode('self-closed', array(), null), '[self-closed /]', 0, array('slash' => 13))),
+            array(new TextSerializer(), '[self-closed]', new ParsedShortcode(new Shortcode('self-closed', array(), null), '[self-closed /]', 0, array())),
             array(new JsonSerializer(), '{"name":"x","parameters":{"arg":"val"},"content":null}', $empty),
             array(new JsonSerializer(), '{"name":"x","parameters":{"arg":"val"},"content":"cnt"}', $content),
             );

@@ -51,4 +51,9 @@ final class ParsedShortcode extends AbstractShortcode implements ParsedShortcode
     {
         return $this->offsets['content'];
     }
+
+    public function getSlashOffset()
+    {
+        return $this->offsets['slash'];
+    }
 }
