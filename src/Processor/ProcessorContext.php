@@ -25,4 +25,5 @@ final class ProcessorContext
     public $recursionLevel = 0;
     public $textOffset = null;
     public $contentOffset = null;
+    public $slashOffset = null;
 }

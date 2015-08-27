@@ -73,6 +73,8 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $context->iterationNumber = 1;
         $context->recursionLevel = 0;
         $context->parent = null;
+        $context->contentOffset = 19;
+        $context->slashOffset = 21;
 
         $processed = ProcessedShortcode::createFromContext($context);
 
@@ -89,6 +91,8 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(0, $processed->getRecursionLevel());
         $this->assertSame(null, $processed->getParent());
         $this->assertSame($processor, $processed->getProcessor());
+        $this->assertSame(19, $processed->getContentOffset());
+        $this->assertSame(21, $processed->getSlashOffset());
     }
 
     public function testParsedShortcode()

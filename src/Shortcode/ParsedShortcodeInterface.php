@@ -26,4 +26,11 @@ interface ParsedShortcodeInterface extends ShortcodeInterface
      * @return int
      */
     public function getContentOffset();
+
+    /**
+     * Returns position of self-closing marker, null if not present
+     *
+     * @return int
+     */
+    public function getSlashOffset();
 }

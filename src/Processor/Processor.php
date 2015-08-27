@@ -83,6 +83,8 @@ final class Processor implements ProcessorInterface
             ? $context->namePosition[$name] + 1
             : 1;
         $context->shortcode = $shortcode;
+        $context->contentOffset = $shortcode->getContentOffset();
+        $context->slashOffset = $shortcode->getSlashOffset();
 
         return $this->processHandler($shortcode, $context, $this->handlers->get($name));
     }

@@ -14,6 +14,7 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
     private $namePosition;
     private $text;
     private $textOffset;
+    private $slashOffset;
     private $shortcodeText;
     private $iterationNumber;
     private $recursionLevel;
@@ -49,6 +50,7 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
         // text context
         $self->textOffset = $context->textOffset;
         $self->contentOffset = $context->contentOffset;
+        $self->slashOffset = $context->slashOffset;
 
         return $self;
     }
@@ -94,6 +96,11 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
     public function getContentOffset()
     {
         return $this->contentOffset;
+    }
+
+    public function getSlashOffset()
+    {
+        return $this->slashOffset;
     }
 
     public function getIterationNumber()
