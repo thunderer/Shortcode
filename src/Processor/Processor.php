@@ -60,7 +60,9 @@ final class Processor implements ProcessorInterface
         $shortcodes = $this->parser->parse($text);
         $replaces = array();
         foreach ($shortcodes as $shortcode) {
-            $replace = $this->processShortcode($shortcode, $context);
+            $this->prepareHandlerContext($shortcode, $context);
+            $handler = $this->handlers->get($shortcode->getName());
+            $replace = $this->processHandler($shortcode, $context, $handler);
             $length = mb_strlen($shortcode->getText());
 
             $replaces[] = array($replace, $shortcode->getOffset(), $length);
@@ -72,21 +74,18 @@ final class Processor implements ProcessorInterface
         }, $text);
     }
 
-    private function processShortcode(ParsedShortcodeInterface $shortcode, ProcessorContext $context)
+    private function prepareHandlerContext(ParsedShortcodeInterface $shortcode, ProcessorContext $context)
     {
-        $name = $shortcode->getName();
+        $context->position++;
+        $hasNamePosition = array_key_exists($shortcode->getName(), $context->namePosition);
+        $context->namePosition[$shortcode->getName()] = $hasNamePosition ? $context->namePosition[$shortcode->getName()] + 1 : 1;
 
         $context->shortcodeText = $shortcode->getText();
         $context->textOffset = $shortcode->getOffset();
-        $context->position++;
-        $context->namePosition[$name] = array_key_exists($name, $context->namePosition)
-            ? $context->namePosition[$name] + 1
-            : 1;
         $context->shortcode = $shortcode;
+
         $context->contentOffset = $shortcode->getContentOffset();
         $context->slashOffset = $shortcode->getMarkerOffset();
-
-        return $this->processHandler($shortcode, $context, $this->handlers->get($name));
     }
 
     private function processHandler(ParsedShortcodeInterface $parsed, ProcessorContext $context, $handler)
@@ -104,6 +103,7 @@ final class Processor implements ProcessorInterface
         if ($this->autoProcessContent && null !== $shortcode->getContent()) {
             $context->recursionLevel++;
             $context->parent = $shortcode;
+            // this is safe from using max iterations value because it's manipulated in process() method
             $content = $this->processIteration($shortcode->getContent(), $context);
             $context->parent = null;
             $context->recursionLevel--;
