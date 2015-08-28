@@ -92,7 +92,7 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(null, $processed->getParent());
         $this->assertSame($processor, $processed->getProcessor());
         $this->assertSame(19, $processed->getContentOffset());
-        $this->assertSame(21, $processed->getSlashOffset());
+        $this->assertSame(21, $processed->getMarkerOffset());
     }
 
     public function testParsedShortcode()
@@ -100,7 +100,7 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $shortcode = new ParsedShortcode(new Shortcode('name', array('arg' => 'val'), 'content'), 'text', 12, array(
             'name' => 15,
             'content' => 7,
-            'slash' => 30,
+            'marker' => 30,
             'parameters' => 9,
         ));
 

@@ -2,9 +2,11 @@
 
 ## Version 1.*
 
-* v1.0.0 (26.08.2015)
+* v1.0.0 (28.08.2015)
 
-  * fixed bug which caused shortcode content to be returned without modification when auto processing was enabled, there was no handler for that shortcode, but there were handlers for inner shortcodes.
+  * fixed bug which caused shortcode content to be returned without modification when auto processing was enabled, there was no handler for that shortcode, but there were handlers for inner shortcodes,
+  * AbstractShortcode::getParameter() does not throw exception for missing parameter without defualt value,
+  * removed `create*()` methods from `ShortcodeFacade`, now all dependencies construction is inside the constructor,
   * removed classes and methods deprecated in previous releases,
   * removed `RegexExtractor` and `ExtractorInterface`, its functionality was moved to `Parser` - now it returns instances of `ParsedShortcodeInterface`,
   * removed `Match` and `MatchInterface`,

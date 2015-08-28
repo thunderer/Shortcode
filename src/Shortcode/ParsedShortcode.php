@@ -12,7 +12,7 @@ final class ParsedShortcode extends AbstractShortcode implements ParsedShortcode
         'name' => null,
         'parameters' => null,
         'content' => null,
-        'slash' => null,
+        'marker' => null,
         );
 
     public function __construct(ShortcodeInterface $shortcode, $text, $offset, array $offsets = array())
@@ -52,8 +52,8 @@ final class ParsedShortcode extends AbstractShortcode implements ParsedShortcode
         return $this->offsets['content'];
     }
 
-    public function getSlashOffset()
+    public function getMarkerOffset()
     {
-        return $this->offsets['slash'];
+        return $this->offsets['marker'];
     }
 }

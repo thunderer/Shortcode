@@ -26,7 +26,7 @@ final class TextSerializer implements SerializerInterface
         $return = $open.$shortcode->getName().$parameters;
 
         return null === $shortcode->getContent()
-            ? $return.($shortcode instanceof ParsedShortcodeInterface && $shortcode->getSlashOffset() ? ' '.$marker : '').$close
+            ? $return.($shortcode instanceof ParsedShortcodeInterface && $shortcode->getMarkerOffset() ? ' '.$marker : '').$close
             : $return.$close.$shortcode->getContent().$open.$marker.$shortcode->getName().$close;
     }
 

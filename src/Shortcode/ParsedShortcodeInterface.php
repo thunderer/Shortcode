@@ -32,5 +32,5 @@ interface ParsedShortcodeInterface extends ShortcodeInterface
      *
      * @return int
      */
-    public function getSlashOffset();
+    public function getMarkerOffset();
 }

@@ -35,6 +35,7 @@ final class RegexParser implements ParserInterface
     {
         preg_match_all($this->shortcodeRegex, $text, $matches, PREG_OFFSET_CAPTURE);
 
+        // loop instead of array_map to pass the arguments explicitly
         $shortcodes = array();
         foreach($matches[0] as $match) {
             $shortcodes[] = $this->parseSingle($match[0], $match[1]);
@@ -54,7 +55,7 @@ final class RegexParser implements ParserInterface
             'name' => $matches[2][1],
             'parameters' => isset($matches[3][1]) ? $matches[3][1] : null,
             'content' => isset($matches[4][1]) ? $matches[4][1] : null,
-            'slash' => isset($matches[6][1]) ? $matches[6][1] : null,
+            'marker' => isset($matches[6][1]) ? $matches[6][1] : null,
         );
 
         return new ParsedShortcode(new Shortcode($name, $parameters, $content), $text, $offset, $offsets);
@@ -64,6 +65,7 @@ final class RegexParser implements ParserInterface
     {
         preg_match_all($this->argumentsRegex, $text, $argsMatches);
 
+        // loop because PHP 5.3 can't handle $this properly and I want separate methods
         $return = array();
         foreach ($argsMatches[1] as $item) {
             $parts = explode($this->syntax->getParameterValueSeparator(), $item, 2);

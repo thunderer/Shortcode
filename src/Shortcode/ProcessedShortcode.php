@@ -98,7 +98,7 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
         return $this->contentOffset;
     }
 
-    public function getSlashOffset()
+    public function getMarkerOffset()
     {
         return $this->slashOffset;
     }

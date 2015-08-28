@@ -37,11 +37,9 @@ final class HandlerContainer implements HandlerContainerInterface
             throw new \InvalidArgumentException(sprintf($msg, $alias, $name));
         }
 
-        $this->add($alias, function (ShortcodeInterface $shortcode) use ($handler) {
+        return $this->add($alias, function (ShortcodeInterface $shortcode) use ($handler) {
             return call_user_func_array($handler, array($shortcode));
         });
-
-        return $this;
     }
 
     public function setDefault($handler)
@@ -55,9 +53,7 @@ final class HandlerContainer implements HandlerContainerInterface
 
     public function get($name)
     {
-        return $this->has($name)
-            ? $this->handlers[$name]
-            : ($this->default ?: null);
+        return $this->has($name) ? $this->handlers[$name] : ($this->default ?: null);
     }
 
     private function has($name)
@@ -68,8 +64,7 @@ final class HandlerContainer implements HandlerContainerInterface
     private function guardHandler($handler)
     {
         if (!is_callable($handler)) {
-            $msg = 'Shortcode handler must be callable!';
-            throw new \RuntimeException(sprintf($msg));
+            throw new \RuntimeException('Shortcode handler must be callable!');
         }
     }
 }
