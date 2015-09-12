@@ -20,6 +20,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             ->add('name', function (ShortcodeInterface $s) { return $s->getName(); })
             ->add('content', function (ShortcodeInterface $s) { return $s->getContent(); })
             ->add('reverse', new ReverseShortcode())
+            ->add('url', function(ShortcodeInterface $s) { return '<a href="'.$s->getParameter('url').'">'.$s->getParameter('url').'</a>'; })
             ->addAlias('c', 'content')
             ->addAlias('n', 'name');
 
@@ -50,6 +51,8 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             array('x [html]bold[/html] z', 'x [html]bold[/html] z'),
             array('x [reverse]abc xyz[/reverse] z', 'x zyx cba z'),
             array('x [i /][i]i[/i][i /][i]i[/i][i /] z', 'x [i /][i]i[/i][i /][i]i[/i][i /] z'),
+            array('x [url url="http://giggle.com/search" /] z', 'x <a href="http://giggle.com/search">http://giggle.com/search</a> z'),
+            array('x [url="http://giggle.com/search"] z', 'x <a href="http://giggle.com/search">http://giggle.com/search</a> z'),
             );
     }
 

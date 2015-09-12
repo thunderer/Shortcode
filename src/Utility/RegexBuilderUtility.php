@@ -44,27 +44,31 @@ final class RegexBuilderUtility
 
         $space = '\s*';
 
+        // parameter and value separator can have any number of spaces around itself
+        $equalsSpaced = $space.$equals.$space;
         // lookahead test for space, closing tag, self-closing tag or end of string
         $empty = '(?=\s|'.$close.'|'.$slash.$space.$close.'|$)';
         // equals sign and alphanumeric value
-        $simple = $space.$equals.$space.'(?!=(?:\s*|'.$close.'|'.$slash.$close.'))';
+        $simple = '(?!=(?:\s*|'.$close.'|'.$slash.$close.'))';
         // equals sign and value without unescaped string delimiters enclosed in them
-        $complex = $space.$equals.$space.$string.'(?:[^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*)'.$string;
+        $complex = $string.'(?:[^'.$string.'\\\\]*(?:\\\\.[^'.$string.'\\\\]*)*)'.$string;
         // complete parameters matching regex
-        $parameters = '((?:\s*(?:\w+(?:'.$complex.'|'.$simple.'|'.$empty.')))*)';
+        $parameters = '(?<parameters>(?:\s*(?:\w+(?:'.$equalsSpaced.$complex.'|'.$equalsSpaced.$simple.'|'.$empty.')))*)';
+        // BBCode is the part after name that makes it behave like a non-empty parameter value
+        $bbCode = '(?:'.$equals.'(?<bbCode>'.$complex.'|'.$simple.'))?';
 
         // alphanumeric characters and dash
-        $name = '([\w-]+)';
+        $name = '(?<name>[\w-]+)';
         // non-greedy match for any characters
-        $content = '(.*?)';
+        $content = '(?<content>.*?)';
 
         // equal beginning for each variant: open tag, name and parameters
-        $common = $open.$space.$name.$parameters.$space;
+        $common = $open.$space.$name.$bbCode.$parameters.$space;
         // closing tag variants: just closing tag, self closing tag or content
         // and closing block with backreference name validation
         $justClosed = $close;
-        $selfClosed  = '(['.$slash.'])'.$space.$close;
-        $withContent = $close.$content.$open.$space.$slash.$space.'(\2)'.$space.$close;
+        $selfClosed = '(?<marker>['.$slash.'])'.$space.$close;
+        $withContent = $close.$content.$open.$space.$slash.$space.'(\k<name>)'.$space.$close;
 
         return '(?:'.$common.'(?:'.$withContent.'|'.$justClosed.'|'.$selfClosed.'))';
     }

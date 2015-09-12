@@ -48,14 +48,17 @@ final class RegexParser implements ParserInterface
     {
         preg_match($this->singleShortcodeRegex, $text, $matches, PREG_OFFSET_CAPTURE);
 
-        $name = $matches[2][0];
-        $parameters = isset($matches[3][0]) ? $this->parseParameters($matches[3][0]) : array();
-        $content = isset($matches[4][0]) && $matches[4][1] !== -1 ? $matches[4][0] : null;
+        $name = $matches['name'][0];
+        $parameters = isset($matches['parameters'][0]) ? $this->parseParameters($matches['parameters'][0]) : array();
+        if(isset($matches['bbCode'][0]) && $matches['bbCode'][1] !== -1) {
+            $parameters[$name] = $this->extractValue($matches['bbCode'][0]);
+        }
+        $content = isset($matches['content'][0]) && $matches['content'][1] !== -1 ? $matches['content'][0] : null;
         $offsets = array(
-            'name' => $matches[2][1],
-            'parameters' => isset($matches[3][1]) ? $matches[3][1] : null,
-            'content' => isset($matches[4][1]) ? $matches[4][1] : null,
-            'marker' => isset($matches[6][1]) ? $matches[6][1] : null,
+            'name' => $matches['name'][1],
+            'parameters' => isset($matches['parameters'][1]) ? $matches['parameters'][1] : null,
+            'content' => isset($matches['content'][1]) ? $matches['content'][1] : null,
+            'marker' => isset($matches['marker'][1]) ? $matches['marker'][1] : null,
         );
 
         return new ParsedShortcode(new Shortcode($name, $parameters, $content), $text, $offset, $offsets);
