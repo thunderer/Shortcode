@@ -50,9 +50,9 @@ final class RegexParser implements ParserInterface
 
         $name = $matches['name'][0];
         $parameters = isset($matches['parameters'][0]) ? $this->parseParameters($matches['parameters'][0]) : array();
-        if(isset($matches['bbCode'][0]) && $matches['bbCode'][1] !== -1) {
-            $parameters[$name] = $this->extractValue($matches['bbCode'][0]);
-        }
+        $bbCode = isset($matches['bbCode'][0]) && $matches['bbCode'][1] !== -1
+            ? $this->extractValue($matches['bbCode'][0])
+            : null;
         $content = isset($matches['content'][0]) && $matches['content'][1] !== -1 ? $matches['content'][0] : null;
         $offsets = array(
             'name' => $matches['name'][1],
@@ -61,7 +61,7 @@ final class RegexParser implements ParserInterface
             'marker' => isset($matches['marker'][1]) ? $matches['marker'][1] : null,
         );
 
-        return new ParsedShortcode(new Shortcode($name, $parameters, $content), $text, $offset, $offsets);
+        return new ParsedShortcode(new Shortcode($name, $parameters, $content, $bbCode), $text, $offset, $offsets);
     }
 
     private function parseParameters($text)

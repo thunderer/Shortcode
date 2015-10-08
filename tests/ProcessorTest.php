@@ -20,7 +20,11 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             ->add('name', function (ShortcodeInterface $s) { return $s->getName(); })
             ->add('content', function (ShortcodeInterface $s) { return $s->getContent(); })
             ->add('reverse', new ReverseShortcode())
-            ->add('url', function(ShortcodeInterface $s) { return '<a href="'.$s->getParameter('url').'">'.$s->getParameter('url').'</a>'; })
+            ->add('url', function(ShortcodeInterface $s) {
+                $url = $s->getParameter('url', $s->getBbCode());
+
+                return '<a href="'.$url.'">'.$url.'</a>';
+            })
             ->addAlias('c', 'content')
             ->addAlias('n', 'name');
 

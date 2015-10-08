@@ -9,6 +9,7 @@ abstract class AbstractShortcode
     protected $name;
     protected $parameters = array();
     protected $content;
+    protected $bbCode;
 
     public function hasContent()
     {
@@ -50,5 +51,10 @@ abstract class AbstractShortcode
     public function getContent()
     {
         return $this->content;
+    }
+
+    public function getBbCode()
+    {
+        return $this->bbCode;
     }
 }

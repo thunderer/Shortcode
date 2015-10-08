@@ -34,6 +34,7 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
         $self->name = $context->shortcode->getName();
         $self->parameters = $context->shortcode->getParameters();
         $self->content = $context->shortcode->getContent();
+        $self->bbCode = $context->shortcode->getBbCode();
 
         // runtime context
         $self->parent = $context->parent;

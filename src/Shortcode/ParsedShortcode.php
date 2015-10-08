@@ -20,6 +20,7 @@ final class ParsedShortcode extends AbstractShortcode implements ParsedShortcode
         $this->name = $shortcode->getName();
         $this->parameters = $shortcode->getParameters();
         $this->content = $shortcode->getContent();
+        $this->bbCode = $shortcode->getBbCode();
         $this->text = $text;
         $this->offset = $offset;
 
