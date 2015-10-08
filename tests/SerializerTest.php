@@ -4,6 +4,8 @@ namespace Thunder\Shortcode\Tests;
 use Thunder\Shortcode\Serializer\JsonSerializer;
 use Thunder\Shortcode\Serializer\SerializerInterface;
 use Thunder\Shortcode\Serializer\TextSerializer;
+use Thunder\Shortcode\Serializer\XmlSerializer;
+use Thunder\Shortcode\Serializer\YamlSerializer;
 use Thunder\Shortcode\Shortcode\ParsedShortcode;
 use Thunder\Shortcode\Shortcode\Shortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
@@ -33,6 +35,29 @@ final class SerializerTest extends \PHPUnit_Framework_TestCase
         $nullArgument = new Shortcode('x', array('arg' => null), null);
         $content = new Shortcode('x', array('arg' => 'val'), 'cnt');
 
+        $yaml = <<<EOF
+name: x
+parameters:
+    arg: val
+content: cnt
+
+EOF;
+        $xml = <<<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<shortcode>
+  <name>x</name>
+  <parameters>
+    <parameter>
+      <name>arg</name>
+      <value>val</value>
+    </parameter>
+  </parameters>
+  <content>cnt</content>
+</shortcode>
+
+EOF;
+
+
         return array(
             array(new TextSerializer(), '[x arg=val]', $empty),
             array(new TextSerializer(), '[x arg]', $nullArgument),
@@ -41,34 +66,36 @@ final class SerializerTest extends \PHPUnit_Framework_TestCase
             array(new TextSerializer(), '[self-closed]', new ParsedShortcode(new Shortcode('self-closed', array(), null), '[self-closed /]', 0, array())),
             array(new JsonSerializer(), '{"name":"x","parameters":{"arg":"val"},"content":null}', $empty),
             array(new JsonSerializer(), '{"name":"x","parameters":{"arg":"val"},"content":"cnt"}', $content),
+            array(new XmlSerializer(), $xml, $content),
+            array(new YamlSerializer(), $yaml, $content),
             );
     }
 
-    public function testExceptionInvalidJson()
+    /**
+     * @dataProvider provideExceptions
+     */
+    public function testSerializerExceptions(SerializerInterface $serializer, $value, $exceptionClass)
     {
-        $serializer = new JsonSerializer();
-        $this->setExpectedException('RuntimeException');
-        $serializer->unserialize('');
+        $this->setExpectedException($exceptionClass);
+        $serializer->unserialize($value);
     }
 
-    public function testExceptionMalformedJson()
+    public function provideExceptions()
     {
-        $serializer = new JsonSerializer();
-        $this->setExpectedException('RuntimeException');
-        $serializer->unserialize('{}');
-    }
+        $xml = new XmlSerializer();
+        $yaml = new YamlSerializer();
+        $text = new TextSerializer();
+        $json = new JsonSerializer();
 
-    public function testExceptionMalformedText()
-    {
-        $serializer = new TextSerializer();
-        $this->setExpectedException('InvalidArgumentException');
-        $serializer->unserialize('[/sc]');
-    }
-
-    public function testExceptionMultipleText()
-    {
-        $serializer = new TextSerializer();
-        $this->setExpectedException('InvalidArgumentException');
-        $serializer->unserialize('[sc /] c [xx]');
+        return array(
+            array($text, '[sc /] c [xx]', 'InvalidArgumentException'),
+            array($text, '[/sc]', 'InvalidArgumentException'),
+            array($json, '{}', 'RuntimeException'),
+            array($json, '', 'RuntimeException'),
+            array($yaml, 'shortcode: ', 'InvalidArgumentException'),
+            array($yaml, '', 'InvalidArgumentException'),
+            array($xml, '<shortcode />', 'InvalidArgumentException'),
+            array($xml, '', 'InvalidArgumentException'),
+        );
     }
 }
