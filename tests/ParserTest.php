@@ -34,6 +34,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
             $this->assertSame($shortcodes[$i]->getContent(), $codes[$i]->getContent());
             $this->assertSame($shortcodes[$i]->getText(), $codes[$i]->getText());
             $this->assertSame($shortcodes[$i]->getOffset(), $codes[$i]->getOffset());
+            $this->assertSame($shortcodes[$i]->getBbCode(), $codes[$i]->getBbCode());
         }
     }
 
@@ -45,6 +46,9 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
             // invalid
             array($s, '', array()),
             array($s, '[/y]', array()),
+            array($s, '[sc', array()),
+            array($s, '[sc / [/sc]', array()),
+            array($s, '[sc arg="val', array()),
 
             // single shortcodes
             array($s, '[sc]', array(
@@ -102,6 +106,11 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
                 new ParsedShortcode(new Shortcode('sc', array('url' => 'http://giggle.com/search'), null), '[sc url="http://giggle.com/search" /]', 0),
             )),
 
+            // bbcode
+            array($s, '[sc="http://giggle.com/search" /]', array(
+                new ParsedShortcode(new Shortcode('sc', array(), null, 'http://giggle.com/search'), '[sc="http://giggle.com/search" /]', 0),
+            )),
+
             // multiple shortcodes
             array($s, 'Lorem [ipsum] random [code-code arg=val] which is here', array(
                 new ParsedShortcode(new Shortcode('ipsum', array(), null), '[ipsum]', 6),
@@ -155,5 +164,10 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
         }
 
         return $result;
+    }
+
+    public function testRegularParserInstance()
+    {
+        $this->assertInstanceOf('Thunder\Shortcode\Parser\RegularParser', new RegularParser());
     }
 }

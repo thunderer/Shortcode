@@ -29,7 +29,7 @@ final class RegularParser implements ParserInterface
     {
         $this->syntax = $syntax ?: new CommonSyntax();
 
-        $quote = function($text) { return preg_replace('/(.)/us', '\\\\$0', $text); };
+        $quote = function($text) { return '~^('.preg_replace('/(.)/us', '\\\\$0', $text).')~us'; };
 
         $this->lexerRules = array(
             self::TOKEN_OPEN => $quote($this->syntax->getOpeningTag()),
@@ -37,8 +37,8 @@ final class RegularParser implements ParserInterface
             self::TOKEN_MARKER => $quote($this->syntax->getClosingTagMarker()),
             self::TOKEN_SEPARATOR => $quote($this->syntax->getParameterValueSeparator()),
             self::TOKEN_DELIMITER => $quote($this->syntax->getParameterValueDelimiter()),
-            self::TOKEN_WS => '\s+',
-            self::TOKEN_STRING => '[\w-]+|\\\\.|.',
+            self::TOKEN_WS => '~^(\s+)~us',
+            self::TOKEN_STRING => '~^([\w-]+|\\\\.|.)~us',
         );
     }
 
@@ -65,9 +65,9 @@ final class RegularParser implements ParserInterface
         return $shortcodes;
     }
 
-    private function addShortcode($name, $parameters, $content, $text, $offset, $positions)
+    private function addShortcode($name, $parameters, $content, $bbCode, $text, $offset, $positions)
     {
-        return new ParsedShortcode(new Shortcode($name, $parameters, $content), $text, $offset, $positions);
+        return new ParsedShortcode(new Shortcode($name, $parameters, $content, $bbCode), $text, $offset, $positions);
     }
 
     /* --- RULES ----------------------------------------------------------- */
@@ -100,7 +100,7 @@ final class RegularParser implements ParserInterface
         if($this->match(self::TOKEN_MARKER, $setMarkerPosition, true)) {
             if(!$this->match(self::TOKEN_CLOSE)) { return false; }
 
-            return $isRoot ? $this->addShortcode($name, $arguments, null, $this->getBacktrack(), $offset, $positions) : null;
+            return $isRoot ? $this->addShortcode($name, $arguments, null, $bbCode, $this->getBacktrack(), $offset, $positions) : null;
 
         // just-closed or with-content
         } elseif($this->match(self::TOKEN_CLOSE)) {
@@ -110,7 +110,7 @@ final class RegularParser implements ParserInterface
                 $this->backtrack();
                 $positions['content'] = null;
 
-                return $isRoot ? $this->addShortcode($name, $arguments, null, $this->getBacktrack(), $offset, $positions) : null;
+                return $isRoot ? $this->addShortcode($name, $arguments, null, $bbCode, $this->getBacktrack(), $offset, $positions) : null;
             }
             $this->discardBacktrack();
             if(!$this->match(self::TOKEN_OPEN, null, true)) { return false; }
@@ -122,7 +122,7 @@ final class RegularParser implements ParserInterface
         // u wot m8?
         } else { return false; }
 
-        return $isRoot ? $this->addShortcode($name, $arguments, $content, $this->getBacktrack(), $offset, $positions) : null;
+        return $isRoot ? $this->addShortcode($name, $arguments, $content, $bbCode, $this->getBacktrack(), $offset, $positions) : null;
     }
 
     private function content($name)
@@ -131,7 +131,13 @@ final class RegularParser implements ParserInterface
         $appendContent = function(array $token) use(&$content) { $content .= $token[1]; };
 
         while(true) {
-            while($this->match(array(self::TOKEN_STRING, self::TOKEN_WS), $appendContent));
+            if($this->isEof()) {
+                return false;
+            }
+
+            while($this->match(array(self::TOKEN_STRING, self::TOKEN_WS), $appendContent)) {
+                continue;
+            }
 
             $this->beginBacktrack();
             if(false !== $this->shortcode(false)) {
@@ -149,10 +155,6 @@ final class RegularParser implements ParserInterface
             $this->backtrack();
 
             $this->match(null, $appendContent);
-
-            if($this->isEof()) {
-                return false;
-            }
         }
 
         return $content;
@@ -174,10 +176,10 @@ final class RegularParser implements ParserInterface
     private function bbCode()
     {
         $value = '';
-        $appendValue = function(array $token) use(&$value) { $value = $token[1]; };
+        $appendValue = function(array $token) use(&$value) { $value .= $token[1]; };
 
         if(!$this->match(self::TOKEN_SEPARATOR)) { return null; }
-        if(!$this->value($appendValue)) { return false; }
+        if(false === $this->value($appendValue)) { return false; }
 
         return $value;
     }
@@ -209,7 +211,7 @@ final class RegularParser implements ParserInterface
     private function value($callback)
     {
         if($this->match(self::TOKEN_DELIMITER)) {
-            while(!$this->lookahead(self::TOKEN_DELIMITER)) {
+            while(!$this->isEof() && !$this->lookahead(self::TOKEN_DELIMITER)) {
                 $this->match(null, $callback);
             }
 
@@ -321,7 +323,7 @@ final class RegularParser implements ParserInterface
 
         while(mb_strlen($text) > 0) {
             foreach($this->lexerRules as $token => $regex) {
-                if(preg_match('~^('.$regex.')~us', $text, $matches)) {
+                if(preg_match($regex, $text, $matches)) {
                     $tokens->unshift(array($token, $matches[0], $position));
                     $text = mb_substr($text, mb_strlen($matches[0]));
                     $position += mb_strlen($matches[0]);
