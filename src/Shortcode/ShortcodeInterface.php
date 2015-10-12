@@ -48,4 +48,12 @@ interface ShortcodeInterface
      * @return string|null
      */
     public function getContent();
+
+    /**
+     * Returns the so-called "BBCode" fragment when shortcode name is treated
+     * like a parameter, eg.: [name="value" /]
+     *
+     * @return string
+     */
+    public function getBbCode();
 }
