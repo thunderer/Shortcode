@@ -11,7 +11,6 @@ use Thunder\Shortcode\Syntax\SyntaxInterface;
  */
 final class RegularParser implements ParserInterface
 {
-    private $syntax;
     private $lexerRules;
     /** @var \SplStack */
     private $tokens;
@@ -27,16 +26,16 @@ final class RegularParser implements ParserInterface
 
     public function __construct(SyntaxInterface $syntax = null)
     {
-        $this->syntax = $syntax ?: new CommonSyntax();
+        $syntax = $syntax ?: new CommonSyntax();
 
         $quote = function($text) { return '~^('.preg_replace('/(.)/us', '\\\\$0', $text).')~us'; };
 
         $this->lexerRules = array(
-            self::TOKEN_OPEN => $quote($this->syntax->getOpeningTag()),
-            self::TOKEN_CLOSE => $quote($this->syntax->getClosingTag()),
-            self::TOKEN_MARKER => $quote($this->syntax->getClosingTagMarker()),
-            self::TOKEN_SEPARATOR => $quote($this->syntax->getParameterValueSeparator()),
-            self::TOKEN_DELIMITER => $quote($this->syntax->getParameterValueDelimiter()),
+            self::TOKEN_OPEN => $quote($syntax->getOpeningTag()),
+            self::TOKEN_CLOSE => $quote($syntax->getClosingTag()),
+            self::TOKEN_MARKER => $quote($syntax->getClosingTagMarker()),
+            self::TOKEN_SEPARATOR => $quote($syntax->getParameterValueSeparator()),
+            self::TOKEN_DELIMITER => $quote($syntax->getParameterValueDelimiter()),
             self::TOKEN_WS => '~^(\s+)~us',
             self::TOKEN_STRING => '~^([\w-]+|\\\\.|.)~us',
         );
@@ -65,7 +64,7 @@ final class RegularParser implements ParserInterface
         return $shortcodes;
     }
 
-    private function addShortcode($name, $parameters, $content, $bbCode, $text, $offset, $positions)
+    private function addShortcode($name, $parameters, $content, $bbCode, $text, $offset, array $positions)
     {
         return new ParsedShortcode(new Shortcode($name, $parameters, $content, $bbCode), $text, $offset, $positions);
     }
@@ -130,11 +129,7 @@ final class RegularParser implements ParserInterface
         $content = null;
         $appendContent = function(array $token) use(&$content) { $content .= $token[1]; };
 
-        while(true) {
-            if($this->isEof()) {
-                return false;
-            }
-
+        while(!$this->isEof()) {
             while($this->match(array(self::TOKEN_STRING, self::TOKEN_WS), $appendContent)) {
                 continue;
             }
@@ -157,7 +152,7 @@ final class RegularParser implements ParserInterface
             $this->match(null, $appendContent);
         }
 
-        return $content;
+        return $this->isEof() ? false : $content;
     }
 
     private function close($openingName)
@@ -175,31 +170,22 @@ final class RegularParser implements ParserInterface
 
     private function bbCode()
     {
-        $value = '';
-        $appendValue = function(array $token) use(&$value) { $value .= $token[1]; };
-
-        if(!$this->match(self::TOKEN_SEPARATOR)) { return null; }
-        if(false === $this->value($appendValue)) { return false; }
-
-        return $value;
+        return $this->match(self::TOKEN_SEPARATOR) ? $this->value() : null;
     }
 
     private function arguments()
     {
-        $setName = function(array $token) use(&$name) { $name = $token[1]; };
-        $appendValue = function(array $token) use(&$value) { $value .= $token[1]; };
-
         $arguments = array();
+        $setName = function(array $token) use(&$name) { $name = $token[1]; };
 
         while(true) {
             $name = null;
-            $value = '';
 
             $this->match(self::TOKEN_WS);
             if($this->lookahead(array(self::TOKEN_MARKER, self::TOKEN_CLOSE))) { break; }
             if(!$this->match(self::TOKEN_STRING, $setName, true)) { return false; }
             if(!$this->match(self::TOKEN_SEPARATOR, null, true)) { $arguments[$name] = null; continue; }
-            if(!$this->value($appendValue)) { return false; }
+            if(false === ($value = $this->value())) { return false; }
             $this->match(self::TOKEN_WS);
 
             $arguments[$name] = $value;
@@ -208,17 +194,20 @@ final class RegularParser implements ParserInterface
         return $arguments;
     }
 
-    private function value($callback)
+    private function value()
     {
+        $value = '';
+        $appendValue = function(array $token) use(&$value) { $value .= $token[1]; };
+
         if($this->match(self::TOKEN_DELIMITER)) {
             while(!$this->isEof() && !$this->lookahead(self::TOKEN_DELIMITER)) {
-                $this->match(null, $callback);
+                $this->match(null, $appendValue);
             }
 
-            return $this->match(self::TOKEN_DELIMITER);
+            return $this->match(self::TOKEN_DELIMITER) ? $value : false;
         }
 
-        return $this->match(self::TOKEN_STRING, $callback);
+        return $this->match(self::TOKEN_STRING, $appendValue) ? $value : false;
     }
 
     /* --- PARSER ---------------------------------------------------------- */
