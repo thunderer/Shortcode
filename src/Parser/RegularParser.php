@@ -64,64 +64,63 @@ final class RegularParser implements ParserInterface
         return $shortcodes;
     }
 
-    private function addShortcode($name, $parameters, $content, $bbCode, $text, $offset, array $positions)
+    private function getObject($name, $arguments, $bbCode, $offset, $positions, $content)
     {
-        return new ParsedShortcode(new Shortcode($name, $parameters, $content, $bbCode), $text, $offset, $positions);
+        return new ParsedShortcode(new Shortcode($name, $arguments, $content, $bbCode), $this->getBacktrack(), $offset, $positions);
     }
 
     /* --- RULES ----------------------------------------------------------- */
 
     private function shortcode($isRoot)
     {
-        $baseOffset = $this->getPosition();
-
         $name = null;
-        $bbCode = '';
-        $content = null;
         $nameClose = null;
-        $offset = null;
         $positions = array();
 
         $setName = function(array $token) use(&$name) { $name = $token[1]; };
-        $setOffset = function(array $token) use(&$offset) { $offset = $token[2]; };
-        $setClosingName = function(array $token) use(&$nameClose) { $nameClose = $token[1]; };
-        $setNamePosition = function(array $token) use(&$positions, $baseOffset) { $positions['name'] = $token[2] - $baseOffset; };
-        $setMarkerPosition = function(array $token) use(&$positions, $baseOffset) { $positions['marker'] = $token[2] - $baseOffset; };
+        $setNameClose = function(array $token) use(&$nameClose) { $nameClose = $token[1]; };
 
+        $offset = $this->getPosition();
         !$isRoot ?: $this->beginBacktrack();
-        if(!$this->match(self::TOKEN_OPEN, $setOffset, true)) { return false; }
-        if(!$this->match(self::TOKEN_STRING, array($setName, $setNamePosition), true)) { return false; }
-        if(false === ($bbCode = $this->bbCode($bbCode))) { return false; }
-        $positions['parameters'] = $this->getPosition() - $baseOffset;
+        if(!$this->match(self::TOKEN_OPEN, null, true)) { return false; }
+        $positions['name'] = $this->getPosition() - $offset;
+        if(!$this->match(self::TOKEN_STRING, array($setName), true)) { return false; }
+        if(false === ($bbCode = $this->bbCode($positions))) { return false; }
+        $parametersPosition = $this->getPosition() - $offset;
         if(false === ($arguments = $this->arguments())) { return false; }
+        $positions['parameters'] = $arguments ? $parametersPosition : null;
+
 
         // self-closing
-        if($this->match(self::TOKEN_MARKER, $setMarkerPosition, true)) {
+        $positions['marker'] = $this->getPosition() - $offset;
+        if($this->match(self::TOKEN_MARKER, null, true)) {
             if(!$this->match(self::TOKEN_CLOSE)) { return false; }
 
-            return $isRoot ? $this->addShortcode($name, $arguments, null, $bbCode, $this->getBacktrack(), $offset, $positions) : null;
+            return $isRoot ? $this->getObject($name, $arguments, $bbCode, $offset, $positions, null) : null;
 
         // just-closed or with-content
         } elseif($this->match(self::TOKEN_CLOSE)) {
             $this->beginBacktrack();
-            $positions['content'] = $this->getPosition() - $baseOffset;
+            $positions['content'] = $this->getPosition() - $offset;
             if(false === ($content = $this->content($name))) {
                 $this->backtrack();
+                $positions['marker'] = null;
                 $positions['content'] = null;
 
-                return $isRoot ? $this->addShortcode($name, $arguments, null, $bbCode, $this->getBacktrack(), $offset, $positions) : null;
+                return $isRoot ? $this->getObject($name, $arguments, $bbCode, $offset, $positions, null) : null;
             }
             $this->discardBacktrack();
             if(!$this->match(self::TOKEN_OPEN, null, true)) { return false; }
-            if(!$this->match(self::TOKEN_MARKER, $setMarkerPosition, true)) { return false; }
-            if(!$this->match(self::TOKEN_STRING, $setClosingName, true)) { return false; }
+            $positions['marker'] = $this->getPosition() - $offset;
+            if(!$this->match(self::TOKEN_MARKER, null, true)) { return false; }
+            if(!$this->match(self::TOKEN_STRING, $setNameClose, true)) { return false; }
             if(!$this->match(self::TOKEN_CLOSE)) { return false; }
             if($name !== $nameClose) { return false; }
 
-        // u wot m8?
+        // neither, invalid
         } else { return false; }
 
-        return $isRoot ? $this->addShortcode($name, $arguments, $content, $bbCode, $this->getBacktrack(), $offset, $positions) : null;
+        return $isRoot ? $this->getObject($name, $arguments, $bbCode, $offset, $positions, $content) : null;
     }
 
     private function content($name)
@@ -168,9 +167,13 @@ final class RegularParser implements ParserInterface
         return $openingName === $closingName;
     }
 
-    private function bbCode()
+    private function bbCode(array &$positions)
     {
-        return $this->match(self::TOKEN_SEPARATOR) ? $this->value() : null;
+        if(!$this->match(self::TOKEN_SEPARATOR, null, true)) { return null; }
+
+        $positions['bbCode'] = $this->getPosition();
+
+        return $this->value();
     }
 
     private function arguments()

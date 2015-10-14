@@ -56,9 +56,12 @@ final class RegexParser implements ParserInterface
         $content = isset($matches['content'][0]) && $matches['content'][1] !== -1 ? $matches['content'][0] : null;
         $offsets = array(
             'name' => $matches['name'][1],
-            'parameters' => isset($matches['parameters'][1]) ? $matches['parameters'][1] : null,
-            'content' => isset($matches['content'][1]) ? $matches['content'][1] : null,
-            'marker' => isset($matches['marker'][1]) ? $matches['marker'][1] : null,
+            'parameters' => $parameters && isset($matches['parameters'][1]) && $matches['parameters'][1] !== -1 ? $matches['parameters'][1] : null,
+            'bbCode' => isset($matches['bbCode'][1]) && $matches['bbCode'][1] !== -1 ? $matches['bbCode'][1] : null,
+            'content' => isset($matches['content'][1]) && $matches['content'][1] !== -1 ? $matches['content'][1] : null,
+            'marker' => isset($matches['markerContent'][1]) && $matches['markerContent'][1] !== -1
+                ? $matches['markerContent'][1]
+                : (isset($matches['marker'][1]) && $matches['marker'][1] !== -1 ? $matches['marker'][1] : null),
         );
 
         return new ParsedShortcode(new Shortcode($name, $parameters, $content, $bbCode), $text, $offset, $offsets);
