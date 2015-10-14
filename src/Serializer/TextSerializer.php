@@ -2,7 +2,6 @@
 namespace Thunder\Shortcode\Serializer;
 
 use Thunder\Shortcode\Parser\RegexParser;
-use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 use Thunder\Shortcode\Syntax\Syntax;
 use Thunder\Shortcode\Syntax\SyntaxInterface;
@@ -26,7 +25,7 @@ final class TextSerializer implements SerializerInterface
         $return = $open.$shortcode->getName().$parameters;
 
         return null === $shortcode->getContent()
-            ? $return.($shortcode instanceof ParsedShortcodeInterface && $shortcode->getMarkerOffset() ? ' '.$marker : '').$close
+            ? $return.' '.$marker.$close
             : $return.$close.$shortcode->getContent().$open.$marker.$shortcode->getName().$close;
     }
 

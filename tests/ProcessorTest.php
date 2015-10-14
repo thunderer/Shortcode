@@ -31,6 +31,14 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         return new Processor(new RegexParser(), $handlers);
     }
 
+    public function testReplaceWithoutContentOffset()
+    {
+        $text = ' [x value=" [name]yyy[/name] "] [name]yyy[/name] [/x] ';
+        $result = ' [x value=" [name]yyy[/name] "] name [/x] ';
+
+        $this->assertSame($result, $this->getProcessor()->process($text));
+    }
+
     /**
      * @dataProvider provideTexts
      */

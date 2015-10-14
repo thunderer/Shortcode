@@ -9,9 +9,9 @@ interface ProcessorInterface
     /**
      * Process text using registered shortcode handlers
      *
-     * @param string $text
+     * @param string $text Text containing shortcodes
      *
-     * @return string
+     * @return string Text with replaced shortcodes
      */
     public function process($text);
 }

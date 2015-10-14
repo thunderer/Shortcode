@@ -33,8 +33,8 @@ interface ShortcodeInterface
      * Returns parameter value using its name, will return null for parameter
      * without value
      *
-     * @param string $name
-     * @param null $default
+     * @param string $name Parameter name
+     * @param null $default Value returned if there is no parameter with given name
      *
      * @return mixed
      */

@@ -59,11 +59,10 @@ EOF;
 
 
         return array(
-            array(new TextSerializer(), '[x arg=val]', $empty),
-            array(new TextSerializer(), '[x arg]', $nullArgument),
+            array(new TextSerializer(), '[x arg=val /]', $empty),
+            array(new TextSerializer(), '[x arg /]', $nullArgument),
             array(new TextSerializer(), '[x arg=val]cnt[/x]', $content),
-            array(new TextSerializer(), '[self-closed /]', new ParsedShortcode(new Shortcode('self-closed', array(), null), '[self-closed /]', 0, array('marker' => 13))),
-            array(new TextSerializer(), '[self-closed]', new ParsedShortcode(new Shortcode('self-closed', array(), null), '[self-closed /]', 0, array())),
+            array(new TextSerializer(), '[self-closed /]', new ParsedShortcode(new Shortcode('self-closed', array(), null), '[self-closed /]', 0, array())),
             array(new JsonSerializer(), '{"name":"x","parameters":{"arg":"val"},"content":null}', $empty),
             array(new JsonSerializer(), '{"name":"x","parameters":{"arg":"val"},"content":"cnt"}', $content),
             array(new XmlSerializer(), $xml, $content),

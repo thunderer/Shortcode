@@ -19,18 +19,4 @@ interface ParsedShortcodeInterface extends ShortcodeInterface
      * @return int
      */
     public function getOffset();
-
-    /**
-     * Returns position of content in shortcode text, null if no content
-     *
-     * @return int
-     */
-    public function getContentOffset();
-
-    /**
-     * Returns position of self-closing marker, null if not present
-     *
-     * @return int
-     */
-    public function getMarkerOffset();
 }

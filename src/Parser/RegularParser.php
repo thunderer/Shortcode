@@ -64,9 +64,9 @@ final class RegularParser implements ParserInterface
         return $shortcodes;
     }
 
-    private function getObject($name, $arguments, $bbCode, $offset, $positions, $content)
+    private function getObject($name, $arguments, $bbCode, $offset, $content)
     {
-        return new ParsedShortcode(new Shortcode($name, $arguments, $content, $bbCode), $this->getBacktrack(), $offset, $positions);
+        return new ParsedShortcode(new Shortcode($name, $arguments, $content, $bbCode), $this->getBacktrack(), $offset);
     }
 
     /* --- RULES ----------------------------------------------------------- */
@@ -75,7 +75,6 @@ final class RegularParser implements ParserInterface
     {
         $name = null;
         $nameClose = null;
-        $positions = array();
 
         $setName = function(array $token) use(&$name) { $name = $token[1]; };
         $setNameClose = function(array $token) use(&$nameClose) { $nameClose = $token[1]; };
@@ -83,20 +82,16 @@ final class RegularParser implements ParserInterface
         $offset = $this->getPosition();
         !$isRoot ?: $this->beginBacktrack();
         if(!$this->match(self::TOKEN_OPEN, null, true)) { return false; }
-        $positions['name'] = $this->getPosition() - $offset;
         if(!$this->match(self::TOKEN_STRING, array($setName), true)) { return false; }
-        if(false === ($bbCode = $this->bbCode($positions))) { return false; }
-        $parametersPosition = $this->getPosition() - $offset;
+        if(false === ($bbCode = $this->bbCode())) { return false; }
         if(false === ($arguments = $this->arguments())) { return false; }
-        $positions['parameters'] = $arguments ? $parametersPosition : null;
 
 
         // self-closing
-        $positions['marker'] = $this->getPosition() - $offset;
         if($this->match(self::TOKEN_MARKER, null, true)) {
             if(!$this->match(self::TOKEN_CLOSE)) { return false; }
 
-            return $isRoot ? $this->getObject($name, $arguments, $bbCode, $offset, $positions, null) : null;
+            return $isRoot ? $this->getObject($name, $arguments, $bbCode, $offset, null) : null;
 
         // just-closed or with-content
         } elseif($this->match(self::TOKEN_CLOSE)) {
@@ -104,14 +99,11 @@ final class RegularParser implements ParserInterface
             $positions['content'] = $this->getPosition() - $offset;
             if(false === ($content = $this->content($name))) {
                 $this->backtrack();
-                $positions['marker'] = null;
-                $positions['content'] = null;
 
-                return $isRoot ? $this->getObject($name, $arguments, $bbCode, $offset, $positions, null) : null;
+                return $isRoot ? $this->getObject($name, $arguments, $bbCode, $offset, null) : null;
             }
             $this->discardBacktrack();
             if(!$this->match(self::TOKEN_OPEN, null, true)) { return false; }
-            $positions['marker'] = $this->getPosition() - $offset;
             if(!$this->match(self::TOKEN_MARKER, null, true)) { return false; }
             if(!$this->match(self::TOKEN_STRING, $setNameClose, true)) { return false; }
             if(!$this->match(self::TOKEN_CLOSE)) { return false; }
@@ -120,7 +112,7 @@ final class RegularParser implements ParserInterface
         // neither, invalid
         } else { return false; }
 
-        return $isRoot ? $this->getObject($name, $arguments, $bbCode, $offset, $positions, $content) : null;
+        return $isRoot ? $this->getObject($name, $arguments, $bbCode, $offset, $content) : null;
     }
 
     private function content($name)
@@ -167,11 +159,9 @@ final class RegularParser implements ParserInterface
         return $openingName === $closingName;
     }
 
-    private function bbCode(array &$positions)
+    private function bbCode()
     {
         if(!$this->match(self::TOKEN_SEPARATOR, null, true)) { return null; }
-
-        $positions['bbCode'] = $this->getPosition();
 
         return $this->value();
     }

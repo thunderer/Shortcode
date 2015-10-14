@@ -34,7 +34,7 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
     public function provideShortcodes()
     {
         return array(
-            array('[x arg=val]', 'x', array('arg' => 'val'), null),
+            array('[x arg=val /]', 'x', array('arg' => 'val'), null),
             array('[x arg=val][/x]', 'x', array('arg' => 'val'), ''),
             array('[x arg=val]inner[/x]', 'x', array('arg' => 'val'), 'inner'),
             array('[x arg="val val"]inner[/x]', 'x', array('arg' => 'val val'), 'inner'),
@@ -43,10 +43,7 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
 
     public function testObject()
     {
-        $shortcode = new Shortcode('random', array(
-            'arg' => 'value',
-            'none' => null,
-            ), 'something');
+        $shortcode = new Shortcode('random', array('arg' => 'value', 'none' => null), 'something');
 
         $this->assertTrue($shortcode->hasParameter('arg'));
         $this->assertFalse($shortcode->hasParameter('invalid'));
@@ -69,12 +66,10 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $context->namePosition = array('code' => 10);
         $context->text = ' [code] ';
         $context->shortcodeText = '[code]';
-        $context->textOffset = 1;
+        $context->offset = 1;
         $context->iterationNumber = 1;
         $context->recursionLevel = 0;
         $context->parent = null;
-        $context->contentOffset = 19;
-        $context->slashOffset = 21;
 
         $processed = ProcessedShortcode::createFromContext($context);
 
@@ -91,8 +86,6 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(0, $processed->getRecursionLevel());
         $this->assertSame(null, $processed->getParent());
         $this->assertSame($processor, $processed->getProcessor());
-        $this->assertSame(19, $processed->getContentOffset());
-        $this->assertSame(21, $processed->getMarkerOffset());
     }
 
     public function testParsedShortcode()
@@ -113,11 +106,5 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(false, $shortcode->withContent(null)->hasContent());
         $this->assertSame('another', $shortcode->withContent('another')->getContent());
-    }
-
-    public function testExceptionOnInvalidParsedShortcodePositionsData()
-    {
-        $this->setExpectedException('InvalidArgumentException');
-        new ParsedShortcode(new Shortcode('name', array(), null), null, 0, array('invalid' => null));
     }
 }
