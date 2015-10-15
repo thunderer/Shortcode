@@ -74,7 +74,6 @@ final class RegularParser implements ParserInterface
     private function shortcode($isRoot)
     {
         $name = null;
-        $nameClose = null;
         $offset = null;
 
         $setName = function(array $token) use(&$name) { $name = $token[1]; };
