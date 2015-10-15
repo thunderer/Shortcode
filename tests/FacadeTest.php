@@ -33,7 +33,7 @@ final class FacadeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('[c /]', $facade->serializeToText($s));
         $this->assertSame('c', $facade->unserializeFromText('[c]')->getName());
 
-        $json = '{"name":"c","parameters":[],"content":null}';
+        $json = '{"name":"c","parameters":[],"content":null,"bbCode":null}';
         $this->assertSame($json, $facade->serializeToJson($s));
         $this->assertSame('c', $facade->unserializeFromJson($json)->getName());
     }

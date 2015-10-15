@@ -5,6 +5,9 @@ use Symfony\Component\Yaml\Yaml;
 use Thunder\Shortcode\Shortcode\Shortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
+/**
+ * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
+ */
 final class YamlSerializer implements SerializerInterface
 {
     public function serialize(ShortcodeInterface $shortcode)
@@ -13,6 +16,7 @@ final class YamlSerializer implements SerializerInterface
             'name' => $shortcode->getName(),
             'parameters' => $shortcode->getParameters(),
             'content' => $shortcode->getContent(),
+            'bbCode' => $shortcode->getBbCode(),
         ));
     }
 
@@ -32,6 +36,6 @@ final class YamlSerializer implements SerializerInterface
             throw new \InvalidArgumentException('Malformed shortcode YAML, expected name, parameters, and content!');
         }
 
-        return new Shortcode($data['name'], $data['parameters'], $data['content']);
+        return new Shortcode($data['name'], $data['parameters'], $data['content'], $data['bbCode']);
     }
 }

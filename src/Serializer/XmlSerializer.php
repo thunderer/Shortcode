@@ -4,28 +4,61 @@ namespace Thunder\Shortcode\Serializer;
 use Thunder\Shortcode\Shortcode\Shortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
+/**
+ * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
+ */
 final class XmlSerializer implements SerializerInterface
 {
+    /**
+     * <shortcode name="NAME">
+     *   <bbCode>BBCODE</bbCode>
+     *   <parameters>
+     *     <parameter name="KEY">VALUE</parameter>
+     *     <parameter name="KEY">VALUE</parameter>
+     *   </parameters>
+     *   <content>CONTENT></content>
+     * </shortcode>
+     *
+     * @param ShortcodeInterface $shortcode
+     *
+     * @return string
+     */
     public function serialize(ShortcodeInterface $shortcode)
     {
         $doc = new \DOMDocument('1.0', 'UTF-8');
         $doc->preserveWhiteSpace = false;
         $doc->formatOutput = true;
 
-        $xml = $doc->appendChild($doc->createElement('shortcode'));
-        $xml->appendChild($doc->createElement('name', $shortcode->getName()));
+        $code = $doc->createElement('shortcode');
+        $code->setAttribute('name', $shortcode->getName());
+        $xml = $doc->appendChild($code);
+        $xml->appendChild($this->createCDataNode($doc, 'bbCode', $shortcode->getBbCode()));
 
         $parameters = $xml->appendChild($doc->createElement('parameters'));
         foreach($shortcode->getParameters() as $key => $value) {
             $parameter = $doc->createElement('parameter');
-            $parameter->appendChild($doc->createElement('name', $key));
-            $parameter->appendChild($doc->createElement('value', $value));
+            $parameter->setAttribute('name', $key);
+            if(null !== $value) {
+                $parameter->appendChild($doc->createCDATASection($value));
+            }
+
             $parameters->appendChild($parameter);
         }
 
-        $xml->appendChild($doc->createElement('content', $shortcode->getContent()));
+        $xml->appendChild($this->createCDataNode($doc, 'content', $shortcode->getContent()));
 
         return $doc->saveXML();
+    }
+
+    private function createCDataNode(\DOMDocument $doc, $name, $content)
+    {
+        $node = $doc->createElement($name);
+
+        if(null !== $content) {
+            $node->appendChild($doc->createCDATASection($content));
+        }
+
+        return $node;
     }
 
     /**
@@ -36,31 +69,49 @@ final class XmlSerializer implements SerializerInterface
     public function unserialize($text)
     {
         $xml = new \DOMDocument();
+        $internalErrors = libxml_use_internal_errors(true);
         if(!$text || ($text && !$xml->loadXML($text))) {
+            libxml_use_internal_errors($internalErrors);
             throw new \InvalidArgumentException('Failed to parse provided XML!');
         }
+        libxml_use_internal_errors($internalErrors);
 
         $xpath = new \DOMXPath($xml);
-        $name = $this->getValue($xpath, '/shortcode/name');
-        $content = $this->getValue($xpath, '/shortcode/content');
+        $shortcode = $xpath->query('/shortcode');
+        if($shortcode->length !== 1) {
+            throw new \InvalidArgumentException('Invalid shortcode XML!');
+        }
+        $name = $this->getAttribute($shortcode->item(0), 'name');
+
+        $bbCode = $this->getValue($xpath->query('/shortcode/bbCode'));
+        $content = $this->getValue($xpath->query('/shortcode/content'));
 
         $parameters = array();
         $elements = $xpath->query('/shortcode/parameters/parameter');
-        for($i = 1; $i <= $elements->length; $i++) {
-            $path = '/shortcode/parameters/parameter['.$i.']';
-            $parameters[$this->getValue($xpath, $path.'/name')] = $this->getValue($xpath, $path.'/value');
+        for($i = 0; $i < $elements->length; $i++) {
+            $node = $elements->item($i);
+
+            $parameters[$this->getAttribute($node, 'name')] = $node->hasChildNodes() ? $node->nodeValue : null;
         }
 
-        return new Shortcode($name, $parameters, $content);
+        return new Shortcode($name, $parameters, $content, $bbCode);
     }
 
-    private function getValue(\DOMXPath $xpath, $path)
+    private function getValue(\DOMNodeList $node)
     {
-        $node = $xpath->query($path);
-        if(1 !== $node->length) {
+        return $node->length === 1 && $node->item(0)->hasChildNodes()
+            ? $node->item(0)->nodeValue
+            : null;
+    }
+
+    private function getAttribute(\DOMNode $node, $name)
+    {
+        $attribute = $node->attributes->getNamedItem($name);
+
+        if(!$attribute || ($attribute && !$attribute->nodeValue)) {
             throw new \InvalidArgumentException('Invalid shortcode XML!');
         }
 
-        return $node->item(0)->nodeValue;
+        return $attribute->nodeValue;
     }
 }

@@ -18,56 +18,44 @@ final class SerializerTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider provideShortcodes
      */
-    public function testSerializer(SerializerInterface $serializer, $text, ShortcodeInterface $shortcode)
+    public function testSerializer(SerializerInterface $serializer, ShortcodeInterface $test)
     {
-        $serialized = $serializer->serialize($shortcode);
-        $this->assertSame($text, $serialized);
+        $result = $serializer->serialize($test);
+        $tested = $serializer->unserialize($result);
 
-        $s = $serializer->unserialize($text);
-        $this->assertSame($shortcode->getName(), $s->getName());
-        $this->assertSame($shortcode->getParameters(), $s->getParameters());
-        $this->assertSame($shortcode->getContent(), $s->getContent());
+        $this->assertSame($test->getName(), $tested->getName(), 'name: '.$result);
+        $this->assertSame($test->getParameters(), $tested->getParameters(), 'parameters: '.$result);
+        $this->assertSame($test->getContent(), $tested->getContent(), 'content: '.$result);
+        $this->assertSame($test->getBbCode(), $tested->getBbCode(), 'bbCode: '.$result);
     }
 
     public function provideShortcodes()
     {
-        $empty = new Shortcode('x', array('arg' => 'val'), null);
-        $nullArgument = new Shortcode('x', array('arg' => null), null);
-        $content = new Shortcode('x', array('arg' => 'val'), 'cnt');
+        $shortcodes = array(
+            new Shortcode('x', array(), null),
+            new Shortcode('x', array('arg' => 'val'), null),
+            new Shortcode('x', array('arg' => null), null),
+            new Shortcode('x', array('arg' => ''), null),
+            new Shortcode('x', array('arg' => 'val'), 'cnt'),
+            new ParsedShortcode(new Shortcode('self-closed', array(), null), '[self-closed /]', 0),
+            new Shortcode('self-closed', array(), null, 'bb code'."\n".' value'),
+        );
 
-        $yaml = <<<EOF
-name: x
-parameters:
-    arg: val
-content: cnt
+        $serializers = array(
+            new TextSerializer(),
+            new JsonSerializer(),
+            new XmlSerializer(),
+            new YamlSerializer(),
+        );
 
-EOF;
-        $xml = <<<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<shortcode>
-  <name>x</name>
-  <parameters>
-    <parameter>
-      <name>arg</name>
-      <value>val</value>
-    </parameter>
-  </parameters>
-  <content>cnt</content>
-</shortcode>
+        $tests = array();
+        foreach($shortcodes as $shortcode) {
+            foreach($serializers as $serializer) {
+                $tests[] = array($serializer, $shortcode);
+            }
+        }
 
-EOF;
-
-
-        return array(
-            array(new TextSerializer(), '[x arg=val /]', $empty),
-            array(new TextSerializer(), '[x arg /]', $nullArgument),
-            array(new TextSerializer(), '[x arg=val]cnt[/x]', $content),
-            array(new TextSerializer(), '[self-closed /]', new ParsedShortcode(new Shortcode('self-closed', array(), null), '[self-closed /]', 0, array())),
-            array(new JsonSerializer(), '{"name":"x","parameters":{"arg":"val"},"content":null}', $empty),
-            array(new JsonSerializer(), '{"name":"x","parameters":{"arg":"val"},"content":"cnt"}', $content),
-            array(new XmlSerializer(), $xml, $content),
-            array(new YamlSerializer(), $yaml, $content),
-            );
+        return $tests;
     }
 
     /**
@@ -89,11 +77,18 @@ EOF;
         return array(
             array($text, '[sc /] c [xx]', 'InvalidArgumentException'),
             array($text, '[/sc]', 'InvalidArgumentException'),
-            array($json, '{}', 'RuntimeException'),
-            array($json, '', 'RuntimeException'),
+            array($json, '{}', 'InvalidArgumentException'),
+            array($json, '', 'InvalidArgumentException'),
+            array($json, '{"name":"x","parameters":null}', 'InvalidArgumentException'),
+            array($json, '{"name":"x","parameters":{"key":[]}}', 'InvalidArgumentException'),
             array($yaml, 'shortcode: ', 'InvalidArgumentException'),
             array($yaml, '', 'InvalidArgumentException'),
             array($xml, '<shortcode />', 'InvalidArgumentException'),
+            array($xml, '<shortcode name=""><content>sss</content></shortcode>', 'InvalidArgumentException'),
+            array($xml, '<shortcode name="x"><parameters><parameter>xx</parameter></parameters><content>sss</content></shortcode>', 'InvalidArgumentException'),
+            array($xml, '<shortcode name="x"><parameters><parameter name="">xx</parameter></parameters><content>sss</content></shortcode>', 'InvalidArgumentException'),
+            array($xml, '<shortcode name="x"><parameters><parameter name=>xx</parameter></parameters><content>sss</content></shortcode>', 'InvalidArgumentException'),
+            array($xml, '<invalid />', 'InvalidArgumentException'),
             array($xml, '', 'InvalidArgumentException'),
         );
     }

@@ -107,4 +107,10 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(false, $shortcode->withContent(null)->hasContent());
         $this->assertSame('another', $shortcode->withContent('another')->getContent());
     }
+
+    public function testShortcodeEmptyNameException()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        new Shortcode('', [], null);
+    }
 }

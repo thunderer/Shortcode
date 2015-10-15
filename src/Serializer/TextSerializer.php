@@ -2,10 +2,14 @@
 namespace Thunder\Shortcode\Serializer;
 
 use Thunder\Shortcode\Parser\RegexParser;
+use Thunder\Shortcode\Shortcode\Shortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 use Thunder\Shortcode\Syntax\Syntax;
 use Thunder\Shortcode\Syntax\SyntaxInterface;
 
+/**
+ * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
+ */
 final class TextSerializer implements SerializerInterface
 {
     private $syntax;
@@ -22,7 +26,10 @@ final class TextSerializer implements SerializerInterface
         $marker = $this->syntax->getClosingTagMarker();
 
         $parameters = $this->serializeParameters($shortcode->getParameters());
-        $return = $open.$shortcode->getName().$parameters;
+        $bbCode = null !== $shortcode->getBbCode()
+            ? $this->serializeValue($shortcode->getBbCode())
+            : '';
+        $return = $open.$shortcode->getName().$bbCode.$parameters;
 
         return null === $shortcode->getContent()
             ? $return.' '.$marker.$close
@@ -34,13 +41,13 @@ final class TextSerializer implements SerializerInterface
         // unfortunately array_reduce() does not support keys
         $return = '';
         foreach ($parameters as $key => $value) {
-            $return .= ' '.$key.$this->serializeParameter($value);
+            $return .= ' '.$key.$this->serializeValue($value);
         }
 
         return $return;
     }
 
-    private function serializeParameter($value)
+    private function serializeValue($value)
     {
         if (null === $value) {
             return '';
@@ -69,6 +76,14 @@ final class TextSerializer implements SerializerInterface
             throw new \InvalidArgumentException(sprintf($msg, $text));
         }
 
-        return array_shift($shortcodes);
+        /** @var $parsed ShortcodeInterface */
+        $parsed = array_shift($shortcodes);
+
+        $name = $parsed->getName();
+        $parameters = $parsed->getParameters();
+        $content = $parsed->getContent();
+        $bbCode = $parsed->getBbCode();
+
+        return new Shortcode($name, $parameters, $content, $bbCode);
     }
 }
