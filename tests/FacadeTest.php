@@ -30,7 +30,7 @@ final class FacadeTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Thunder\\Shortcode\\Shortcode\\ShortcodeInterface', $shortcodes[0]);
 
         $s = new Shortcode('c', array(), null);
-        $this->assertSame('[c]', $facade->serializeToText($s));
+        $this->assertSame('[c /]', $facade->serializeToText($s));
         $this->assertSame('c', $facade->unserializeFromText('[c]')->getName());
 
         $json = '{"name":"c","parameters":[],"content":null}';

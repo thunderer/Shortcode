@@ -8,14 +8,8 @@ final class ParsedShortcode extends AbstractShortcode implements ParsedShortcode
 {
     private $text;
     private $offset;
-    private $offsets = array(
-        'name' => null,
-        'parameters' => null,
-        'content' => null,
-        'marker' => null,
-        );
 
-    public function __construct(ShortcodeInterface $shortcode, $text, $offset, array $offsets = array())
+    public function __construct(ShortcodeInterface $shortcode, $text, $offset)
     {
         $this->name = $shortcode->getName();
         $this->parameters = $shortcode->getParameters();
@@ -23,11 +17,6 @@ final class ParsedShortcode extends AbstractShortcode implements ParsedShortcode
         $this->bbCode = $shortcode->getBbCode();
         $this->text = $text;
         $this->offset = $offset;
-
-        if(array_diff_key($offsets, $this->offsets)) {
-            throw new \InvalidArgumentException('Invalid positions data!');
-        }
-        $this->offsets = array_merge($this->offsets, $offsets);
     }
 
     public function withContent($content)
@@ -46,15 +35,5 @@ final class ParsedShortcode extends AbstractShortcode implements ParsedShortcode
     public function getOffset()
     {
         return $this->offset;
-    }
-
-    public function getContentOffset()
-    {
-        return $this->offsets['content'];
-    }
-
-    public function getMarkerOffset()
-    {
-        return $this->offsets['marker'];
     }
 }

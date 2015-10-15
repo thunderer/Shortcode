@@ -23,7 +23,5 @@ final class ProcessorContext
     public $shortcodeText = '';
     public $iterationNumber = 0;
     public $recursionLevel = 0;
-    public $textOffset = null;
-    public $contentOffset = null;
-    public $slashOffset = null;
+    public $offset = null;
 }

@@ -81,11 +81,8 @@ final class Processor implements ProcessorInterface
         $context->namePosition[$shortcode->getName()] = $hasNamePosition ? $context->namePosition[$shortcode->getName()] + 1 : 1;
 
         $context->shortcodeText = $shortcode->getText();
-        $context->textOffset = $shortcode->getOffset();
+        $context->offset = $shortcode->getOffset();
         $context->shortcode = $shortcode;
-
-        $context->contentOffset = $shortcode->getContentOffset();
-        $context->slashOffset = $shortcode->getMarkerOffset();
     }
 
     private function processHandler(ParsedShortcodeInterface $parsed, ProcessorContext $context, $handler)
@@ -95,7 +92,7 @@ final class Processor implements ProcessorInterface
 
         return $handler
             ? call_user_func_array($handler, array($processed))
-            : substr_replace($parsed->getText(), $processed->getContent(), $parsed->getContentOffset(), mb_strlen($parsed->getContent()));
+            : substr_replace($parsed->getText(), $processed->getContent(), strrpos($parsed->getText(), $parsed->getContent()), mb_strlen($parsed->getContent()));
     }
 
     private function processRecursion(ParsedShortcodeInterface $shortcode, ProcessorContext $context)

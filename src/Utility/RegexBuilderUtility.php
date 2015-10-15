@@ -55,7 +55,7 @@ final class RegexBuilderUtility
         // complete parameters matching regex
         $parameters = '(?<parameters>(?:\s*(?:\w+(?:'.$equalsSpaced.$complex.'|'.$equalsSpaced.$simple.'|'.$empty.')))*)';
         // BBCode is the part after name that makes it behave like a non-empty parameter value
-        $bbCode = '(?:'.$equals.'(?<bbCode>'.$complex.'|'.$simple.'))?';
+        $bbCode = '(?:'.$equals.$space.'(?<bbCode>'.$complex.'|'.$simple.'))?';
 
         // alphanumeric characters and dash
         $name = '(?<name>[\w-]+)';
@@ -63,12 +63,12 @@ final class RegexBuilderUtility
         $content = '(?<content>.*?)';
 
         // equal beginning for each variant: open tag, name and parameters
-        $common = $open.$space.$name.$bbCode.$parameters.$space;
+        $common = $open.$space.$name.$space.$bbCode.$space.$parameters.$space;
         // closing tag variants: just closing tag, self closing tag or content
         // and closing block with backreference name validation
         $justClosed = $close;
-        $selfClosed = '(?<marker>['.$slash.'])'.$space.$close;
-        $withContent = $close.$content.$open.$space.$slash.$space.'(\k<name>)'.$space.$close;
+        $selfClosed = '(?<marker>'.$slash.')'.$space.$close;
+        $withContent = $close.$content.$open.$space.'(?<markerContent>'.$slash.')'.$space.'(\k<name>)'.$space.$close;
 
         return '(?:'.$common.'(?:'.$withContent.'|'.$justClosed.'|'.$selfClosed.'))';
     }
