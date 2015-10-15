@@ -75,42 +75,34 @@ final class RegularParser implements ParserInterface
     {
         $name = null;
         $nameClose = null;
+        $offset = null;
 
         $setName = function(array $token) use(&$name) { $name = $token[1]; };
-        $setNameClose = function(array $token) use(&$nameClose) { $nameClose = $token[1]; };
+        $setOffset = function(array $token) use(&$offset) { $offset = $token[2]; };
 
-        $offset = $this->getPosition();
         !$isRoot ?: $this->beginBacktrack();
-        if(!$this->match(self::TOKEN_OPEN, null, true)) { return false; }
-        if(!$this->match(self::TOKEN_STRING, array($setName), true)) { return false; }
+        if(!$this->match(self::TOKEN_OPEN, $setOffset, true)) { return false; }
+        if(!$this->match(self::TOKEN_STRING, $setName, true)) { return false; }
         if(false === ($bbCode = $this->bbCode())) { return false; }
         if(false === ($arguments = $this->arguments())) { return false; }
-
 
         // self-closing
         if($this->match(self::TOKEN_MARKER, null, true)) {
             if(!$this->match(self::TOKEN_CLOSE)) { return false; }
 
             return $isRoot ? $this->getObject($name, $arguments, $bbCode, $offset, null) : null;
+        }
 
         // just-closed or with-content
-        } elseif($this->match(self::TOKEN_CLOSE)) {
-            $this->beginBacktrack();
-            $positions['content'] = $this->getPosition() - $offset;
-            if(false === ($content = $this->content($name))) {
-                $this->backtrack();
+        if(!$this->match(self::TOKEN_CLOSE)) { return false; }
+        $this->beginBacktrack();
+        if(false === ($content = $this->content($name))) {
+            $this->backtrack();
 
-                return $isRoot ? $this->getObject($name, $arguments, $bbCode, $offset, null) : null;
-            }
-            $this->discardBacktrack();
-            if(!$this->match(self::TOKEN_OPEN, null, true)) { return false; }
-            if(!$this->match(self::TOKEN_MARKER, null, true)) { return false; }
-            if(!$this->match(self::TOKEN_STRING, $setNameClose, true)) { return false; }
-            if(!$this->match(self::TOKEN_CLOSE)) { return false; }
-            if($name !== $nameClose) { return false; }
-
-        // neither, invalid
-        } else { return false; }
+            return $isRoot ? $this->getObject($name, $arguments, $bbCode, $offset, null) : null;
+        }
+        $this->discardBacktrack();
+        if(!$this->close($name)) { return false; }
 
         return $isRoot ? $this->getObject($name, $arguments, $bbCode, $offset, $content) : null;
     }
@@ -161,9 +153,7 @@ final class RegularParser implements ParserInterface
 
     private function bbCode()
     {
-        if(!$this->match(self::TOKEN_SEPARATOR, null, true)) { return null; }
-
-        return $this->value();
+        return $this->match(self::TOKEN_SEPARATOR, null, true) ? $this->value() : null;
     }
 
     private function arguments()
@@ -217,9 +207,7 @@ final class RegularParser implements ParserInterface
 
     private function getBacktrack()
     {
-        $tokenToString = function(array $token) { return $token[1]; };
-
-        return implode('', array_map($tokenToString, $this->discardBacktrack()));
+        return implode('', array_map(function(array $token) { return $token[1]; }, $this->discardBacktrack()));
     }
 
     private function backtrack()
@@ -233,17 +221,6 @@ final class RegularParser implements ParserInterface
         }
     }
 
-    private function getPosition()
-    {
-        if($this->isEof()) {
-            return null;
-        }
-
-        $token = $this->tokens->top();
-
-        return $token[2];
-    }
-
     private function isEof()
     {
         return $this->tokens->isEmpty();
@@ -254,10 +231,8 @@ final class RegularParser implements ParserInterface
         if($this->isEof()) {
             return false;
         }
-        if(!is_array($type)) {
-            $type = array($type);
-        }
 
+        $type = (array)$type;
         $token = $this->tokens->top();
         if(!empty($type) && !in_array($token[0], $type)) {
             return false;
@@ -274,10 +249,8 @@ final class RegularParser implements ParserInterface
         if($this->isEof()) {
             return false;
         }
-        if(!is_array($type)) {
-            $type = (array)$type;
-        }
 
+        $type = (array)$type;
         $token = $this->tokens->top();
         if(!empty($type) && !in_array($token[0], $type)) {
             return false;
