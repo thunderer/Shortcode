@@ -67,7 +67,6 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             array('x [content]a-[name]-b[/content] y', 'x a-name-b y'),
             array('x [c]a-[n][/n]-b[/c] y', 'x a-n-b y'),
             array('x [content]a-[c]v[/c]-b[/content] y', 'x a-v-b y'),
-            // array('x [html b]bold[/html] y [html code]code[/html] z', 'x <b>bold</b> y <code>code</code> z'),
             array('x [html]bold[/html] z', 'x [html]bold[/html] z'),
             array('x [reverse]abc xyz[/reverse] z', 'x zyx cba z'),
             array('x [i /][i]i[/i][i /][i]i[/i][i /] z', 'x [i /][i]i[/i][i /][i]i[/i][i /] z'),
@@ -213,14 +212,9 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
     {
         $handlers = new HandlerContainer();
         $handlers
-            ->add('name', function (ShortcodeInterface $s) { return $s->getName(); })
-            ->add('content', function (ShortcodeInterface $s) { return $s->getContent(); })
-            ->add('reverse', new ReverseShortcode())
-            ->addAlias('c', 'content')
-            ->addAlias('n', 'name')
             ->add('self', function () { return '[self]'; })
             ->add('other', function () { return '[self]'; })
-            ->add('random', function () { return '[various]'; });
+            ->add('random', function () { return '[other]'; });
         $processor = new Processor(new RegexParser(), $handlers);
         $processor->withMaxIterations(null);
 

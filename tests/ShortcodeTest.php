@@ -38,7 +38,7 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
             array('[x arg=val][/x]', 'x', array('arg' => 'val'), ''),
             array('[x arg=val]inner[/x]', 'x', array('arg' => 'val'), 'inner'),
             array('[x arg="val val"]inner[/x]', 'x', array('arg' => 'val val'), 'inner'),
-            );
+        );
     }
 
     public function testObject()

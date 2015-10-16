@@ -28,10 +28,14 @@ final class SyntaxTest extends \PHPUnit_Framework_TestCase
         return array(
             array(new Syntax(), '[', ']', '/', '=', '"'),
             array(new Syntax('[[', ']]', '//', '==', '""'), '[[', ']]', '//', '==', '""'),
-            array(new CommonSyntax(), '[', ']', '/', '=', '"')
+            array(new CommonSyntax(), '[', ']', '/', '=', '"'),
             );
     }
 
+    /**
+     * Note: do not merge this test with data provider above, code coverage
+     * does not understand this and marks builder class as untested.
+     */
     public function testBuilder()
     {
         $builder = new SyntaxBuilder();
