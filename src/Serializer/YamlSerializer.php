@@ -36,6 +36,15 @@ final class YamlSerializer implements SerializerInterface
             throw new \InvalidArgumentException('Malformed shortcode YAML, expected name, parameters, and content!');
         }
 
-        return new Shortcode($data['name'], $data['parameters'], $data['content'], $data['bbCode']);
+        $name = array_key_exists('name', $data) ? $data['name'] : null;
+        $parameters = array_key_exists('parameters', $data) ? $data['parameters'] : array();
+        $content = array_key_exists('content', $data) ? $data['content'] : null;
+        $bbCode = array_key_exists('bbCode', $data) ? $data['bbCode'] : null;
+
+        if(!is_array($parameters)) {
+            throw new \InvalidArgumentException('Parameters must be an array!');
+        }
+
+        return new Shortcode($name, $parameters, $content, $bbCode);
     }
 }

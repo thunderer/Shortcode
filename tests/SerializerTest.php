@@ -59,6 +59,34 @@ final class SerializerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @dataProvider provideUnserialized
+     */
+    public function testUnserialize(SerializerInterface $serializer, ShortcodeInterface $test, $text)
+    {
+        $tested = $serializer->unserialize($text);
+
+        $this->assertSame($test->getName(), $tested->getName(), 'name: '.$text);
+        $this->assertSame($test->getParameters(), $tested->getParameters(), 'parameters: '.$text);
+        $this->assertSame($test->getContent(), $tested->getContent(), 'content: '.$text);
+        $this->assertSame($test->getBbCode(), $tested->getBbCode(), 'bbCode: '.$text);
+    }
+
+    public function provideUnserialized()
+    {
+        return array(
+            array(new JsonSerializer(), new Shortcode('x', array(), null), '{"name":"x"}'),
+            array(new JsonSerializer(), new Shortcode('x', array('arg' => 'val'), null), '{"name":"x","parameters":{"arg":"val"}}'),
+            array(new JsonSerializer(), new Shortcode('x', array(), 'cnt'), '{"name":"x","content":"cnt"}'),
+            array(new YamlSerializer(), new Shortcode('x', array(), null), 'name: x'),
+            array(new YamlSerializer(), new Shortcode('x', array('arg' => 'val'), null), 'name: x'."\n".'parameters:'."\n".'  arg: val'),
+            array(new YamlSerializer(), new Shortcode('x', array(), 'cnt'), 'name: x'."\n".'content: cnt'),
+            array(new XmlSerializer(), new Shortcode('x', array(), null), '<shortcode name="x"></shortcode>'),
+            array(new XmlSerializer(), new Shortcode('x', array('arg' => 'val'), null), '<shortcode name="x"><parameters><parameter name="arg">val</parameter></parameters></shortcode>'),
+            array(new XmlSerializer(), new Shortcode('x', array(), 'cnt'), '<shortcode name="x"><content>cnt</content></shortcode>'),
+        );
+    }
+
+    /**
      * @dataProvider provideExceptions
      */
     public function testSerializerExceptions(SerializerInterface $serializer, $value, $exceptionClass)
@@ -83,6 +111,7 @@ final class SerializerTest extends \PHPUnit_Framework_TestCase
             array($json, '{"name":"x","parameters":{"key":[]}}', 'InvalidArgumentException'),
             array($yaml, 'shortcode: ', 'InvalidArgumentException'),
             array($yaml, '', 'InvalidArgumentException'),
+            array($yaml, 'name: x'."\n".'parameters: string', 'InvalidArgumentException'),
             array($xml, '<shortcode />', 'InvalidArgumentException'),
             array($xml, '<shortcode name=""><content>sss</content></shortcode>', 'InvalidArgumentException'),
             array($xml, '<shortcode name="x"><parameters><parameter>xx</parameter></parameters><content>sss</content></shortcode>', 'InvalidArgumentException'),

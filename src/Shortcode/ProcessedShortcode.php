@@ -9,6 +9,7 @@ use Thunder\Shortcode\Processor\ProcessorInterface;
  */
 final class ProcessedShortcode extends AbstractShortcode implements ParsedShortcodeInterface
 {
+    /** @var ShortcodeInterface */
     private $parent;
     private $position;
     private $namePosition;

@@ -34,7 +34,7 @@ final class HandlerContainer implements HandlerContainerInterface
 
         if (!$handler) {
             $msg = 'Failed to add an alias %s to non existent handler %s!';
-            throw new \InvalidArgumentException(sprintf($msg, $alias, $name));
+            throw new \RuntimeException(sprintf($msg, $alias, $name));
         }
 
         return $this->add($alias, function (ShortcodeInterface $shortcode) use ($handler) {

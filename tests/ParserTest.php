@@ -109,7 +109,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
 
             // multiple shortcodes
             array($s, 'Lorem [ipsum] random [code-code arg=val] which is here', array(
-                new ParsedShortcode(new Shortcode('ipsum', array(), null), '[ipsum]', 6, array('name' => 1)),
+                new ParsedShortcode(new Shortcode('ipsum', array(), null), '[ipsum]', 6),
                 new ParsedShortcode(new Shortcode('code-code', array('arg' => 'val'), null), '[code-code arg=val]', 21),
             )),
             array($s, 'x [aa] x [aa] x', array(

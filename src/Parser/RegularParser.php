@@ -64,9 +64,9 @@ final class RegularParser implements ParserInterface
         return $shortcodes;
     }
 
-    private function getObject($name, $arguments, $bbCode, $offset, $content)
+    private function getObject($name, $parameters, $bbCode, $offset, $content)
     {
-        return new ParsedShortcode(new Shortcode($name, $arguments, $content, $bbCode), $this->getBacktrack(), $offset);
+        return new ParsedShortcode(new Shortcode($name, $parameters, $content, $bbCode), $this->getBacktrack(), $offset);
     }
 
     /* --- RULES ----------------------------------------------------------- */
@@ -83,13 +83,13 @@ final class RegularParser implements ParserInterface
         if(!$this->match(self::TOKEN_OPEN, $setOffset, true)) { return false; }
         if(!$this->match(self::TOKEN_STRING, $setName, true)) { return false; }
         if(false === ($bbCode = $this->bbCode())) { return false; }
-        if(false === ($arguments = $this->arguments())) { return false; }
+        if(false === ($parameters = $this->parameters())) { return false; }
 
         // self-closing
         if($this->match(self::TOKEN_MARKER, null, true)) {
             if(!$this->match(self::TOKEN_CLOSE)) { return false; }
 
-            return $isRoot ? $this->getObject($name, $arguments, $bbCode, $offset, null) : null;
+            return $isRoot ? $this->getObject($name, $parameters, $bbCode, $offset, null) : null;
         }
 
         // just-closed or with-content
@@ -98,12 +98,12 @@ final class RegularParser implements ParserInterface
         if(false === ($content = $this->content($name))) {
             $this->backtrack();
 
-            return $isRoot ? $this->getObject($name, $arguments, $bbCode, $offset, null) : null;
+            return $isRoot ? $this->getObject($name, $parameters, $bbCode, $offset, null) : null;
         }
         $this->discardBacktrack();
         if(!$this->close($name)) { return false; }
 
-        return $isRoot ? $this->getObject($name, $arguments, $bbCode, $offset, $content) : null;
+        return $isRoot ? $this->getObject($name, $parameters, $bbCode, $offset, $content) : null;
     }
 
     private function content($name)
@@ -155,9 +155,9 @@ final class RegularParser implements ParserInterface
         return $this->match(self::TOKEN_SEPARATOR, null, true) ? $this->value() : null;
     }
 
-    private function arguments()
+    private function parameters()
     {
-        $arguments = array();
+        $parameters = array();
         $setName = function(array $token) use(&$name) { $name = $token[1]; };
 
         while(true) {
@@ -166,14 +166,14 @@ final class RegularParser implements ParserInterface
             $this->match(self::TOKEN_WS);
             if($this->lookahead(array(self::TOKEN_MARKER, self::TOKEN_CLOSE))) { break; }
             if(!$this->match(self::TOKEN_STRING, $setName, true)) { return false; }
-            if(!$this->match(self::TOKEN_SEPARATOR, null, true)) { $arguments[$name] = null; continue; }
+            if(!$this->match(self::TOKEN_SEPARATOR, null, true)) { $parameters[$name] = null; continue; }
             if(false === ($value = $this->value())) { return false; }
             $this->match(self::TOKEN_WS);
 
-            $arguments[$name] = $value;
+            $parameters[$name] = $value;
         }
 
-        return $arguments;
+        return $parameters;
     }
 
     private function value()

@@ -90,12 +90,7 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
 
     public function testParsedShortcode()
     {
-        $shortcode = new ParsedShortcode(new Shortcode('name', array('arg' => 'val'), 'content'), 'text', 12, array(
-            'name' => 15,
-            'content' => 7,
-            'marker' => 30,
-            'parameters' => 9,
-        ));
+        $shortcode = new ParsedShortcode(new Shortcode('name', array('arg' => 'val'), 'content'), 'text', 12);
 
         $this->assertSame('name', $shortcode->getName());
         $this->assertSame(array('arg' => 'val'), $shortcode->getParameters());

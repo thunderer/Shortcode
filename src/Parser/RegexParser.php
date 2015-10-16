@@ -16,14 +16,14 @@ final class RegexParser implements ParserInterface
     private $syntax;
     private $shortcodeRegex;
     private $singleShortcodeRegex;
-    private $argumentsRegex;
+    private $parametersRegex;
 
     public function __construct(SyntaxInterface $syntax = null)
     {
         $this->syntax = $syntax ?: new Syntax();
         $this->shortcodeRegex = RegexBuilderUtility::buildShortcodeRegex($this->syntax);
         $this->singleShortcodeRegex = RegexBuilderUtility::buildSingleShortcodeRegex($this->syntax);
-        $this->argumentsRegex = RegexBuilderUtility::buildArgumentsRegex($this->syntax);
+        $this->parametersRegex = RegexBuilderUtility::buildParametersRegex($this->syntax);
     }
 
     /**
@@ -60,7 +60,7 @@ final class RegexParser implements ParserInterface
 
     private function parseParameters($text)
     {
-        preg_match_all($this->argumentsRegex, $text, $argsMatches);
+        preg_match_all($this->parametersRegex, $text, $argsMatches);
 
         // loop because PHP 5.3 can't handle $this properly and I want separate methods
         $return = array();

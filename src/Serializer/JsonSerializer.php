@@ -36,7 +36,7 @@ final class JsonSerializer implements SerializerInterface
         }
 
         $name = array_key_exists('name', $data) ? $data['name'] : null;
-        $parameters = array_key_exists('parameters', $data) ? $data['parameters'] : null;
+        $parameters = array_key_exists('parameters', $data) ? $data['parameters'] : array();
         $content = array_key_exists('content', $data) ? $data['content'] : null;
         $bbCode = array_key_exists('bbCode', $data) ? $data['bbCode'] : null;
 
