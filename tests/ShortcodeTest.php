@@ -106,6 +106,6 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
     public function testShortcodeEmptyNameException()
     {
         $this->setExpectedException('InvalidArgumentException');
-        new Shortcode('', [], null);
+        new Shortcode('', array(), null);
     }
 }
