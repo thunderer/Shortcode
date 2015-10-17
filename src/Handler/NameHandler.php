@@ -8,6 +8,14 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
  */
 final class NameHandler
 {
+    /**
+     * [name /]
+     * [name]content is ignored[/name]
+     *
+     * @param ShortcodeInterface $shortcode
+     *
+     * @return string
+     */
     public function __invoke(ShortcodeInterface $shortcode)
     {
         return $shortcode->getName();

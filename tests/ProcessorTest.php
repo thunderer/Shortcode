@@ -164,6 +164,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             ->add('text', new SerializerHandler(new TextSerializer()))
             ->add('placeholder', new PlaceholderHandler())
             ->add('b', new WrapHandler('<b>', '</b>'))
+            ->add('bb', WrapHandler::createBold())
             ->add('declare', new DeclareHandler($handlers))
             ->add('url', new UrlHandler())
             ->add('email', new EmailHandler());
@@ -179,16 +180,18 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             array('[declare sample]%param%[/declare][invalid param=value]', '[invalid param=value]'),
             array('[declare]%param%[/declare][invalid param=value]', '[invalid param=value]'),
             array('[url]http://kowalczyk.cc[/url]', '<a href="http://kowalczyk.cc">http://kowalczyk.cc</a>'),
-            array('[url title="Visit!"]http://kowalczyk.cc[/url]', '<a href="http://kowalczyk.cc">Visit!</a>'),
+            array('[url="http://kowalczyk.cc"]Visit![/url]', '<a href="http://kowalczyk.cc">Visit!</a>'),
             array('[email]tomasz@kowalczyk.cc[/email]', '<a href="mailto:tomasz@kowalczyk.cc">tomasz@kowalczyk.cc</a>'),
-            array('[email title="Send!"]tomasz@kowalczyk.cc[/email]', '<a href="mailto:tomasz@kowalczyk.cc">Send!</a>'),
+            array('[email="tomasz@kowalczyk.cc"]Send![/email]', '<a href="mailto:tomasz@kowalczyk.cc">Send!</a>'),
+            array('[email="tomasz@kowalczyk.cc" /]', '<a href="mailto:tomasz@kowalczyk.cc">tomasz@kowalczyk.cc</a>'),
             array('[b]text[/b]', '<b>text</b>'),
-            array('[b]text[/b]', '<b>text</b>'),
-            array('[json arg=val]value[/json]', '{"name":"json","parameters":{"arg":"val"},"content":"value"}'),
+            array('[bb]text[/bb]', '<b>text</b>'),
+            array('[json arg=val]value[/json]', '{"name":"json","parameters":{"arg":"val"},"content":"value","bbCode":null}'),
             array('[text arg=val]value[/text]', '[text arg=val]value[/text]'),
             array('[null arg=val]value[/null]', ''),
             array('[name /]', 'name'),
             array('[content]cnt[/content]', 'cnt'),
+            array('[placeholder param=val]%param%[/placeholder]', 'val'),
             array('[placeholder param=val]%param%[/placeholder]', 'val'),
         );
     }

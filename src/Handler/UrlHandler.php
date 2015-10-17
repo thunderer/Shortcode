@@ -8,10 +8,19 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
  */
 final class UrlHandler
 {
+    /**
+     * [url="http://example.org"]Click![/url]
+     * [url="http://example.org" /]
+     * [url]http://example.org[/url]
+     *
+     * @param ShortcodeInterface $shortcode
+     *
+     * @return string
+     */
     public function __invoke(ShortcodeInterface $shortcode)
     {
-        $title = $shortcode->getParameter('title', '') ?: $shortcode->getContent();
+        $url = $shortcode->getBbCode() ?: $shortcode->getContent();
 
-        return '<a href="'.$shortcode->getContent().'">'.$title.'</a>';
+        return '<a href="'.$url.'">'.$shortcode->getContent().'</a>';
     }
 }

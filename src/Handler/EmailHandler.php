@@ -8,10 +8,20 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
  */
 final class EmailHandler
 {
+    /**
+     * [email="example@example.org"]Contact me![/email]
+     * [email="example@example.org" /]
+     * [email]example@example.org[/email]
+     *
+     * @param ShortcodeInterface $shortcode
+     *
+     * @return string
+     */
     public function __invoke(ShortcodeInterface $shortcode)
     {
-        $title = $shortcode->getParameter('title', '') ?: $shortcode->getContent();
+        $email = $shortcode->getBbCode() ?: $shortcode->getContent();
+        $content = $shortcode->getContent() === null ? $email : $shortcode->getContent();
 
-        return '<a href="mailto:'.$shortcode->getContent().'">'.$title.'</a>';
+        return '<a href="mailto:'.$email.'">'.$content.'</a>';
     }
 }

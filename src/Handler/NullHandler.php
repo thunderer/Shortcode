@@ -8,6 +8,13 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
  */
 final class NullHandler
 {
+    /**
+     * Special shortcode to discard any input and return empty text
+     *
+     * @param ShortcodeInterface $shortcode
+     *
+     * @return null
+     */
     public function __invoke(ShortcodeInterface $shortcode)
     {
         return null;

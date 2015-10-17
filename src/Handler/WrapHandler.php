@@ -17,6 +17,19 @@ final class WrapHandler
         $this->after = $after;
     }
 
+    public static function createBold()
+    {
+        return new self('<b>', '</b>');
+    }
+
+    /**
+     * [b]content[b]
+     * [strong]content[/strong]
+     *
+     * @param ShortcodeInterface $shortcode
+     *
+     * @return string
+     */
     public function __invoke(ShortcodeInterface $shortcode)
     {
         return $this->before.$shortcode->getContent().$this->after;

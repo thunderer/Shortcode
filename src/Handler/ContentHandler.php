@@ -8,6 +8,13 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
  */
 final class ContentHandler
 {
+    /**
+     * [content]text to display[/content]
+     *
+     * @param ShortcodeInterface $shortcode
+     *
+     * @return null|string
+     */
     public function __invoke(ShortcodeInterface $shortcode)
     {
         return $shortcode->getContent();
