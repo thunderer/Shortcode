@@ -18,7 +18,7 @@ final class RegexBuilderUtility
         return '~(\A'.self::createShortcodeRegexContent($syntax).'\Z)~us';
     }
 
-    public static function buildArgumentsRegex(SyntaxInterface $syntax)
+    public static function buildParametersRegex(SyntaxInterface $syntax)
     {
         $equals = self::quote($syntax->getParameterValueSeparator());
         $string = self::quote($syntax->getParameterValueDelimiter());

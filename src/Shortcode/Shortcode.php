@@ -8,6 +8,15 @@ final class Shortcode extends AbstractShortcode implements ShortcodeInterface
 {
     public function __construct($name, array $parameters, $content, $bbCode = null)
     {
+        if(!is_string($name) || empty($name)) {
+            throw new \InvalidArgumentException('Shortcode name must be a non-empty string!');
+        }
+
+        $isStringOrNull = function($value) { return is_string($value) || is_null($value); };
+        if(count(array_filter($parameters, $isStringOrNull)) !== count($parameters)) {
+            throw new \InvalidArgumentException('Parameter values must be either string or empty (null)!');
+        }
+
         $this->name = $name;
         $this->parameters = $parameters;
         $this->content = $content;

@@ -38,7 +38,7 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
             array('[x arg=val][/x]', 'x', array('arg' => 'val'), ''),
             array('[x arg=val]inner[/x]', 'x', array('arg' => 'val'), 'inner'),
             array('[x arg="val val"]inner[/x]', 'x', array('arg' => 'val val'), 'inner'),
-            );
+        );
     }
 
     public function testObject()
@@ -90,12 +90,7 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
 
     public function testParsedShortcode()
     {
-        $shortcode = new ParsedShortcode(new Shortcode('name', array('arg' => 'val'), 'content'), 'text', 12, array(
-            'name' => 15,
-            'content' => 7,
-            'marker' => 30,
-            'parameters' => 9,
-        ));
+        $shortcode = new ParsedShortcode(new Shortcode('name', array('arg' => 'val'), 'content'), 'text', 12);
 
         $this->assertSame('name', $shortcode->getName());
         $this->assertSame(array('arg' => 'val'), $shortcode->getParameters());
@@ -106,5 +101,11 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(false, $shortcode->withContent(null)->hasContent());
         $this->assertSame('another', $shortcode->withContent('another')->getContent());
+    }
+
+    public function testShortcodeEmptyNameException()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        new Shortcode('', [], null);
     }
 }

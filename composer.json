@@ -15,6 +15,11 @@
     "require-dev": {
         "phpunit/phpunit": "~4.1"
     },
+    "suggest": {
+        "symfony/yaml": "if you want to use YAML serializer",
+        "ext-dom": "if you want to use XML serializer",
+        "ext-json": "if you want to use JSON serializer"
+    },
     "autoload": {
         "psr-4": {
             "Thunder\\Shortcode\\": "src/",

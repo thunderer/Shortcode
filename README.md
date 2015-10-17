@@ -200,13 +200,10 @@ $shortcode = $parser->parse('[[code arg==""value other""]]content[[//code]]');
 
 Looking for contribution ideas? Here you are:
 
-* XML serializer,
-* YAML serializer,
 * specialized exceptions classes,
 * example handlers for common shortcodes (`[b]`, `[i]`, `[url]`),
 * specialized parameter values (`array=value,value`, `map=key:value,key:value`),
 * events fired at various stages of text processing,
-* BBCode syntax `[code="argument" arg=val]content[/code]`,
 * ...your idea?
 
 ## License

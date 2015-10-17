@@ -47,7 +47,7 @@ final class HandlerContainerTest extends \PHPUnit_Framework_TestCase
     public function testExceptionIfAliasingNonExistentHandler()
     {
         $handlers = new HandlerContainer();
-        $this->setExpectedException('InvalidArgumentException');
+        $this->setExpectedException('RuntimeException');
         $handlers->addAlias('m', 'missing');
     }
 
@@ -56,15 +56,17 @@ final class HandlerContainerTest extends \PHPUnit_Framework_TestCase
         $handlers = new HandlerContainer();
         $handlers->add('code', function () {});
         $handlers->addAlias('c', 'code');
-        $handlers = new ImmutableHandlerContainer($handlers);
+        $imHandlers = new ImmutableHandlerContainer($handlers);
+        $handlers->add('not', function() {});
 
-        $this->assertNull($handlers->get('missing'));
-        $this->assertNotNull($handlers->get('code'));
-        $this->assertNotNull($handlers->get('c'));
+        $this->assertNull($imHandlers->get('missing'));
+        $this->assertNotNull($imHandlers->get('code'));
+        $this->assertNotNull($imHandlers->get('c'));
+        $this->assertNull($imHandlers->get('not'));
 
         $defaultHandlers = new HandlerContainer();
         $defaultHandlers->setDefault(function () {});
-        $defaultHandlers = new ImmutableHandlerContainer($defaultHandlers);
-        $this->assertNotNull($defaultHandlers->get('missing'));
+        $imDefaultHandlers = new ImmutableHandlerContainer($defaultHandlers);
+        $this->assertNotNull($imDefaultHandlers->get('missing'));
     }
 }
