@@ -3,6 +3,7 @@ namespace Thunder\Shortcode\Tests;
 
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\HandlerContainer\ImmutableHandlerContainer;
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -15,6 +16,33 @@ final class HandlerContainerTest extends \PHPUnit_Framework_TestCase
         $handlers->add('name', function () {});
         $this->setExpectedException('RuntimeException');
         $handlers->add('name', function () {});
+    }
+
+    public function testRemove()
+    {
+        $handlers = new HandlerContainer();
+        $this->assertFalse($handlers->has('code'));
+        $handlers->add('code', function(ShortcodeInterface $s) {});
+        $this->assertTrue($handlers->has('code'));
+        $handlers->remove('code');
+        $this->assertFalse($handlers->has('code'));
+    }
+
+    public function testRemoveException()
+    {
+        $handlers = new HandlerContainer();
+        $this->setExpectedException('RuntimeException');
+        $handlers->remove('code');
+    }
+
+    public function testNames()
+    {
+        $handlers = new HandlerContainer();
+        $this->assertEmpty($handlers->getNames());
+        $handlers->add('code', function(ShortcodeInterface $s) {});
+        $this->assertSame(array('code'), $handlers->getNames());
+        $handlers->addAlias('c', 'code');
+        $this->assertSame(array('code', 'c'), $handlers->getNames());
     }
 
     public function testHandlerContainer()

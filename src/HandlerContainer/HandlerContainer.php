@@ -9,7 +9,7 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 final class HandlerContainer implements HandlerContainerInterface
 {
     /** @var callable[] */
-    protected $handlers = array();
+    private $handlers = array();
 
     /** @var callable */
     private $default;
@@ -42,6 +42,18 @@ final class HandlerContainer implements HandlerContainerInterface
         });
     }
 
+    public function remove($name)
+    {
+        $handler = $this->get($name);
+
+        if (!$handler) {
+            $msg = 'Failed to remove non existent handler %s!';
+            throw new \RuntimeException(sprintf($msg, $name));
+        }
+
+        unset($this->handlers[$name]);
+    }
+
     public function setDefault($handler)
     {
         $this->guardHandler($handler);
@@ -51,12 +63,17 @@ final class HandlerContainer implements HandlerContainerInterface
         return $this;
     }
 
+    public function getNames()
+    {
+        return array_keys($this->handlers);
+    }
+
     public function get($name)
     {
         return $this->has($name) ? $this->handlers[$name] : ($this->default ?: null);
     }
 
-    private function has($name)
+    public function has($name)
     {
         return array_key_exists($name, $this->handlers);
     }
