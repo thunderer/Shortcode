@@ -37,9 +37,7 @@ final class HandlerContainer implements HandlerContainerInterface
             throw new \RuntimeException(sprintf($msg, $alias, $name));
         }
 
-        return $this->add($alias, function (ShortcodeInterface $shortcode) use ($handler) {
-            return call_user_func_array($handler, array($shortcode));
-        });
+        return $this->add($alias, $handler);
     }
 
     public function remove($name)

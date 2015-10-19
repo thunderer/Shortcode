@@ -222,4 +222,17 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $processor->process('[other]');
         $processor->process('[random]');
     }
+
+    public function testValidProcessAfterHandlerRemoval()
+    {
+        $handlers = new HandlerContainer();
+        $handlers->add('name', function(ShortcodeInterface $s) { return $s->getName(); });
+        $handlers->addAlias('n', 'name');
+        $processor = new Processor(new RegexParser(), $handlers);
+        $this->assertSame('n', $processor->process('[n]'));
+        $this->assertSame('name', $processor->process('[name]'));
+        $handlers->remove('name');
+        $this->assertSame('n', $processor->process('[n]'));
+        $this->assertSame('[name]', $processor->process('[name]'));
+    }
 }
