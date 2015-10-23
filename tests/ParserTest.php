@@ -4,6 +4,7 @@ namespace Thunder\Shortcode\Tests;
 use Thunder\Shortcode\Parser\RegularParser;
 use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Parser\RegexParser;
+use Thunder\Shortcode\Parser\WordpressParser;
 use Thunder\Shortcode\Shortcode\ParsedShortcode;
 use Thunder\Shortcode\Shortcode\Shortcode;
 use Thunder\Shortcode\Syntax\CommonSyntax;
@@ -26,7 +27,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
         $parsed = $parser->parse($code);
 
         $count = count($tested);
-        $this->assertSame($count, count($parsed));
+        $this->assertSame($count, count($parsed), 'counts');
         for ($i = 0; $i < $count; $i++) {
             $this->assertSame($tested[$i]->getName(), $parsed[$i]->getName(), 'name');
             $this->assertSame($tested[$i]->getParameters(), $parsed[$i]->getParameters(), 'parameters');
@@ -109,7 +110,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
 
             // multiple shortcodes
             array($s, 'Lorem [ipsum] random [code-code arg=val] which is here', array(
-                new ParsedShortcode(new Shortcode('ipsum', array(), null), '[ipsum]', 6),
+                new ParsedShortcode(new Shortcode('ipsum', array(), null), '[ipsum]', 6, array('name' => 1)),
                 new ParsedShortcode(new Shortcode('code-code', array('arg' => 'val'), null), '[code-code arg=val]', 21),
             )),
             array($s, 'x [aa] x [aa] x', array(
@@ -151,19 +152,47 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
             )),
         );
 
+        /**
+         * WordPress can't handle:
+         *   - incorrect shortcode opening tag (blindly matches everything
+         *     between opening token and closing token)
+         *   - spaces between shortcode open tag and its name ([  name]),
+         *   - spaces around BBCode part ([name  = "bbcode"]),
+         *   - escaped tokens anywhere in the arguments ([x arg=" \" "]),
+         *   - configurable syntax (that's intended).
+         *
+         * Tests cases from array above with identifiers in the array below must be skipped.
+         */
+        $wordpressSkip = array(3, 13, 18, 19, 20, 22, 29, 30, 31);
         $result = array();
-        foreach($tests as $test) {
+        foreach($tests as $key => $test) {
             $syntax = array_shift($test);
 
             $result[] = array_merge(array(new RegexParser($syntax)), $test);
             $result[] = array_merge(array(new RegularParser($syntax)), $test);
+            if(!in_array($key, $wordpressSkip)) {
+                $result[] = array_merge(array(new WordpressParser()), $test);
+            }
         }
 
         return $result;
     }
 
-    public function testRegularParserInstance()
+    public function testWordPress()
     {
+        $parser = new WordpressParser();
+
+        $this->testParser($parser, '[code arg="<html" oth=\'val\']', array(
+            new ParsedShortcode(new Shortcode('code', array('arg' => '', 'oth' => 'val'), null), '[code arg="<html" oth=\'val\']', 0)
+        ));
+        $this->testParser($parser, '[code "xxx"]', array(
+            new ParsedShortcode(new Shortcode('code', array('xxx' => null), null, null), '[code "xxx"]', 0)
+        ));
+    }
+
+    public function testInstances()
+    {
+        $this->assertInstanceOf('Thunder\Shortcode\Parser\WordPressParser', new WordpressParser());
         $this->assertInstanceOf('Thunder\Shortcode\Parser\RegularParser', new RegularParser());
     }
 }
