@@ -17,6 +17,7 @@ final class ProcessorContext
     /** @var ProcessorInterface */
     public $processor = null;
 
+    public $originalContent = null;
     public $position = 0;
     public $namePosition = array();
     public $text = '';

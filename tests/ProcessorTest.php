@@ -5,6 +5,8 @@ use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegexParser;
 use Thunder\Shortcode\Parser\RegularParser;
 use Thunder\Shortcode\Processor\Processor;
+use Thunder\Shortcode\Shortcode\ParsedShortcode;
+use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 use Thunder\Shortcode\Tests\Fake\ReverseShortcode;
@@ -206,6 +208,49 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $processor = new Processor(new RegexParser(), $handlers);
 
         $this->assertSame('namerandom', $processor->process('[name][other][/name][random]'));
+    }
+
+    public function testStripOuter()
+    {
+        $handlers = new HandlerContainer();
+        $handlers->add('q', function(ShortcodeInterface $s) {
+            return $s->getContent();
+        });
+        $handlers->add('p', function(ProcessedShortcode $s) use(&$handlers) {
+            $parser = new RegexParser();
+            $processor = new Processor($parser, $handlers);
+            $shortcodes = $parser->parse($s->getOriginalContent());
+
+            return array_reduce($shortcodes, function($result, ParsedShortcodeInterface $s) use($processor) {
+                return $result.$processor->process($s->getText());
+            }, '');
+        });
+        $processor = new Processor(new RegexParser(), $handlers);
+
+        $this->assertSame('x ab y', $processor->process('x [p] [q]a[/q] [q]b[/q] [/p] y'));
+        $this->assertSame('x ab c y', $processor->process('x [p] [q]a[/q] [q]b [q]c[/q][/q] [/p] y'));
+    }
+
+    public function testOriginalContent()
+    {
+        $handlers = new HandlerContainer();
+        $handlers->add('p', function(ProcessedShortcode $s) { return $s->getOriginalContent(); });
+        $handlers->addAlias('q', 'p');
+        $processor = new Processor(new RegexParser(), $handlers);
+
+        $this->assertSame('x  [q]a[/q] [q]b[/q]  y', $processor->process('x [p] [q]a[/q] [q]b[/q] [/p] y'));
+    }
+
+    public function testMultipleParent()
+    {
+        $parents = 0;
+        $handlers = new HandlerContainer();
+        $handlers->add('p', function(ProcessedShortcode $s) use(&$parents) { $parents += $s->getParent() ? 1 : 0; });
+        $handlers->addAlias('q', 'p');
+        $processor = new Processor(new RegexParser(), $handlers);
+        $processor->process('x [p] [q]a[/q] [q]b[/q] [q]c[/q] [/p] y');
+
+        $this->assertSame(3, $parents);
     }
 
     public function testPreventInfiniteLoop()

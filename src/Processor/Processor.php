@@ -5,6 +5,7 @@ use Thunder\Shortcode\HandlerContainer\HandlerContainerInterface;
 use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -39,7 +40,7 @@ final class Processor implements ProcessorInterface
 
         while ($iterations--) {
             $context->iterationNumber++;
-            $newText = $this->processIteration($text, $context);
+            $newText = $this->processIteration($text, $context, null);
             if ($newText === $text) {
                 break;
             }
@@ -50,7 +51,7 @@ final class Processor implements ProcessorInterface
         return $text;
     }
 
-    private function processIteration($text, ProcessorContext $context)
+    private function processIteration($text, ProcessorContext $context, ShortcodeInterface $parent = null)
     {
         if (null !== $this->recursionDepth && $context->recursionLevel > $this->recursionDepth) {
             return $text;
@@ -60,6 +61,7 @@ final class Processor implements ProcessorInterface
         $shortcodes = $this->parser->parse($text);
         $replaces = array();
         foreach ($shortcodes as $shortcode) {
+            $context->parent = $parent;
             $this->prepareHandlerContext($shortcode, $context);
             $handler = $this->handlers->get($shortcode->getName());
             $replace = $this->processHandler($shortcode, $context, $handler);
@@ -83,6 +85,7 @@ final class Processor implements ProcessorInterface
         $context->shortcodeText = $shortcode->getText();
         $context->offset = $shortcode->getOffset();
         $context->shortcode = $shortcode;
+        $context->originalContent = $shortcode->getContent();
     }
 
     private function processHandler(ParsedShortcodeInterface $parsed, ProcessorContext $context, $handler)
@@ -99,10 +102,8 @@ final class Processor implements ProcessorInterface
     {
         if ($this->autoProcessContent && null !== $shortcode->getContent()) {
             $context->recursionLevel++;
-            $context->parent = $shortcode;
             // this is safe from using max iterations value because it's manipulated in process() method
-            $content = $this->processIteration($shortcode->getContent(), $context);
-            $context->parent = null;
+            $content = $this->processIteration($shortcode->getContent(), $context, $shortcode);
             $context->recursionLevel--;
 
             return $shortcode->withContent($content);
