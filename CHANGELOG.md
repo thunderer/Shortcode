@@ -1,11 +1,15 @@
 # Changelog
 
-## Version 1.*
+## Version 0.*
 
-* v1.0.0 (28.08.2015)
+* v0.5.0 (28.10.2015)
 
+  * fixed bug with parent shortcode not being correctly set when there was more than one shortcode at given recursion level,
   * fixed bug which caused shortcode content to be returned without modification when auto processing was enabled, there was no handler for that shortcode, but there were handlers for inner shortcodes,
-  * AbstractShortcode::getParameter() does not throw exception for missing parameter without defualt value,
+  * added example demonstrating how to remove content outside shortcodes,
+  * added `ProcessedShortcode::getTextContent()` to allow returning unprocessed content regardless of auto processing setting value,
+  * added XML and YAML serializers,
+  * AbstractShortcode::getParameter() does not throw exception for missing parameter without default value,
   * removed `create*()` methods from `ShortcodeFacade`, now all dependencies construction is inside the constructor,
   * removed classes and methods deprecated in previous releases,
   * removed `RegexExtractor` and `ExtractorInterface`, its functionality was moved to `Parser` - now it returns instances of `ParsedShortcodeInterface`,
@@ -22,13 +26,13 @@
     * `setAutoProcessContent()` &raquo; `withAutoProcessContent()`,
   * extracted `HandlerContainerInterface` and its default implementation `HandlerContainer` from `Processor`,
   * `Processor` now requires instance of `HandlerContainer`,
+  * introduced `RegularParser` with dedicated parser implementation that correctly handles nested shortcodes,
+  * introduced `WordpressParser` with slightly refactored implementation of WordPress' regex-based shortcodes in case anyone would like full compatibility,
   * introduced `ImmutableHandlerContainer` as an alternative implementation,
   * introduced `ProcessorContext` to store internal state when processing text,
   * introduced `AbstractShortcode`, restored `final` on regular `Shortcode`,
   * `ProcessedShortcode` can be now created with static method `createFromContext()` using instance of `ProcessorContext`,
   * introduced `ParsedShortcode` and `ParsedShortcodeInterface` that extends `ShortcodeInterface` with position and exact text match.
-
-## Version 0.*
 
 * v0.4.0 (15.07.2015)
 

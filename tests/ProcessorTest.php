@@ -5,7 +5,6 @@ use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegexParser;
 use Thunder\Shortcode\Parser\RegularParser;
 use Thunder\Shortcode\Processor\Processor;
-use Thunder\Shortcode\Shortcode\ParsedShortcode;
 use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
