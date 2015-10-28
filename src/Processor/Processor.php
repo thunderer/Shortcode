@@ -57,11 +57,11 @@ final class Processor implements ProcessorInterface
             return $text;
         }
 
+        $context->parent = $parent;
         $context->text = $text;
         $shortcodes = $this->parser->parse($text);
         $replaces = array();
         foreach ($shortcodes as $shortcode) {
-            $context->parent = $parent;
             $this->prepareHandlerContext($shortcode, $context);
             $handler = $this->handlers->get($shortcode->getName());
             $replace = $this->processHandler($shortcode, $context, $handler);
@@ -103,7 +103,7 @@ final class Processor implements ProcessorInterface
         if ($this->autoProcessContent && null !== $shortcode->getContent()) {
             $context->recursionLevel++;
             // this is safe from using max iterations value because it's manipulated in process() method
-            $content = $this->processIteration($shortcode->getContent(), $context, $shortcode);
+            $content = $this->processIteration($shortcode->getContent(), clone $context, $shortcode);
             $context->recursionLevel--;
 
             return $shortcode->withContent($content);
