@@ -219,7 +219,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $handlers->add('p', function(ProcessedShortcode $s) use(&$handlers) {
             $parser = new RegexParser();
             $processor = new Processor($parser, $handlers);
-            $shortcodes = $parser->parse($s->getOriginalContent());
+            $shortcodes = $parser->parse($s->getTextContent());
 
             return array_reduce($shortcodes, function($result, ParsedShortcodeInterface $s) use($processor) {
                 return $result.$processor->process($s->getText());
@@ -234,7 +234,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
     public function testOriginalContent()
     {
         $handlers = new HandlerContainer();
-        $handlers->add('p', function(ProcessedShortcode $s) { return $s->getOriginalContent(); });
+        $handlers->add('p', function(ProcessedShortcode $s) { return $s->getTextContent(); });
         $handlers->addAlias('q', 'p');
         $processor = new Processor(new RegexParser(), $handlers);
 

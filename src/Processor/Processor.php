@@ -85,7 +85,7 @@ final class Processor implements ProcessorInterface
         $context->shortcodeText = $shortcode->getText();
         $context->offset = $shortcode->getOffset();
         $context->shortcode = $shortcode;
-        $context->originalContent = $shortcode->getContent();
+        $context->textContent = $shortcode->getContent();
     }
 
     private function processHandler(ParsedShortcodeInterface $parsed, ProcessorContext $context, $handler)

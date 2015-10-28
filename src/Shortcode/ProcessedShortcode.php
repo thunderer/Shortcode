@@ -14,7 +14,7 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
     private $position;
     private $namePosition;
     private $text;
-    private $originalContent;
+    private $textContent;
     private $offset;
     private $shortcodeText;
     private $iterationNumber;
@@ -35,7 +35,7 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
         $self->parameters = $context->shortcode->getParameters();
         $self->content = $context->shortcode->getContent();
         $self->bbCode = $context->shortcode->getBbCode();
-        $self->originalContent = $context->originalContent;
+        $self->textContent = $context->textContent;
 
         // runtime context
         $self->parent = $context->parent;
@@ -68,9 +68,9 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
         return $this->parent;
     }
 
-    public function getOriginalContent()
+    public function getTextContent()
     {
-        return $this->originalContent;
+        return $this->textContent;
     }
 
     public function getPosition()
