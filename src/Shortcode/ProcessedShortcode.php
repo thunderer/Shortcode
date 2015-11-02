@@ -21,6 +21,7 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
     private $recursionLevel;
     /** @var ProcessorInterface */
     private $processor;
+    private $results;
 
     private function __construct()
     {
@@ -43,6 +44,7 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
         $self->namePosition = $context->namePosition[$self->name];
         $self->text = $context->text;
         $self->shortcodeText = $context->shortcodeText;
+        $self->results = $context->results;
 
         // processor state
         $self->iterationNumber = $context->iterationNumber;
@@ -111,5 +113,10 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
     public function getProcessor()
     {
         return $this->processor;
+    }
+
+    public function getResults()
+    {
+        return $this->results;
     }
 }
