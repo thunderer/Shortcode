@@ -61,6 +61,9 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         return array(
             array('[name]', 'name'),
             array('[content]random[/content]', 'random'),
+            array('[content]象形字[/content]', '象形字'),
+            array('xxx [content]象形字[/content] yyy', 'xxx 象形字 yyy'),
+            array('xxx [content]ąćęłńóśżź ąćęłńóśżź[/content] yyy', 'xxx ąćęłńóśżź ąćęłńóśżź yyy'),
             array('[name]random[/other]', 'namerandom[/other]'),
             array('[name][other]random[/other]', 'name[other]random[/other]'),
             array('[content]random-[name]-random[/content]', 'random-name-random'),

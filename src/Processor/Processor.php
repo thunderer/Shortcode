@@ -72,7 +72,7 @@ final class Processor implements ProcessorInterface
         $replaces = array_reverse(array_filter($replaces));
 
         return array_reduce($replaces, function ($state, array $item) {
-            return substr_replace($state, $item[0], $item[1], $item[2]);
+            return mb_substr($state, 0, $item[1]).$item[0].mb_substr($state, $item[1] + $item[2]);
         }, $text);
     }
 
