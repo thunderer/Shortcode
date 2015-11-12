@@ -2,6 +2,10 @@
 
 ## Version 0.*
 
+* v0.5.1 (12.11.2015)
+
+  * fixed bug leaving part of shortcode text when it contained multibyte characters.
+
 * v0.5.0 (28.10.2015)
 
   * fixed bug with parent shortcode not being correctly set when there was more than one shortcode at given recursion level,
