@@ -1,13 +1,12 @@
 <?php
 namespace Thunder\Shortcode\Event;
 
-use Symfony\Component\EventDispatcher\Event;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-class FilterShortcodesEvent extends Event
+class FilterShortcodesEvent
 {
     private $parent;
     private $shortcodes;
