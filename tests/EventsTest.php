@@ -1,8 +1,9 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Thunder\Shortcode\EventContainer\EventContainer;
 use Thunder\Shortcode\Event\FilterShortcodesEvent;
+use Thunder\Shortcode\EventDispatcher\EventDispatcher;
 use Thunder\Shortcode\Events;
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegularParser;
@@ -21,14 +22,16 @@ final class EventsTest extends \PHPUnit_Framework_TestCase
         $handlers->add('yes', function(ShortcodeInterface $s) { return 'yes['.$s->getContent().']'; });
         $handlers->add('no', function(ShortcodeInterface $s) { return 'nope'; });
 
-        $events = new EventDispatcher();
+        $events = new EventContainer();
         $events->addListener(Events::FILTER_SHORTCODES, function(FilterShortcodesEvent $event) {
             $event->setShortcodes(array_filter($event->getShortcodes(), function(ShortcodeInterface $s) {
                 return $s->getName() !== 'no';
             }));
         });
 
-        $processor = new Processor(new RegularParser(), $handlers, $events);
+        $dispatcher = new EventDispatcher($events);
+
+        $processor = new Processor(new RegularParser(), $handlers, $dispatcher);
 
         $this->assertSame('x root[ yes[ yes[] ] yes[ [no /] ] ] y', $processor->process('x [root] [yes] [yes/] [/yes] [yes] [no /] [/yes] [/root] y'));
     }

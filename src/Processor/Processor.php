@@ -1,10 +1,10 @@
 <?php
 namespace Thunder\Shortcode\Processor;
 
-use Symfony\Component\EventDispatcher\EventDispatcher;
 use Thunder\Shortcode\Event\FilterShortcodesEvent;
+use Thunder\Shortcode\EventDispatcher\EventDispatcherInterface;
 use Thunder\Shortcode\Events;
-use Thunder\Shortcode\HandlerContainer\HandlerContainerInterface;
+use Thunder\Shortcode\HandlerContainer\HandlerContainerInterface as Handlers;
 use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
@@ -22,11 +22,11 @@ final class Processor implements ProcessorInterface
     private $autoProcessContent = true; // automatically process shortcode content
     private $eventDispatcher;
 
-    public function __construct(ParserInterface $parser, HandlerContainerInterface $handlers, EventDispatcher $dispatcher = null)
+    public function __construct(ParserInterface $parser, Handlers $handlers, EventDispatcherInterface $events = null)
     {
         $this->parser = $parser;
         $this->handlers = $handlers;
-        $this->eventDispatcher = $dispatcher ?: new EventDispatcher();
+        $this->eventDispatcher = $events;
     }
 
     /**
@@ -56,6 +56,11 @@ final class Processor implements ProcessorInterface
         return $text;
     }
 
+    private function dispatchEvent($name, $event)
+    {
+        return $this->eventDispatcher ? $this->eventDispatcher->dispatch($name, $event) : $event;
+    }
+
     private function processIteration($text, ProcessorContext $context, ShortcodeInterface $parent = null)
     {
         if (null !== $this->recursionDepth && $context->recursionLevel > $this->recursionDepth) {
@@ -66,7 +71,7 @@ final class Processor implements ProcessorInterface
         $context->text = $text;
         $event = new FilterShortcodesEvent($this->parser->parse($text), $parent);
         /** @var $event FilterShortcodesEvent */
-        $event = $this->eventDispatcher->dispatch(Events::FILTER_SHORTCODES, $event);
+        $event = $this->dispatchEvent(Events::FILTER_SHORTCODES, $event);
         /** @var $shortcodes ParsedShortcodeInterface[] */
         $shortcodes = $event->getShortcodes();
         $replaces = array();
