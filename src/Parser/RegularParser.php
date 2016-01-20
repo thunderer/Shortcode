@@ -83,7 +83,7 @@ final class RegularParser implements ParserInterface
         if(!$this->match(self::TOKEN_OPEN, $setOffset, true)) { return false; }
         if(!$this->match(self::TOKEN_STRING, $setName, false)) { return false; }
         if($this->lookahead(self::TOKEN_STRING, null)) { return false; }
-        if(!preg_match_all('/^[a-zA-Z0-9-]+$/', $name)) { return false; }
+        if(!preg_match_all('/^[a-zA-Z0-9-]+$/', $name, $matches)) { return false; }
         $this->match(self::TOKEN_WS);
         if(false === ($bbCode = $this->bbCode())) { return false; }
         if(false === ($parameters = $this->parameters())) { return false; }
