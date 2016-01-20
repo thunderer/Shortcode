@@ -45,6 +45,8 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
         $tests = array(
             // invalid
             array($s, '', array()),
+            array($s, '![](image.jpg)', array()),
+            array($s, 'x html([a. title][, alt][, classes]) x', array()),
             array($s, '[/y]', array()),
             array($s, '[sc', array()),
             array($s, '[sc / [/sc]', array()),
@@ -163,7 +165,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
          *
          * Tests cases from array above with identifiers in the array below must be skipped.
          */
-        $wordpressSkip = array(3, 13, 18, 19, 20, 22, 29, 30, 31);
+        $wordpressSkip = array(2, 5, 15, 20, 21, 22, 24, 31, 32, 33);
         $result = array();
         foreach($tests as $key => $test) {
             $syntax = array_shift($test);
