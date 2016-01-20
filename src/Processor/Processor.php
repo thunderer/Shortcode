@@ -64,6 +64,9 @@ final class Processor implements ProcessorInterface
         foreach ($shortcodes as $shortcode) {
             $this->prepareHandlerContext($shortcode, $context);
             $handler = $this->handlers->get($shortcode->getName());
+            if (is_null($handler)) {
+                continue;
+            }
             $replace = $this->processHandler($shortcode, $context, $handler);
             $length = mb_strlen($shortcode->getText());
 
