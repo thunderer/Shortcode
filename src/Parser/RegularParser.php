@@ -12,9 +12,11 @@ use Thunder\Shortcode\Syntax\SyntaxInterface;
 final class RegularParser implements ParserInterface
 {
     private $lexerRules;
-    /** @var \SplStack */
     private $tokens;
+    private $tokensCount;
+    private $position;
     private $backtracks;
+    private $syntax;
 
     const TOKEN_OPEN = 1;
     const TOKEN_CLOSE = 2;
@@ -26,16 +28,16 @@ final class RegularParser implements ParserInterface
 
     public function __construct(SyntaxInterface $syntax = null)
     {
-        $syntax = $syntax ?: new CommonSyntax();
+        $this->syntax = $syntax ?: new CommonSyntax();
 
         $quote = function($text) { return '~^('.preg_replace('/(.)/us', '\\\\$0', $text).')~us'; };
 
         $this->lexerRules = array(
-            self::TOKEN_OPEN => $quote($syntax->getOpeningTag()),
-            self::TOKEN_CLOSE => $quote($syntax->getClosingTag()),
-            self::TOKEN_MARKER => $quote($syntax->getClosingTagMarker()),
-            self::TOKEN_SEPARATOR => $quote($syntax->getParameterValueSeparator()),
-            self::TOKEN_DELIMITER => $quote($syntax->getParameterValueDelimiter()),
+            self::TOKEN_OPEN => $quote($this->syntax->getOpeningTag()),
+            self::TOKEN_CLOSE => $quote($this->syntax->getClosingTag()),
+            self::TOKEN_MARKER => $quote($this->syntax->getClosingTagMarker()),
+            self::TOKEN_SEPARATOR => $quote($this->syntax->getParameterValueSeparator()),
+            self::TOKEN_DELIMITER => $quote($this->syntax->getParameterValueDelimiter()),
             self::TOKEN_WS => '~^(\s+)~us',
             self::TOKEN_STRING => '~^([\w-]+|\\\\.|.)~us',
         );
@@ -48,18 +50,22 @@ final class RegularParser implements ParserInterface
      */
     public function parse($text)
     {
+        $encoding = mb_internal_encoding();
         $this->tokens = $this->tokenize($text);
         $this->backtracks = array();
+        $this->position = 0;
+        $this->tokensCount = count($this->tokens);
 
         $shortcodes = array();
-        while(false === $this->tokens->isEmpty()) {
-            while(!$this->tokens->isEmpty() && !$this->lookahead(self::TOKEN_OPEN)) {
-                $this->tokens->pop();
+        while($this->position < $this->tokensCount) {
+            while($this->position < $this->tokensCount && !$this->lookahead(self::TOKEN_OPEN)) {
+                $this->position++;
             }
             if($shortcode = $this->shortcode(true)) {
                 $shortcodes[] = $shortcode;
             }
         }
+        mb_internal_encoding($encoding);
 
         return $shortcodes;
     }
@@ -103,7 +109,7 @@ final class RegularParser implements ParserInterface
 
             return $isRoot ? $this->getObject($name, $parameters, $bbCode, $offset, null) : null;
         }
-        $this->discardBacktrack();
+        array_pop($this->backtracks);
         if(!$this->close($name)) { return false; }
 
         return $isRoot ? $this->getObject($name, $parameters, $bbCode, $offset, $content) : null;
@@ -114,7 +120,7 @@ final class RegularParser implements ParserInterface
         $content = null;
         $appendContent = function(array $token) use(&$content) { $content .= $token[1]; };
 
-        while(!$this->tokens->isEmpty()) {
+        while($this->position < $this->tokensCount) {
             while($this->match(array(self::TOKEN_STRING, self::TOKEN_WS), $appendContent)) {
                 continue;
             }
@@ -137,7 +143,7 @@ final class RegularParser implements ParserInterface
             $this->match(null, $appendContent);
         }
 
-        return $this->tokens->isEmpty() ? false : $content;
+        return $this->position < $this->tokensCount ? $content : false;
     }
 
     private function close($openingName)
@@ -185,7 +191,7 @@ final class RegularParser implements ParserInterface
         $appendValue = function(array $token) use(&$value) { $value .= $token[1]; };
 
         if($this->match(self::TOKEN_DELIMITER)) {
-            while(!$this->tokens->isEmpty() && !$this->lookahead(self::TOKEN_DELIMITER)) {
+            while($this->position < $this->tokensCount && !$this->lookahead(self::TOKEN_DELIMITER)) {
                 $this->match(null, $appendValue);
             }
 
@@ -197,11 +203,6 @@ final class RegularParser implements ParserInterface
 
     /* --- PARSER ---------------------------------------------------------- */
 
-    private function discardBacktrack()
-    {
-        return array_pop($this->backtracks);
-    }
-
     private function beginBacktrack()
     {
         $this->backtracks[] = array();
@@ -209,15 +210,20 @@ final class RegularParser implements ParserInterface
 
     private function getBacktrack()
     {
-        return implode('', array_map(function(array $token) { return $token[1]; }, $this->discardBacktrack()));
+        // switch from array_map() to array_column() when dropping support for PHP <5.5
+        return implode('', array_map(function(array $token) { return $token[1]; }, array_pop($this->backtracks)));
     }
 
     private function backtrack()
     {
-        foreach(array_reverse($this->discardBacktrack()) as $token) {
-            $this->tokens->push($token);
+        $tokens = array_pop($this->backtracks);
+        $count = count($tokens);
+        $this->position -= $count;
 
-            foreach($this->backtracks as &$backtrack) {
+        foreach($this->backtracks as &$backtrack) {
+            // array_pop() in loop is much faster than array_slice() because
+            // it operates directly on the passed array
+            for($i = 0; $i < $count; $i++) {
                 array_pop($backtrack);
             }
         }
@@ -225,12 +231,12 @@ final class RegularParser implements ParserInterface
 
     private function lookahead($type, $callback = null)
     {
-        if($this->tokens->isEmpty()) {
+        if($this->position >= $this->tokensCount) {
             return false;
         }
 
         $type = (array)$type;
-        $token = $this->tokens->top();
+        $token = $this->tokens[$this->position];
         if(!empty($type) && !in_array($token[0], $type)) {
             return false;
         }
@@ -243,12 +249,12 @@ final class RegularParser implements ParserInterface
 
     private function match($type, $callbacks = null, $ws = false)
     {
-        if($this->tokens->isEmpty()) {
+        if($this->position >= $this->tokensCount) {
             return false;
         }
 
         $type = (array)$type;
-        $token = $this->tokens->top();
+        $token = $this->tokens[$this->position];
         if(!empty($type) && !in_array($token[0], $type)) {
             return false;
         }
@@ -256,7 +262,7 @@ final class RegularParser implements ParserInterface
             $backtrack[] = $token;
         }
 
-        $this->tokens->pop();
+        $this->position++;
         foreach((array)$callbacks as $callback) {
             $callback($token);
         }
@@ -270,13 +276,16 @@ final class RegularParser implements ParserInterface
 
     private function tokenize($text)
     {
-        $tokens = new \SplStack();
-        $position = 0;
+        $tokens = array();
+        // performance improvement: start generating tokens after first opening
+        // tag position because it's impossible to find shortcode earlier
+        $position = mb_strpos($text, $this->syntax->getOpeningTag());
+        $text = mb_substr($text, $position);
 
         while(mb_strlen($text) > 0) {
             foreach($this->lexerRules as $token => $regex) {
                 if(preg_match($regex, $text, $matches)) {
-                    $tokens->unshift(array($token, $matches[0], $position));
+                    $tokens[] = array($token, $matches[0], $position);
                     $text = mb_substr($text, mb_strlen($matches[0]));
                     $position += mb_strlen($matches[0], 'utf-8');
                     break;
