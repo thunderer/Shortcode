@@ -52,8 +52,8 @@ final class RegularParser implements ParserInterface
         $this->backtracks = array();
 
         $shortcodes = array();
-        while(false === $this->isEof()) {
-            while(!$this->isEof() && !$this->lookahead(self::TOKEN_OPEN)) {
+        while(false === $this->tokens->isEmpty()) {
+            while(!$this->tokens->isEmpty() && !$this->lookahead(self::TOKEN_OPEN)) {
                 $this->tokens->pop();
             }
             if($shortcode = $this->shortcode(true)) {
@@ -79,7 +79,7 @@ final class RegularParser implements ParserInterface
         $setName = function(array $token) use(&$name) { $name = $token[1]; };
         $setOffset = function(array $token) use(&$offset) { $offset = $token[2]; };
 
-        !$isRoot ?: $this->beginBacktrack();
+        $isRoot && $this->beginBacktrack();
         if(!$this->match(self::TOKEN_OPEN, $setOffset, true)) { return false; }
         if(!$this->match(self::TOKEN_STRING, $setName, false)) { return false; }
         if($this->lookahead(self::TOKEN_STRING, null)) { return false; }
@@ -114,7 +114,7 @@ final class RegularParser implements ParserInterface
         $content = null;
         $appendContent = function(array $token) use(&$content) { $content .= $token[1]; };
 
-        while(!$this->isEof()) {
+        while(!$this->tokens->isEmpty()) {
             while($this->match(array(self::TOKEN_STRING, self::TOKEN_WS), $appendContent)) {
                 continue;
             }
@@ -137,7 +137,7 @@ final class RegularParser implements ParserInterface
             $this->match(null, $appendContent);
         }
 
-        return $this->isEof() ? false : $content;
+        return $this->tokens->isEmpty() ? false : $content;
     }
 
     private function close($openingName)
@@ -185,7 +185,7 @@ final class RegularParser implements ParserInterface
         $appendValue = function(array $token) use(&$value) { $value .= $token[1]; };
 
         if($this->match(self::TOKEN_DELIMITER)) {
-            while(!$this->isEof() && !$this->lookahead(self::TOKEN_DELIMITER)) {
+            while(!$this->tokens->isEmpty() && !$this->lookahead(self::TOKEN_DELIMITER)) {
                 $this->match(null, $appendValue);
             }
 
@@ -204,7 +204,7 @@ final class RegularParser implements ParserInterface
 
     private function beginBacktrack()
     {
-        array_push($this->backtracks, array());
+        $this->backtracks[] = array();
     }
 
     private function getBacktrack()
@@ -223,14 +223,9 @@ final class RegularParser implements ParserInterface
         }
     }
 
-    private function isEof()
-    {
-        return $this->tokens->isEmpty();
-    }
-
     private function lookahead($type, $callback = null)
     {
-        if($this->isEof()) {
+        if($this->tokens->isEmpty()) {
             return false;
         }
 
@@ -241,14 +236,14 @@ final class RegularParser implements ParserInterface
         }
 
         /** @var $callback callable */
-        !$callback ?: $callback($token);
+        $callback && $callback($token);
 
         return true;
     }
 
     private function match($type, $callbacks = null, $ws = false)
     {
-        if($this->isEof()) {
+        if($this->tokens->isEmpty()) {
             return false;
         }
 
@@ -258,7 +253,7 @@ final class RegularParser implements ParserInterface
             return false;
         }
         foreach($this->backtracks as &$backtrack) {
-            array_push($backtrack, $token);
+            $backtrack[] = $token;
         }
 
         $this->tokens->pop();
@@ -266,7 +261,7 @@ final class RegularParser implements ParserInterface
             $callback($token);
         }
 
-        !$ws ?: $this->match(self::TOKEN_WS);
+        $ws && $this->match(self::TOKEN_WS);
 
         return true;
     }
