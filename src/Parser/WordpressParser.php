@@ -42,7 +42,7 @@ final class WordpressParser implements ParserInterface
             $match = $matches[0][$i][0];
             // TODO check how WordPress deals with unicode offset problems
             // which can be solved by changing the line below to
-            // $offset = mb_strlen(substr($text, 0, $matches[0][$i][1]));
+            // $offset = mb_strlen(substr($text, 0, $matches[0][$i][1]), 'utf-8');
             $offset = $matches[0][$i][1];
 
             $shortcode = new Shortcode($name, $parameters, $content, null);
