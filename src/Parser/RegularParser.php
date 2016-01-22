@@ -283,7 +283,7 @@ final class RegularParser implements ParserInterface
                 if(preg_match($regex, $text, $matches)) {
                     $tokens->unshift(array($token, $matches[0], $position));
                     $text = mb_substr($text, mb_strlen($matches[0]));
-                    $position += mb_strlen($matches[0]);
+                    $position += mb_strlen($matches[0], 'utf-8');
                     break;
                 }
             }
