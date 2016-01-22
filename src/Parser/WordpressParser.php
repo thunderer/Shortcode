@@ -39,11 +39,14 @@ final class WordpressParser implements ParserInterface
             $name = $matches[2][$i][0];
             $parameters = static::parseParameters($matches[3][$i][0]);
             $content = $matches[5][$i][0] ?: null;
-            $text = $matches[0][$i][0];
+            $match = $matches[0][$i][0];
+            // TODO check how WordPress deals with unicode offset problems
+            // which can be solved by changing the line below to
+            // $offset = mb_strlen(substr($text, 0, $matches[0][$i][1]));
             $offset = $matches[0][$i][1];
 
             $shortcode = new Shortcode($name, $parameters, $content, null);
-            $shortcodes[] = new ParsedShortcode($shortcode, $text, $offset);
+            $shortcodes[] = new ParsedShortcode($shortcode, $match, $offset);
         }
 
         return $shortcodes;
