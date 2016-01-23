@@ -50,7 +50,6 @@ final class RegularParser implements ParserInterface
      */
     public function parse($text)
     {
-        $encoding = mb_internal_encoding();
         $this->tokens = $this->tokenize($text);
         $this->backtracks = array();
         $this->position = 0;
@@ -61,18 +60,17 @@ final class RegularParser implements ParserInterface
             while($this->position < $this->tokensCount && !$this->lookahead(self::TOKEN_OPEN)) {
                 $this->position++;
             }
-            if($shortcode = $this->shortcode(true)) {
+            foreach($this->shortcode(true) ?: array() as $shortcode) {
                 $shortcodes[] = $shortcode;
             }
         }
-        mb_internal_encoding($encoding);
 
         return $shortcodes;
     }
 
-    private function getObject($name, $parameters, $bbCode, $offset, $content)
+    private function getObject($name, $parameters, $bbCode, $offset, $content, $text)
     {
-        return new ParsedShortcode(new Shortcode($name, $parameters, $content, $bbCode), $this->getBacktrack(), $offset);
+        return new ParsedShortcode(new Shortcode($name, $parameters, $content, $bbCode), $text, $offset);
     }
 
     /* --- RULES ----------------------------------------------------------- */
@@ -98,26 +96,28 @@ final class RegularParser implements ParserInterface
         if($this->match(self::TOKEN_MARKER, null, true)) {
             if(!$this->match(self::TOKEN_CLOSE)) { return false; }
 
-            return $isRoot ? $this->getObject($name, $parameters, $bbCode, $offset, null) : null;
+            return array($this->getObject($name, $parameters, $bbCode, $offset, null, $this->getBacktrack()));
         }
 
         // just-closed or with-content
         if(!$this->match(self::TOKEN_CLOSE)) { return false; }
         $this->beginBacktrack();
-        if(false === ($content = $this->content($name))) {
-            $this->backtrack();
-
-            return $isRoot ? $this->getObject($name, $parameters, $bbCode, $offset, null) : null;
+        list($content, $shortcodes) = $this->content($name);
+        if(false === $content) {
+            $this->backtrackWithoutPositionAndReturn();
+            $text = $this->backtrackWithoutPositionAndReturn();
+            return array_merge(array($this->getObject($name, $parameters, $bbCode, $offset, null, $text)), $shortcodes);
         }
         array_pop($this->backtracks);
         if(!$this->close($name)) { return false; }
 
-        return $isRoot ? $this->getObject($name, $parameters, $bbCode, $offset, $content) : null;
+        return array($this->getObject($name, $parameters, $bbCode, $offset, $content, $this->getBacktrack()));
     }
 
     private function content($name)
     {
         $content = null;
+        $shortcodes = array();
         $appendContent = function(array $token) use(&$content) { $content .= $token[1]; };
 
         while($this->position < $this->tokensCount) {
@@ -126,8 +126,9 @@ final class RegularParser implements ParserInterface
             }
 
             $this->beginBacktrack();
-            if(false !== $this->shortcode(false)) {
-                $content .= $this->getBacktrack();
+            $matchedShortcodes = $this->shortcode(false);
+            if(false !== $matchedShortcodes) {
+                $shortcodes = array_merge($shortcodes, $matchedShortcodes);
                 continue;
             }
             $this->backtrack();
@@ -136,14 +137,19 @@ final class RegularParser implements ParserInterface
             if(false !== $this->close($name)) {
                 if(null === $content) { $content = ''; }
                 $this->backtrack();
+                $shortcodes = array();
                 break;
             }
             $this->backtrack();
+            if($this->position < $this->tokensCount) {
+                $shortcodes = array();
+                break;
+            }
 
             $this->match(null, $appendContent);
         }
 
-        return $this->position < $this->tokensCount ? $content : false;
+        return array($this->position < $this->tokensCount ? $content : false, $shortcodes);
     }
 
     private function close($openingName)
@@ -203,15 +209,42 @@ final class RegularParser implements ParserInterface
 
     /* --- PARSER ---------------------------------------------------------- */
 
+    public function backtracksState()
+    {
+        return array_map(function(array $b) { return implode('', array_column($b, 1)); }, $this->backtracks);
+    }
+
     private function beginBacktrack()
     {
         $this->backtracks[] = array();
+    }
+
+    private function getSafeBacktrack()
+    {
+        // switch from array_map() to array_column() when dropping support for PHP <5.5
+        return implode('', array_map(function(array $token) { return $token[1]; }, end($this->backtracks)));
     }
 
     private function getBacktrack()
     {
         // switch from array_map() to array_column() when dropping support for PHP <5.5
         return implode('', array_map(function(array $token) { return $token[1]; }, array_pop($this->backtracks)));
+    }
+
+    private function backtrackWithoutPositionAndReturn()
+    {
+        $tokens = array_pop($this->backtracks);
+        $count = count($tokens);
+
+        foreach($this->backtracks as &$backtrack) {
+            // array_pop() in loop is much faster than array_slice() because
+            // it operates directly on the passed array
+            for($i = 0; $i < $count; $i++) {
+                array_pop($backtrack);
+            }
+        }
+
+        return implode('', array_map(function(array $token) { return $token[1]; }, $tokens));
     }
 
     private function backtrack()
