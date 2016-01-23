@@ -104,8 +104,8 @@ final class RegularParser implements ParserInterface
         $this->beginBacktrack();
         list($content, $shortcodes) = $this->content($name);
         if(false === $content) {
-            $this->backtrackWithoutPositionAndReturn();
-            $text = $this->backtrackWithoutPositionAndReturn();
+            $this->backtrack(false);
+            $text = $this->backtrack(false);
             return array_merge(array($this->getObject($name, $parameters, $bbCode, $offset, null, $text)), $shortcodes);
         }
         array_pop($this->backtracks);
@@ -209,20 +209,9 @@ final class RegularParser implements ParserInterface
 
     /* --- PARSER ---------------------------------------------------------- */
 
-    public function backtracksState()
-    {
-        return array_map(function(array $b) { return implode('', array_column($b, 1)); }, $this->backtracks);
-    }
-
     private function beginBacktrack()
     {
         $this->backtracks[] = array();
-    }
-
-    private function getSafeBacktrack()
-    {
-        // switch from array_map() to array_column() when dropping support for PHP <5.5
-        return implode('', array_map(function(array $token) { return $token[1]; }, end($this->backtracks)));
     }
 
     private function getBacktrack()
@@ -231,10 +220,13 @@ final class RegularParser implements ParserInterface
         return implode('', array_map(function(array $token) { return $token[1]; }, array_pop($this->backtracks)));
     }
 
-    private function backtrackWithoutPositionAndReturn()
+    private function backtrack($modifyPosition = true)
     {
         $tokens = array_pop($this->backtracks);
         $count = count($tokens);
+        if($modifyPosition) {
+            $this->position -= $count;
+        }
 
         foreach($this->backtracks as &$backtrack) {
             // array_pop() in loop is much faster than array_slice() because
@@ -245,21 +237,6 @@ final class RegularParser implements ParserInterface
         }
 
         return implode('', array_map(function(array $token) { return $token[1]; }, $tokens));
-    }
-
-    private function backtrack()
-    {
-        $tokens = array_pop($this->backtracks);
-        $count = count($tokens);
-        $this->position -= $count;
-
-        foreach($this->backtracks as &$backtrack) {
-            // array_pop() in loop is much faster than array_slice() because
-            // it operates directly on the passed array
-            for($i = 0; $i < $count; $i++) {
-                array_pop($backtrack);
-            }
-        }
     }
 
     private function lookahead($type, $callback = null)
@@ -312,8 +289,10 @@ final class RegularParser implements ParserInterface
         $tokens = array();
         // performance improvement: start generating tokens after first opening
         // tag position because it's impossible to find shortcode earlier
-        $position = mb_strpos($text, $this->syntax->getOpeningTag());
-        $text = mb_substr($text, $position);
+        // WARNING: mb_strpos() hangs on PHP 5.5 when used with encoding parameter
+        // $position = mb_strpos($text, $this->syntax->getOpeningTag(), 0, 'utf-8');
+        // $text = mb_substr($text, $position);
+        $position = 0;
 
         while(mb_strlen($text) > 0) {
             foreach($this->lexerRules as $token => $regex) {
