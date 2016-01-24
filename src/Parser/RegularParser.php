@@ -11,12 +11,11 @@ use Thunder\Shortcode\Syntax\SyntaxInterface;
  */
 final class RegularParser implements ParserInterface
 {
-    private $lexerRules;
+    private $lexerRegex;
     private $tokens;
     private $tokensCount;
     private $position;
     private $backtracks;
-    private $syntax;
 
     const TOKEN_OPEN = 1;
     const TOKEN_CLOSE = 2;
@@ -28,19 +27,7 @@ final class RegularParser implements ParserInterface
 
     public function __construct(SyntaxInterface $syntax = null)
     {
-        $this->syntax = $syntax ?: new CommonSyntax();
-
-        $quote = function($text) { return '~^('.preg_replace('/(.)/us', '\\\\$0', $text).')~us'; };
-
-        $this->lexerRules = array(
-            self::TOKEN_OPEN => $quote($this->syntax->getOpeningTag()),
-            self::TOKEN_CLOSE => $quote($this->syntax->getClosingTag()),
-            self::TOKEN_MARKER => $quote($this->syntax->getClosingTagMarker()),
-            self::TOKEN_SEPARATOR => $quote($this->syntax->getParameterValueSeparator()),
-            self::TOKEN_DELIMITER => $quote($this->syntax->getParameterValueDelimiter()),
-            self::TOKEN_WS => '~^(\s+)~us',
-            self::TOKEN_STRING => '~^([\w-]+|\\\\.|.)~us',
-        );
+        $this->lexerRegex = $this->getTokenizerRegex($syntax ?: new CommonSyntax());
     }
 
     /**
@@ -286,25 +273,44 @@ final class RegularParser implements ParserInterface
 
     private function tokenize($text)
     {
+        preg_match_all($this->lexerRegex, $text, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
         $tokens = array();
-        // performance improvement: start generating tokens after first opening
-        // tag position because it's impossible to find shortcode earlier
-        // WARNING: mb_strpos() hangs on PHP 5.5 when used with encoding parameter
-        // $position = mb_strpos($text, $this->syntax->getOpeningTag(), 0, 'utf-8');
-        // $text = mb_substr($text, $position);
         $position = 0;
-
-        while(mb_strlen($text) > 0) {
-            foreach($this->lexerRules as $token => $regex) {
-                if(preg_match($regex, $text, $matches)) {
-                    $tokens[] = array($token, $matches[0], $position);
-                    $text = mb_substr($text, mb_strlen($matches[0]));
-                    $position += mb_strlen($matches[0], 'utf-8');
-                    break;
-                }
+        $type = null;
+        $token = null;
+        foreach($matches as $match) {
+            switch(true) {
+                case -1 !== $match['open'][1]: $token = $match['open'][0]; $type = self::TOKEN_OPEN; break;
+                case -1 !== $match['close'][1]: $token = $match['close'][0]; $type = self::TOKEN_CLOSE; break;
+                case -1 !== $match['marker'][1]: $token = $match['marker'][0]; $type = self::TOKEN_MARKER; break;
+                case -1 !== $match['separator'][1]: $token = $match['separator'][0]; $type = self::TOKEN_SEPARATOR; break;
+                case -1 !== $match['delimiter'][1]: $token = $match['delimiter'][0]; $type = self::TOKEN_DELIMITER; break;
+                case -1 !== $match['ws'][1]: $token = $match['ws'][0]; $type = self::TOKEN_WS; break;
+                case -1 !== $match['string'][1]: $token = $match['string'][0]; $type = self::TOKEN_STRING; break;
             }
+            $tokens[] = array($type, $token, $position);
+            $position += mb_strlen($token, 'utf-8');
         }
 
         return $tokens;
+    }
+
+    private function getTokenizerRegex(SyntaxInterface $syntax)
+    {
+        $quote = function($text, $group) {
+            return '(?<'.$group.'>'.preg_replace('/(.)/us', '\\\\$0', $text).')';
+        };
+
+        $rules = array(
+            $quote($syntax->getOpeningTag(), 'open'),
+            $quote($syntax->getClosingTag(), 'close'),
+            $quote($syntax->getClosingTagMarker(), 'marker'),
+            $quote($syntax->getParameterValueSeparator(), 'separator'),
+            $quote($syntax->getParameterValueDelimiter(), 'delimiter'),
+            '(?<ws>\s+)',
+            '(?<string>[\w-]+|\\\\.|.)',
+        );
+
+        return '~('.implode('|', $rules).')~us';
     }
 }
