@@ -159,6 +159,12 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
                 new ParsedShortcode(new Shortcode('sc', array(), null), '[sc]', 4),
                 new ParsedShortcode(new Shortcode('sc', array(), null), '[sc]', 10),
             )),
+
+            // performance
+//            array($s, 'x [[aa]] y', array()),
+            array($s, str_repeat('[a]', 20), array_map(function($offset) { // 20
+                return new ParsedShortcode(new Shortcode('a', array(), null), '[a]', $offset);
+            }, range(0, 57, 3))),
         );
 
         /**
