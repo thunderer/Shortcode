@@ -99,7 +99,7 @@ final class RegularParser implements ParserInterface
 
             return $closingName;
         }
-        if(false === $content) {
+        if(false === $content || $closingName !== $name) {
             $this->backtrack(false);
             $text = $this->backtrack(false);
 
