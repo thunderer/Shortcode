@@ -47,7 +47,9 @@ final class RegularParser implements ParserInterface
             while($this->position < $this->tokensCount && !$this->lookahead(self::TOKEN_OPEN)) {
                 $this->position++;
             }
-            foreach($this->shortcode(true) ?: array() as $shortcode) {
+            $names = array();
+            $this->beginBacktrack();
+            foreach($this->shortcode($names) ?: array() as $shortcode) {
                 $shortcodes[] = $shortcode;
             }
         }
@@ -62,7 +64,7 @@ final class RegularParser implements ParserInterface
 
     /* --- RULES ----------------------------------------------------------- */
 
-    private function shortcode($isRoot)
+    private function shortcode(array &$names)
     {
         $name = null;
         $offset = null;
@@ -70,7 +72,6 @@ final class RegularParser implements ParserInterface
         $setName = function(array $token) use(&$name) { $name = $token[1]; };
         $setOffset = function(array $token) use(&$offset) { $offset = $token[2]; };
 
-        $isRoot && $this->beginBacktrack();
         if(!$this->match(self::TOKEN_OPEN, $setOffset, true)) { return false; }
         if(!$this->match(self::TOKEN_STRING, $setName, false)) { return false; }
         if($this->lookahead(self::TOKEN_STRING, null)) { return false; }
@@ -89,22 +90,32 @@ final class RegularParser implements ParserInterface
         // just-closed or with-content
         if(!$this->match(self::TOKEN_CLOSE)) { return false; }
         $this->beginBacktrack();
-        list($content, $shortcodes) = $this->content($name);
+        $names[] = $name;
+        list($content, $shortcodes, $closingName) = $this->content($names);
+        if(null !== $closingName && $closingName !== $name) {
+            array_pop($names);
+            array_pop($this->backtracks);
+            array_pop($this->backtracks);
+
+            return $closingName;
+        }
         if(false === $content) {
             $this->backtrack(false);
             $text = $this->backtrack(false);
+
             return array_merge(array($this->getObject($name, $parameters, $bbCode, $offset, null, $text)), $shortcodes);
         }
-        array_pop($this->backtracks);
-        if(!$this->close($name)) { return false; }
+        $content = $this->getBacktrack();
+        if(!$this->close($names)) { return false; }
 
         return array($this->getObject($name, $parameters, $bbCode, $offset, $content, $this->getBacktrack()));
     }
 
-    private function content($name)
+    private function content(array &$names)
     {
         $content = null;
         $shortcodes = array();
+        $closingName = null;
         $appendContent = function(array $token) use(&$content) { $content .= $token[1]; };
 
         while($this->position < $this->tokensCount) {
@@ -113,7 +124,11 @@ final class RegularParser implements ParserInterface
             }
 
             $this->beginBacktrack();
-            $matchedShortcodes = $this->shortcode(false);
+            $matchedShortcodes = $this->shortcode($names);
+            if(is_string($matchedShortcodes)) {
+                $closingName = $matchedShortcodes;
+                break;
+            }
             if(false !== $matchedShortcodes) {
                 $shortcodes = array_merge($shortcodes, $matchedShortcodes);
                 continue;
@@ -121,12 +136,13 @@ final class RegularParser implements ParserInterface
             $this->backtrack();
 
             $this->beginBacktrack();
-            if(false !== $this->close($name)) {
+            if(false !== ($closingName = $this->close($names))) {
                 if(null === $content) { $content = ''; }
                 $this->backtrack();
                 $shortcodes = array();
                 break;
             }
+            $closingName = null;
             $this->backtrack();
             if($this->position < $this->tokensCount) {
                 $shortcodes = array();
@@ -136,10 +152,10 @@ final class RegularParser implements ParserInterface
             $this->match(null, $appendContent);
         }
 
-        return array($this->position < $this->tokensCount ? $content : false, $shortcodes);
+        return array($this->position < $this->tokensCount ? $content : false, $shortcodes, $closingName);
     }
 
-    private function close($openingName)
+    private function close(array &$names)
     {
         $closingName = null;
         $setName = function(array $token) use(&$closingName) { $closingName = $token[1]; };
@@ -149,7 +165,7 @@ final class RegularParser implements ParserInterface
         if(!$this->match(self::TOKEN_STRING, $setName, true)) { return false; }
         if(!$this->match(self::TOKEN_CLOSE)) { return false; }
 
-        return $openingName === $closingName;
+        return in_array($closingName, $names) ? $closingName : false;
     }
 
     private function bbCode()
@@ -195,6 +211,18 @@ final class RegularParser implements ParserInterface
     }
 
     /* --- PARSER ---------------------------------------------------------- */
+
+    /**
+     * This method is used only for debugging purposes. DO NOT DELETE.
+     *
+     * @return array
+     */
+    private function listBacktracks()
+    {
+        return array_map(function(array $backtrack) {
+            return implode('', array_column($backtrack, 1));
+        }, $this->backtracks);
+    }
 
     private function beginBacktrack()
     {

@@ -165,6 +165,14 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
             array($s, str_repeat('[a]', 20), array_map(function($offset) { // 20
                 return new ParsedShortcode(new Shortcode('a', array(), null), '[a]', $offset);
             }, range(0, 57, 3))),
+            array($s, '[b][a]x[a][/a][/a][/b] [b][a][a][/a]y[/a][/b]', array(
+                new ParsedShortcode(new Shortcode('b', array(), '[a]x[a][/a][/a]'), '[b][a]x[a][/a][/a][/b]', 0),
+                new ParsedShortcode(new Shortcode('b', array(), '[a][a][/a]y[/a]'), '[b][a][a][/a]y[/a][/b]', 23),
+            )),
+            array($s, '[b] [a][a][a] [/b] [b] [a][a][a] [/b]', array(
+                new ParsedShortcode(new Shortcode('b', array(), ' [a][a][a] '), '[b] [a][a][a] [/b]', 0),
+                new ParsedShortcode(new Shortcode('b', array(), ' [a][a][a] '), '[b] [a][a][a] [/b]', 19),
+            )),
         );
 
         /**
@@ -178,7 +186,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
          *
          * Tests cases from array above with identifiers in the array below must be skipped.
          */
-        $wordpressSkip = array(3, 6, 16, 21, 22, 23, 25, 32, 33, 34, 35);
+        $wordpressSkip = array(3, 6, 16, 21, 22, 23, 25, 32, 33, 34);
         $result = array();
         foreach($tests as $key => $test) {
             $syntax = array_shift($test);
