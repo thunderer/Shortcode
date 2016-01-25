@@ -295,17 +295,16 @@ final class RegularParser implements ParserInterface
         preg_match_all($this->lexerRegex, $text, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
         $tokens = array();
         $position = 0;
-        $type = null;
-        $token = null;
+
         foreach($matches as $match) {
             switch(true) {
-                case -1 !== $match['open'][1]: $token = $match['open'][0]; $type = self::TOKEN_OPEN; break;
-                case -1 !== $match['close'][1]: $token = $match['close'][0]; $type = self::TOKEN_CLOSE; break;
-                case -1 !== $match['marker'][1]: $token = $match['marker'][0]; $type = self::TOKEN_MARKER; break;
-                case -1 !== $match['separator'][1]: $token = $match['separator'][0]; $type = self::TOKEN_SEPARATOR; break;
-                case -1 !== $match['delimiter'][1]: $token = $match['delimiter'][0]; $type = self::TOKEN_DELIMITER; break;
-                case -1 !== $match['ws'][1]: $token = $match['ws'][0]; $type = self::TOKEN_WS; break;
-                case -1 !== $match['string'][1]: $token = $match['string'][0]; $type = self::TOKEN_STRING; break;
+                case -1 !== $match['open'][1]: { $token = $match['open'][0]; $type = self::TOKEN_OPEN; break; }
+                case -1 !== $match['close'][1]: { $token = $match['close'][0]; $type = self::TOKEN_CLOSE; break; }
+                case -1 !== $match['marker'][1]: { $token = $match['marker'][0]; $type = self::TOKEN_MARKER; break; }
+                case -1 !== $match['separator'][1]: { $token = $match['separator'][0]; $type = self::TOKEN_SEPARATOR; break; }
+                case -1 !== $match['delimiter'][1]: { $token = $match['delimiter'][0]; $type = self::TOKEN_DELIMITER; break; }
+                case -1 !== $match['ws'][1]: { $token = $match['ws'][0]; $type = self::TOKEN_WS; break; }
+                default: { $token = $match['string'][0]; $type = self::TOKEN_STRING; }
             }
             $tokens[] = array($type, $token, $position);
             $position += mb_strlen($token, 'utf-8');
