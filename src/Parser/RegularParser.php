@@ -49,8 +49,11 @@ final class RegularParser implements ParserInterface
             }
             $names = array();
             $this->beginBacktrack();
-            foreach($this->shortcode($names) ?: array() as $shortcode) {
-                $shortcodes[] = $shortcode;
+            $matches = $this->shortcode($names);
+            if(is_array($matches)) {
+                foreach($matches as $shortcode) {
+                    $shortcodes[] = $shortcode;
+                }
             }
         }
 
@@ -211,18 +214,6 @@ final class RegularParser implements ParserInterface
     }
 
     /* --- PARSER ---------------------------------------------------------- */
-
-    /**
-     * This method is used only for debugging purposes. DO NOT DELETE.
-     *
-     * @return array
-     */
-    private function listBacktracks()
-    {
-        return array_map(function(array $backtrack) {
-            return implode('', array_column($backtrack, 1));
-        }, $this->backtracks);
-    }
 
     private function beginBacktrack()
     {

@@ -5,6 +5,9 @@ use Thunder\Shortcode\Shortcode\ParsedShortcode;
 use Thunder\Shortcode\Shortcode\Shortcode;
 
 /**
+ * IMPORTANT NOTE: USE THIS PARSER **ONLY** IF YOU WANT THE FULL COMPATIBILITY
+ * WITH WORDPRESS AND REPORT BUGS **ONLY** IF ITS BEHAVIOR IS DIFFERENT.
+ *
  * This is a direct port of WordPress' shortcode parser with code copied from
  * its latest release (4.3.1 at the moment) adjusted to conform to this library.
  * Main regex was copied from get_shortcode_regex(), changed to handle all
