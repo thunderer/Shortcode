@@ -42,7 +42,7 @@ final class RegexParser implements ParserInterface
             $shortcodes[] = $this->parseSingle($match[0], $offset);
         }
 
-        return $shortcodes;
+        return array_filter($shortcodes);
     }
 
     private function parseSingle($text, $offset)
@@ -50,6 +50,9 @@ final class RegexParser implements ParserInterface
         preg_match($this->singleShortcodeRegex, $text, $matches, PREG_OFFSET_CAPTURE);
 
         $name = $matches['name'][0];
+        if(!preg_match('/^[a-zA-Z0-9-]+$/', $name)) {
+            return null;
+        }
         $parameters = isset($matches['parameters'][0]) ? $this->parseParameters($matches['parameters'][0]) : array();
         $bbCode = isset($matches['bbCode'][0]) && $matches['bbCode'][1] !== -1
             ? $this->extractValue($matches['bbCode'][0])
