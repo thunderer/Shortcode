@@ -86,7 +86,6 @@ final class Processor implements ProcessorInterface
         $this->dispatchEvent(Events::FILTER_SHORTCODES, $filterEvent);
         $shortcodes = $filterEvent->getShortcodes();
         $replaces = array();
-        $results = array();
         foreach ($shortcodes as $shortcode) {
             $this->prepareHandlerContext($shortcode, $context);
             $handler = $this->handlers->get($shortcode->getName());
@@ -94,7 +93,6 @@ final class Processor implements ProcessorInterface
             $length = mb_strlen($shortcode->getText());
 
             $replaces[] = array($replace, $shortcode->getOffset(), $length);
-            $results[$shortcode->getOffset()] = $replace;
         }
         $replaces = array_filter($replaces);
 
