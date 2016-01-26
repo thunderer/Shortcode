@@ -8,7 +8,7 @@ final class Shortcode extends AbstractShortcode implements ShortcodeInterface
 {
     public function __construct($name, array $parameters, $content, $bbCode = null)
     {
-        if(false === is_string($name) || (is_string($name) && empty(mb_strlen($name)))) {
+        if(false === is_string($name) || (is_string($name) && !mb_strlen($name))) {
             throw new \InvalidArgumentException('Shortcode name must be a non-empty string!');
         }
 
