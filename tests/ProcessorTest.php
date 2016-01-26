@@ -139,17 +139,6 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('1231567', $processor->process('[p][p][p][n][p][p][p]'), 'pppnppp');
     }
 
-    public function testStripContentOutsideShortcodes()
-    {
-        $handlers = new HandlerContainer();
-        $handlers->add('name', function(ShortcodeInterface $s) { return $s->getName(); });
-        $handlers->add('content', function(ShortcodeInterface $s) { return $s->getContent(); });
-        $handlers->add('root', function(ProcessedShortcode $s) { return 'root['.implode('', $s->getResults()).']'; });
-        $processor = new Processor(new RegexParser(), $handlers);
-
-        $this->assertSame('a root[name name ] b', $processor->process('a [root]x [name] c[content] [name /] [/content] y[/root] b'));
-    }
-
     public function testProcessorDeclare()
     {
         $handlers = new HandlerContainer();

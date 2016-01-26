@@ -1,8 +1,9 @@
 <?php
 namespace Thunder\Shortcode\Processor;
 
+use Thunder\Shortcode\Event\ApplyResultsEvent;
 use Thunder\Shortcode\Event\FilterShortcodesEvent;
-use Thunder\Shortcode\EventDispatcher\EventDispatcherInterface;
+use Thunder\Shortcode\EventContainer\EventContainerInterface;
 use Thunder\Shortcode\Events;
 use Thunder\Shortcode\HandlerContainer\HandlerContainerInterface as Handlers;
 use Thunder\Shortcode\Parser\ParserInterface;
@@ -15,18 +16,21 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
  */
 final class Processor implements ProcessorInterface
 {
+    /** @var Handlers */
     private $handlers;
+    /** @var ParserInterface */
     private $parser;
+    /** @var EventContainerInterface */
+    private $eventContainer;
+
     private $recursionDepth = null; // infinite recursion
     private $maxIterations = 1; // one iteration
     private $autoProcessContent = true; // automatically process shortcode content
-    private $eventDispatcher;
 
-    public function __construct(ParserInterface $parser, Handlers $handlers, EventDispatcherInterface $events = null)
+    public function __construct(ParserInterface $parser, Handlers $handlers)
     {
         $this->parser = $parser;
         $this->handlers = $handlers;
-        $this->eventDispatcher = $events;
     }
 
     /**
@@ -58,7 +62,16 @@ final class Processor implements ProcessorInterface
 
     private function dispatchEvent($name, $event)
     {
-        return $this->eventDispatcher ? $this->eventDispatcher->dispatch($name, $event) : $event;
+        if(null === $this->eventContainer) {
+            return $event;
+        }
+
+        $handlers = $this->eventContainer->getListeners($name);
+        foreach($handlers as $handler) {
+            call_user_func_array($handler, array($event));
+        }
+
+        return $event;
     }
 
     private function processIteration($text, ProcessorContext $context, ShortcodeInterface $parent = null)
@@ -69,11 +82,9 @@ final class Processor implements ProcessorInterface
 
         $context->parent = $parent;
         $context->text = $text;
-        $event = new FilterShortcodesEvent($this->parser->parse($text), $parent);
-        /** @var $event FilterShortcodesEvent */
-        $event = $this->dispatchEvent(Events::FILTER_SHORTCODES, $event);
-        /** @var $shortcodes ParsedShortcodeInterface[] */
-        $shortcodes = $event->getShortcodes();
+        $filterEvent = new FilterShortcodesEvent($this->parser->parse($text), $parent);
+        $this->dispatchEvent(Events::FILTER_SHORTCODES, $filterEvent);
+        $shortcodes = $filterEvent->getShortcodes();
         $replaces = array();
         $results = array();
         foreach ($shortcodes as $shortcode) {
@@ -85,10 +96,17 @@ final class Processor implements ProcessorInterface
             $replaces[] = array($replace, $shortcode->getOffset(), $length);
             $results[$shortcode->getOffset()] = $replace;
         }
-        $context->results = $results;
-        $replaces = array_reverse(array_filter($replaces));
+        $replaces = array_filter($replaces);
 
-        return array_reduce($replaces, function ($state, array $item) {
+        $applyEvent = new ApplyResultsEvent($parent, $text, $replaces);
+        $this->dispatchEvent(Events::APPLY_RESULTS, $applyEvent);
+
+        return $applyEvent->hasResult() ? $applyEvent->getResult() : $this->applyReplaces($text, $replaces);
+    }
+
+    private function applyReplaces($text, array $replaces)
+    {
+        return array_reduce(array_reverse($replaces), function($state, array $item) {
             return mb_substr($state, 0, $item[1]).$item[0].mb_substr($state, $item[1] + $item[2]);
         }, $text);
     }
@@ -107,8 +125,8 @@ final class Processor implements ProcessorInterface
 
     private function processHandler(ParsedShortcodeInterface $parsed, ProcessorContext $context, $handler)
     {
-        $content = $this->processRecursion($parsed, $context);
         $processed = ProcessedShortcode::createFromContext(clone $context);
+        $content = $this->processRecursion($processed, $context);
         $processed = $processed->withContent($content);
 
         return $handler
@@ -121,15 +139,28 @@ final class Processor implements ProcessorInterface
         if ($this->autoProcessContent && null !== $shortcode->getContent()) {
             $context->recursionLevel++;
             // this is safe from using max iterations value because it's manipulated in process() method
-            $subContext = clone $context;
-            $content = $this->processIteration($shortcode->getContent(), $subContext, $shortcode);
-            $context->results = $subContext->results;
+            $content = $this->processIteration($shortcode->getContent(), clone $context, $shortcode);
             $context->recursionLevel--;
 
             return $content;
         }
 
         return $shortcode->getContent();
+    }
+
+    /**
+     * Container for event handlers used in this processor.
+     *
+     * @param EventContainerInterface $eventContainer
+     *
+     * @return self
+     */
+    public function withEventContainer(EventContainerInterface $eventContainer)
+    {
+        $self = clone $this;
+        $self->eventContainer = $eventContainer;
+
+        return $self;
     }
 
     /**
