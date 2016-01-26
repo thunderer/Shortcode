@@ -176,6 +176,12 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
             array($s, '[name]random[/other]', array(
                 new ParsedShortcode(new Shortcode('name', array(), null), '[name]', 0),
             )),
+            array($s, '[0][1][2][3]', array(
+                new ParsedShortcode(new Shortcode('0', array(), null), '[0]', 0),
+                new ParsedShortcode(new Shortcode('1', array(), null), '[1]', 3),
+                new ParsedShortcode(new Shortcode('2', array(), null), '[2]', 6),
+                new ParsedShortcode(new Shortcode('3', array(), null), '[3]', 9),
+            )),
         );
 
         /**
@@ -185,11 +191,12 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
          *   - spaces between shortcode open tag and its name ([  name]),
          *   - spaces around BBCode part ([name  = "bbcode"]),
          *   - escaped tokens anywhere in the arguments ([x arg=" \" "]),
-         *   - configurable syntax (that's intended).
+         *   - configurable syntax (that's intended),
+         *   - numbers in shortcode name.
          *
          * Tests cases from array above with identifiers in the array below must be skipped.
          */
-        $wordpressSkip = array(3, 6, 16, 21, 22, 23, 25, 32, 33, 34);
+        $wordpressSkip = array(3, 6, 16, 21, 22, 23, 25, 32, 33, 34, 40);
         $result = array();
         foreach($tests as $key => $test) {
             $syntax = array_shift($test);
