@@ -89,6 +89,26 @@ final class EventsTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('a root[name name ] b', $processor->process('a [root]x [name] c[content] [name /] [/content] y[/root] b'));
     }
 
+    public function testDefaultApplier()
+    {
+        $handlers = new HandlerContainer();
+        $handlers->add('name', function(ShortcodeInterface $s) { return $s->getName(); });
+        $handlers->add('content', function(ShortcodeInterface $s) { return $s->getContent(); });
+        $handlers->add('root', function(ProcessedShortcode $s) { return 'root['.$s->getContent().']'; });
+
+        $events = new EventContainer();
+        $events->addListener(Events::APPLY_RESULTS, function(ApplyResultsEvent $event) {
+            $event->setResult(array_reduce(array_reverse($event->getReplaces()), function($state, array $item) {
+                return mb_substr($state, 0, $item[1]).$item[0].mb_substr($state, $item[1] + $item[2]);
+            }, $event->getText()));
+        });
+
+        $processor = new Processor(new RegularParser(), $handlers);
+        $processor = $processor->withEventContainer($events);
+
+        $this->assertSame('a root[x name c name  y] b', $processor->process('a [root]x [name] c[content] [name /] [/content] y[/root] b'));
+    }
+
     public function testExceptionOnHandlerForUnknownEvent()
     {
         $events = new EventContainer();
