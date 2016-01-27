@@ -46,10 +46,8 @@ final class EventsTest extends \PHPUnit_Framework_TestCase
 
         $events = new EventContainer();
         $events->addListener(Events::FILTER_SHORTCODES, function(FilterShortcodesEvent $event) {
-            if(!$event->getParent()) {
-                return;
-            }
-            if($event->getParent()->getName() === 'raw' || $event->getParent()->hasAncestor('raw')) {
+            $parent = $event->getParent();
+            if($parent && ($parent->getName() === 'raw' || $parent->hasAncestor('raw'))) {
                 $event->setShortcodes(array());
             }
         });

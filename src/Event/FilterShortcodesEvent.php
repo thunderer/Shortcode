@@ -5,6 +5,10 @@ use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 
 /**
+ * This event is salled immediately after receiving shortcodes from parser to
+ * make changes before processing with registered handler. Result of this event
+ * is used directly in processor.
+ *
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 class FilterShortcodesEvent
@@ -15,7 +19,7 @@ class FilterShortcodesEvent
     public function __construct(array $shortcodes, ProcessedShortcode $parent = null)
     {
         $this->parent = $parent;
-        $this->shortcodes = $shortcodes;
+        $this->setShortcodes($shortcodes);
     }
 
     /**
@@ -33,6 +37,14 @@ class FilterShortcodesEvent
 
     public function setShortcodes(array $shortcodes)
     {
-        $this->shortcodes = $shortcodes;
+        $this->shortcodes = [];
+        foreach($shortcodes as $shortcode) {
+            $this->addShortcode($shortcode);
+        }
+    }
+
+    private function addShortcode(ParsedShortcodeInterface $shortcode)
+    {
+        $this->shortcodes[] = $shortcode;
     }
 }

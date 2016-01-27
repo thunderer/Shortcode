@@ -4,6 +4,9 @@ namespace Thunder\Shortcode\Event;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 /**
+ * This event is called just before returning processed text result to alter the
+ * way handler results are applied to source text.
+ *
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
 class ApplyResultsEvent

@@ -105,6 +105,10 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('p3', $p3->getName());
         $this->assertSame('p2', $p3->getParent()->getName());
         $this->assertSame('p1', $p3->getParent()->getParent()->getName());
+        $this->assertFalse($p1->hasAncestor('p3'));
+        $this->assertFalse($p1->hasAncestor('p1'));
+        $this->assertTrue($p2->hasAncestor('p1'));
+        $this->assertFalse($p2->hasAncestor('p3'));
         $this->assertTrue($p3->hasAncestor('p1'));
         $this->assertTrue($p3->hasAncestor('p2'));
         $this->assertFalse($p3->hasAncestor('p4'));
