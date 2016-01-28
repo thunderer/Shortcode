@@ -6,11 +6,11 @@ namespace Thunder\Shortcode;
  */
 final class Events
 {
-    const FILTER_SHORTCODES = 'event.filter.shortcodes';
-    const APPLY_RESULTS = 'event.apply.results';
+    const FILTER_SHORTCODES = 'event.filter-shortcodes';
+    const REPLACE_SHORTCODES = 'event.replace-shortcodes';
 
     public static function getEvents()
     {
-        return array(static::FILTER_SHORTCODES, static::APPLY_RESULTS);
+        return array(static::FILTER_SHORTCODES, static::REPLACE_SHORTCODES);
     }
 }

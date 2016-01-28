@@ -1,13 +1,14 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
-use Thunder\Shortcode\Event\ApplyResultsEvent;
+use Thunder\Shortcode\Event\ReplaceShortcodesEvent;
 use Thunder\Shortcode\EventContainer\EventContainer;
 use Thunder\Shortcode\Event\FilterShortcodesEvent;
 use Thunder\Shortcode\Events;
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegularParser;
 use Thunder\Shortcode\Processor\Processor;
+use Thunder\Shortcode\Shortcode\ReplacedShortcode;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
@@ -68,14 +69,11 @@ final class EventsTest extends \PHPUnit_Framework_TestCase
         $handlers->add('root', function(ProcessedShortcode $s) { return 'root['.$s->getContent().']'; });
 
         $events = new EventContainer();
-        $events->addListener(Events::APPLY_RESULTS, function(ApplyResultsEvent $event) {
-            if(!$event->getShortcode()) {
-                return;
-            }
-            if('root' === $event->getShortcode()->getName()) {
+        $events->addListener(Events::REPLACE_SHORTCODES, function(ReplaceShortcodesEvent $event) {
+            if($event->getShortcode() && 'root' === $event->getShortcode()->getName()) {
                 $replaces = array();
-                foreach($event->getReplaces() as $replace) {
-                    $replaces[] = $replace[0];
+                foreach($event->getReplacements() as $r) {
+                    $replaces[] = $r->getReplacement();
                 }
                 $event->setResult(implode('', $replaces));
             }
@@ -95,9 +93,12 @@ final class EventsTest extends \PHPUnit_Framework_TestCase
         $handlers->add('root', function(ProcessedShortcode $s) { return 'root['.$s->getContent().']'; });
 
         $events = new EventContainer();
-        $events->addListener(Events::APPLY_RESULTS, function(ApplyResultsEvent $event) {
-            $event->setResult(array_reduce(array_reverse($event->getReplaces()), function($state, array $item) {
-                return mb_substr($state, 0, $item[1]).$item[0].mb_substr($state, $item[1] + $item[2]);
+        $events->addListener(Events::REPLACE_SHORTCODES, function(ReplaceShortcodesEvent $event) {
+            $event->setResult(array_reduce(array_reverse($event->getReplacements()), function($state, ReplacedShortcode $r) {
+                $offset = $r->getOffset();
+                $length = mb_strlen($r->getText());
+
+                return mb_substr($state, 0, $offset).$r->getReplacement().mb_substr($state, $offset + $length);
             }, $event->getText()));
         });
 

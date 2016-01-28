@@ -1,12 +1,13 @@
 <?php
 namespace Thunder\Shortcode\Processor;
 
-use Thunder\Shortcode\Event\ApplyResultsEvent;
+use Thunder\Shortcode\Event\ReplaceShortcodesEvent;
 use Thunder\Shortcode\Event\FilterShortcodesEvent;
 use Thunder\Shortcode\EventContainer\EventContainerInterface;
 use Thunder\Shortcode\Events;
 use Thunder\Shortcode\HandlerContainer\HandlerContainerInterface as Handlers;
 use Thunder\Shortcode\Parser\ParserInterface;
+use Thunder\Shortcode\Shortcode\ReplacedShortcode;
 use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
@@ -90,22 +91,24 @@ final class Processor implements ProcessorInterface
             $this->prepareHandlerContext($shortcode, $context);
             $handler = $this->handlers->get($shortcode->getName());
             $replace = $this->processHandler($shortcode, $context, $handler);
-            $length = mb_strlen($shortcode->getText());
 
-            $replaces[] = array($replace, $shortcode->getOffset(), $length);
+            $replaces[] = new ReplacedShortcode($shortcode, $replace);
         }
         $replaces = array_filter($replaces);
 
-        $applyEvent = new ApplyResultsEvent($parent, $text, $replaces);
-        $this->dispatchEvent(Events::APPLY_RESULTS, $applyEvent);
+        $applyEvent = new ReplaceShortcodesEvent($text, $replaces, $parent);
+        $this->dispatchEvent(Events::REPLACE_SHORTCODES, $applyEvent);
 
         return $applyEvent->hasResult() ? $applyEvent->getResult() : $this->applyReplaces($text, $replaces);
     }
 
     private function applyReplaces($text, array $replaces)
     {
-        return array_reduce(array_reverse($replaces), function($state, array $item) {
-            return mb_substr($state, 0, $item[1]).$item[0].mb_substr($state, $item[1] + $item[2]);
+        return array_reduce(array_reverse($replaces), function($state, ReplacedShortcode $s) {
+            $offset = $s->getOffset();
+            $length = mb_strlen($s->getText());
+
+            return mb_substr($state, 0, $offset).$s->getReplacement().mb_substr($state, $offset + $length);
         }, $text);
     }
 
