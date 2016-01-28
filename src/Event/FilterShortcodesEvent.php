@@ -37,7 +37,7 @@ class FilterShortcodesEvent
 
     public function setShortcodes(array $shortcodes)
     {
-        $this->shortcodes = [];
+        $this->shortcodes = array();
         foreach($shortcodes as $shortcode) {
             $this->addShortcode($shortcode);
         }
