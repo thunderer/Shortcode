@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Shortcode\Shortcode;
 
+use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Processor\ProcessorContext;
 use Thunder\Shortcode\Processor\ProcessorInterface;
 

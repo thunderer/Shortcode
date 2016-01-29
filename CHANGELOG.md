@@ -10,7 +10,10 @@
   * introduced events handling in `Processor` with events above,
   * added `Processor::withEventContainer()` to configure event handlers,
   * added `ProcessedShortcode::hasAncestor()` to detect if shortcode has any parent with given name,
-  * introduced `ReplacedShortcode` which represents parsed shortcode data with replacement returned from its handler.
+  * introduced `ReplacedShortcode` which represents parsed shortcode data with replacement returned from its handler,
+  * introduced ready to use event handlers classes:
+    * `FilterRawEventHandler` allows to automatically configure shortcodes that should not have their content processed,
+    * `ReplaceJoinEventHandler` discards the parent shortcode content and returns only concatenated replacements.
 
 * v0.5.3 (26.01.2016)
   * massive performance improvements in RegularParser,

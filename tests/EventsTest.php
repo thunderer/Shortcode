@@ -3,7 +3,8 @@ namespace Thunder\Shortcode\Tests;
 
 use Thunder\Shortcode\Event\ReplaceShortcodesEvent;
 use Thunder\Shortcode\EventContainer\EventContainer;
-use Thunder\Shortcode\Event\FilterShortcodesEvent;
+use Thunder\Shortcode\EventHandler\FilterRawEventHandler;
+use Thunder\Shortcode\EventHandler\ReplaceJoinEventHandler;
 use Thunder\Shortcode\Events;
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegularParser;
@@ -17,26 +18,6 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
  */
 final class EventsTest extends \PHPUnit_Framework_TestCase
 {
-    public function testFilterShortcodes()
-    {
-        $handlers = new HandlerContainer();
-        $handlers->add('root', function(ShortcodeInterface $s) { return 'root['.$s->getContent().']'; });
-        $handlers->add('yes', function(ShortcodeInterface $s) { return 'yes['.$s->getContent().']'; });
-        $handlers->add('no', function(ShortcodeInterface $s) { return 'nope'; });
-
-        $events = new EventContainer();
-        $events->addListener(Events::FILTER_SHORTCODES, function(FilterShortcodesEvent $event) {
-            $event->setShortcodes(array_filter($event->getShortcodes(), function(ShortcodeInterface $s) {
-                return $s->getName() !== 'no';
-            }));
-        });
-
-        $processor = new Processor(new RegularParser(), $handlers);
-        $processor = $processor->withEventContainer($events);
-
-        $this->assertSame('x root[ yes[ yes[] ] yes[ [no /] ] ] y', $processor->process('x [root] [yes] [yes/] [/yes] [yes] [no /] [/yes] [/root] y'));
-    }
-
     public function testRaw()
     {
         $times = 0;
@@ -46,12 +27,7 @@ final class EventsTest extends \PHPUnit_Framework_TestCase
         $handlers->add('c', function(ShortcodeInterface $s) use(&$times) { ++$times; return $s->getContent(); });
 
         $events = new EventContainer();
-        $events->addListener(Events::FILTER_SHORTCODES, function(FilterShortcodesEvent $event) {
-            $parent = $event->getParent();
-            if($parent && ($parent->getName() === 'raw' || $parent->hasAncestor('raw'))) {
-                $event->setShortcodes(array());
-            }
-        });
+        $events->addListener(Events::FILTER_SHORTCODES, new FilterRawEventHandler(array('raw')));
 
         $processor = new Processor(new RegularParser(), $handlers);
         $processor = $processor->withEventContainer($events);
@@ -69,20 +45,12 @@ final class EventsTest extends \PHPUnit_Framework_TestCase
         $handlers->add('root', function(ProcessedShortcode $s) { return 'root['.$s->getContent().']'; });
 
         $events = new EventContainer();
-        $events->addListener(Events::REPLACE_SHORTCODES, function(ReplaceShortcodesEvent $event) {
-            if($event->getShortcode() && 'root' === $event->getShortcode()->getName()) {
-                $replaces = array();
-                foreach($event->getReplacements() as $r) {
-                    $replaces[] = $r->getReplacement();
-                }
-                $event->setResult(implode('', $replaces));
-            }
-        });
+        $events->addListener(Events::REPLACE_SHORTCODES, new ReplaceJoinEventHandler(array('root')));
 
         $processor = new Processor(new RegularParser(), $handlers);
         $processor = $processor->withEventContainer($events);
 
-        $this->assertSame('a root[name name ] b', $processor->process('a [root]x [name] c[content] [name /] [/content] y[/root] b'));
+        $this->assertSame('a root[name name name] b', $processor->process('a [root]x [name] c[content] [name /] [/content] y[name/][/root] b'));
     }
 
     public function testDefaultApplier()
@@ -113,5 +81,17 @@ final class EventsTest extends \PHPUnit_Framework_TestCase
         $events = new EventContainer();
         $this->setExpectedException('InvalidArgumentException');
         $events->addListener('invalid', function() {});
+    }
+
+    public function testInvalidFilterRawShortcodesNames()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        new FilterRawEventHandler(array(new \stdClass()));
+    }
+
+    public function testInvalidReplaceJoinNames()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        new ReplaceJoinEventHandler(array(new \stdClass()));
     }
 }
