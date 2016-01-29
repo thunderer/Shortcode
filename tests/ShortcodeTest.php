@@ -88,6 +88,32 @@ final class ShortcodeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($processor, $processed->getProcessor());
     }
 
+    public function testProcessedShortcodeParents()
+    {
+        $context = new ProcessorContext();
+        $context->shortcode = new Shortcode('p1', array(), null);
+        $context->parent = null;
+        $context->namePosition = array('p1' => 0, 'p2' => 0, 'p3' => 0);
+        $p1 = ProcessedShortcode::createFromContext($context);
+        $context->shortcode = new Shortcode('p2', array(), null);
+        $context->parent = $p1;
+        $p2 = ProcessedShortcode::createFromContext($context);
+        $context->shortcode = new Shortcode('p3', array(), null);
+        $context->parent = $p2;
+        $p3 = ProcessedShortcode::createFromContext($context);
+
+        $this->assertSame('p3', $p3->getName());
+        $this->assertSame('p2', $p3->getParent()->getName());
+        $this->assertSame('p1', $p3->getParent()->getParent()->getName());
+        $this->assertFalse($p1->hasAncestor('p3'));
+        $this->assertFalse($p1->hasAncestor('p1'));
+        $this->assertTrue($p2->hasAncestor('p1'));
+        $this->assertFalse($p2->hasAncestor('p3'));
+        $this->assertTrue($p3->hasAncestor('p1'));
+        $this->assertTrue($p3->hasAncestor('p2'));
+        $this->assertFalse($p3->hasAncestor('p4'));
+    }
+
     public function testParsedShortcode()
     {
         $shortcode = new ParsedShortcode(new Shortcode('name', array('arg' => 'val'), 'content'), 'text', 12);

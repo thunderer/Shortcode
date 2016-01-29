@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Shortcode\Shortcode;
 
+use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Processor\ProcessorContext;
 use Thunder\Shortcode\Processor\ProcessorInterface;
 
@@ -61,6 +62,19 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
         $self->content = $content;
 
         return $self;
+    }
+
+    public function hasAncestor($name)
+    {
+        $self = $this;
+
+        while($self = $self->getParent()) {
+            if($self->getName() === $name) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function getParent()

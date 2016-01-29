@@ -2,6 +2,27 @@
 
 ## Version 0.*
 
+* v0.6.0 (XX.YY.2016)
+
+  * introduced `FilterShortcodesEvent` for modifying set of parsed shortcodes before processing them,
+  * introduced `ReplaceShortcodesEvent` to alter the way shortcode replacements are applied to source text at each processing level,
+  * introduced `EventContainerInterface` with default implementation `EventContainer` to store event handlers,
+  * introduced events handling in `Processor` with events above,
+  * added `Processor::withEventContainer()` to configure event handlers,
+  * added `ProcessedShortcode::hasAncestor()` to detect if shortcode has any parent with given name,
+  * introduced `ReplacedShortcode` which represents parsed shortcode data with replacement returned from its handler,
+  * introduced ready to use event handlers classes:
+    * `FilterRawEventHandler` allows to automatically configure shortcodes that should not have their content processed,
+    * `ReplaceJoinEventHandler` discards the parent shortcode content and returns only concatenated replacements.
+
+* v0.5.3 (26.01.2016)
+  * massive performance improvements in RegularParser,
+  * fixed problem with multibyte characters in parsed texts,
+  * fixed matching shortcodes with invalid names.
+
+* v0.5.2 (20.01.2016)
+  * fixed bug with subsequent string tokens in RegularParser.
+
 * v0.5.1 (12.11.2015)
 
   * fixed bug leaving part of shortcode text when it contained multibyte characters.
