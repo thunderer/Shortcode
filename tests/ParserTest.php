@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
+use Thunder\Shortcode\Parser\BlockRegexParser;
 use Thunder\Shortcode\Parser\RegularParser;
 use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Parser\RegexParser;
@@ -204,6 +205,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
 
             $result[] = array_merge(array(new RegexParser($syntax)), $test);
             $result[] = array_merge(array(new RegularParser($syntax)), $test);
+            $result[] = array_merge(array(new BlockRegexParser($syntax)), $test);
             if(!in_array($key, $wordpressSkip)) {
                 $result[] = array_merge(array(new WordpressParser()), $test);
             }

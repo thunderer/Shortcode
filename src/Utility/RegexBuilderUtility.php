@@ -18,12 +18,29 @@ final class RegexBuilderUtility
         return '~(\A'.self::createShortcodeRegexContent($syntax).'\Z)~us';
     }
 
+    public static function buildOpeningClosingRegex(SyntaxInterface $syntax)
+    {
+        $open = self::quote($syntax->getOpeningTag());
+        $slash = self::quote($syntax->getClosingTagMarker());
+        $close = self::quote($syntax->getClosingTag());
+        $space = '\s*';
+
+        // closing tag variants: just closing tag or self closing tag
+        $justClosed = $close;
+        $selfClosed = '(?P<marker>'.$slash.')'.$space.$close;
+
+        $opening =  '('.static::createOpeningTagFragment($syntax).'(?:'.$justClosed.'|'.$selfClosed.'))';
+        $closing = '('.$open.$space.'(?<markerContent>'.$slash.')'.$space.'(?<closing>[\w-]+)'.$space.$close.')';
+
+        return '~('.$opening.'|'.$closing.')~us';
+    }
+
     public static function buildParametersRegex(SyntaxInterface $syntax)
     {
         $equals = self::quote($syntax->getParameterValueSeparator());
         $string = self::quote($syntax->getParameterValueDelimiter());
-
         $space = '\s*';
+
         // lookahead test for either space or end of string
         $empty = '(?=\s|$)';
         // equals sign and alphanumeric value
@@ -39,11 +56,30 @@ final class RegexBuilderUtility
         $open = self::quote($syntax->getOpeningTag());
         $slash = self::quote($syntax->getClosingTagMarker());
         $close = self::quote($syntax->getClosingTag());
-        $equals = self::quote($syntax->getParameterValueSeparator());
-        $string = self::quote($syntax->getParameterValueDelimiter());
-
         $space = '\s*';
 
+        // non-greedy match for any characters
+        $content = '(?<content>.*?)';
+        // closing tag variants: just closing tag, self closing tag or content
+        // and closing block with backreference name validation
+        $justClosed = $close;
+        $selfClosed = '(?<marker>'.$slash.')'.$space.$close;
+        $withContent = $close.$content.$open.$space.'(?<markerContent>'.$slash.')'.$space.'(\k<name>)'.$space.$close;
+
+        return '(?:'.static::createOpeningTagFragment($syntax).'(?:'.$withContent.'|'.$justClosed.'|'.$selfClosed.'))';
+    }
+
+    private static function createOpeningTagFragment(SyntaxInterface $syntax)
+    {
+        $open = self::quote($syntax->getOpeningTag());
+        $slash = self::quote($syntax->getClosingTagMarker());
+        $close = self::quote($syntax->getClosingTag());
+        $equals = self::quote($syntax->getParameterValueSeparator());
+        $string = self::quote($syntax->getParameterValueDelimiter());
+        $space = '\s*';
+
+        // alphanumeric characters and dash
+        $name = '(?<name>[\w-]+)';
         // parameter and value separator can have any number of spaces around itself
         $equalsSpaced = $space.$equals.$space;
         // lookahead test for space, closing tag, self-closing tag or end of string
@@ -57,20 +93,8 @@ final class RegexBuilderUtility
         // BBCode is the part after name that makes it behave like a non-empty parameter value
         $bbCode = '(?:'.$equals.$space.'(?<bbCode>'.$complex.'|'.$simple.'))?';
 
-        // alphanumeric characters and dash
-        $name = '(?<name>[\w-]+)';
-        // non-greedy match for any characters
-        $content = '(?<content>.*?)';
-
-        // equal beginning for each variant: open tag, name and parameters
-        $common = $open.$space.$name.$space.$bbCode.$space.$parameters.$space;
-        // closing tag variants: just closing tag, self closing tag or content
-        // and closing block with backreference name validation
-        $justClosed = $close;
-        $selfClosed = '(?<marker>'.$slash.')'.$space.$close;
-        $withContent = $close.$content.$open.$space.'(?<markerContent>'.$slash.')'.$space.'(\k<name>)'.$space.$close;
-
-        return '(?:'.$common.'(?:'.$withContent.'|'.$justClosed.'|'.$selfClosed.'))';
+        // mandatory shortcode opening tag fragment: open tag, name and parameters
+        return $open.$space.$name.$space.$bbCode.$space.$parameters.$space;
     }
 
     private static function quote($text)
