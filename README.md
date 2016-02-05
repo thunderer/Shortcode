@@ -288,12 +288,11 @@ assert($unserializedFromXml->getName() === $shortcode->getName());
 
 ## Handlers
 
-To be implemented (PR #33). See the current state on `builtin-handlers` branch.
-
 There are several builtin shortcode handlers available in `Thunder\Shortcode\Handler` namespace. Description below assumes that given handler was registered with `xyz` name:
 
 - `NameHandler` always returns shortcode's name. `[xyz arg=val]content[/xyz]` becomes `sample`,
 - `ContentHandler` always returns shortcode's content. It discards its opening and closing tag. `[xyz]code[/xyz]` becomes `code`,
+- `RawHandler` returns unprocessed shortcode content. Its behavior is different than `FilterRawEventHandler` because if content auto processing is turned on, then nested shortcodes handlers were called, just their result was discarded,
 - `NullHandler` completely removes shortcode with all nested shortcodes,
 - `DeclareHandler` allows to dynamically create shortcode handler with name as first parameter that will also replace all placeholders in text passed as arguments. Example: `[declare xyz]Your age is %age%.[/declare]` created handler for shortcode `xyz` and when used like `[xyz age=18]` the result is `Your age is 18.`,
 - `EmailHandler` replaces the email address or shortcode content as clickable `mailto:` link:

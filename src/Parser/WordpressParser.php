@@ -4,6 +4,7 @@ namespace Thunder\Shortcode\Parser;
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Shortcode\ParsedShortcode;
 use Thunder\Shortcode\Shortcode\Shortcode;
+use Thunder\Shortcode\Utility\RegexBuilderUtility;
 
 /**
  * IMPORTANT NOTE: USE THIS PARSER **ONLY** IF YOU WANT THE FULL COMPATIBILITY
@@ -58,7 +59,7 @@ final class WordpressParser implements ParserInterface
     {
         $names = $this->names
             ? implode('|', array_map('preg_quote', $this->names))
-            : '[a-zA-Z0-9-]+';
+            : RegexBuilderUtility::buildNameRegex();
         $regex = str_replace('<NAMES>', $names, static::$shortcodeRegex);
         preg_match_all($regex, $text, $matches, PREG_OFFSET_CAPTURE);
 

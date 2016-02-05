@@ -8,6 +8,11 @@ use Thunder\Shortcode\Syntax\SyntaxInterface;
  */
 final class RegexBuilderUtility
 {
+    public static function buildNameRegex()
+    {
+        return '[a-zA-Z0-9-_]+';
+    }
+
     public static function buildShortcodeRegex(SyntaxInterface $syntax)
     {
         return '~('.self::createShortcodeRegexContent($syntax).')~us';
@@ -58,7 +63,7 @@ final class RegexBuilderUtility
         $bbCode = '(?:'.$equals.$space.'(?<bbCode>'.$complex.'|'.$simple.'))?';
 
         // alphanumeric characters and dash
-        $name = '(?<name>[\w-]+)';
+        $name = '(?<name>'.static::buildNameRegex().')';
         // non-greedy match for any characters
         $content = '(?<content>.*?)';
 

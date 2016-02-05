@@ -4,6 +4,7 @@
 
 * v0.6.0 (XX.YY.2016)
 
+  * README was completely rewritten to take into account newest additions,
   * introduced `FilterShortcodesEvent` for modifying set of parsed shortcodes before processing them,
   * introduced `ReplaceShortcodesEvent` to alter the way shortcode replacements are applied to source text at each processing level,
   * introduced `EventContainerInterface` with default implementation `EventContainer` to store event handlers,
@@ -15,7 +16,9 @@
     * `FilterRawEventHandler` allows to automatically configure shortcodes that should not have their content processed,
     * `ReplaceJoinEventHandler` discards the parent shortcode content and returns only concatenated replacements,
   * fixed `HandlerContainer::addAlias()` bug that may have silently added aliases for default handler,
-  * added possibility to create `WordpressParser` with names from array or `HandlerContainer` to catch only those like WordPress does.
+  * added possibility to create `WordpressParser` with names from array or `HandlerContainer` to catch only those like WordPress does,
+  * fixed differences between parsers and standardized validating allowed characters in their names in `RegexBuilderUtility::buildNameRegex()`
+  * introduced several ready to use shortcode handlers described in dedicated section of README.
 
 * v0.5.3 (26.01.2016)
   * massive performance improvements in RegularParser,

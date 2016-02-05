@@ -183,7 +183,14 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
                 new ParsedShortcode(new Shortcode('2', array(), null), '[2]', 6),
                 new ParsedShortcode(new Shortcode('3', array(), null), '[3]', 9),
             )),
-            array($s, '[_][na_me][_name][name_][n_am_e][_n_]', array()),
+            array($s, '[_][na_me][_name][name_][n_am_e][_n_]', array(
+                new ParsedShortcode(new Shortcode('_', array(), null), '[_]', 0),
+                new ParsedShortcode(new Shortcode('na_me', array(), null), '[na_me]', 3),
+                new ParsedShortcode(new Shortcode('_name', array(), null), '[_name]', 10),
+                new ParsedShortcode(new Shortcode('name_', array(), null), '[name_]', 17),
+                new ParsedShortcode(new Shortcode('n_am_e', array(), null), '[n_am_e]', 24),
+                new ParsedShortcode(new Shortcode('_n_', array(), null), '[_n_]', 32),
+            )),
         );
 
         /**

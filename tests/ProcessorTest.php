@@ -7,6 +7,7 @@ use Thunder\Shortcode\Handler\EmailHandler;
 use Thunder\Shortcode\Handler\NameHandler;
 use Thunder\Shortcode\Handler\NullHandler;
 use Thunder\Shortcode\Handler\PlaceholderHandler;
+use Thunder\Shortcode\Handler\RawHandler;
 use Thunder\Shortcode\Handler\SerializerHandler;
 use Thunder\Shortcode\Handler\UrlHandler;
 use Thunder\Shortcode\Handler\WrapHandler;
@@ -167,7 +168,8 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             ->add('bb', WrapHandler::createBold())
             ->add('declare', new DeclareHandler($handlers))
             ->add('url', new UrlHandler())
-            ->add('email', new EmailHandler());
+            ->add('email', new EmailHandler())
+            ->add('raw', new RawHandler());
         $processor = new Processor(new RegexParser(), $handlers);
 
         $this->assertSame($result, $processor->process($text));
@@ -193,6 +195,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             array('[content]cnt[/content]', 'cnt'),
             array('[placeholder param=val]%param%[/placeholder]', 'val'),
             array('[placeholder param=val]%param%[/placeholder]', 'val'),
+            array('[raw][null][content]cnt[/content][name /][/raw]', '[null][content]cnt[/content][name /]'),
         );
     }
 

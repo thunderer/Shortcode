@@ -50,7 +50,7 @@ final class RegexParser implements ParserInterface
         preg_match($this->singleShortcodeRegex, $text, $matches, PREG_OFFSET_CAPTURE);
 
         $name = $matches['name'][0];
-        if(!preg_match('/^[a-zA-Z0-9-]+$/', $name)) {
+        if(!preg_match('~^'.RegexBuilderUtility::buildNameRegex().'$~us', $name)) {
             return null;
         }
         $parameters = isset($matches['parameters'][0]) ? $this->parseParameters($matches['parameters'][0]) : array();
