@@ -10,13 +10,7 @@
 [![Code Coverage](https://scrutinizer-ci.com/g/thunderer/Shortcode/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/thunderer/Shortcode/?branch=master)
 [![Code Climate](https://codeclimate.com/github/thunderer/Shortcode/badges/gpa.svg)](https://codeclimate.com/github/thunderer/Shortcode)
 
-Shortcode is a framework agnostic PHP library allowing to find, extract and process text fragments called "shortcodes" or "BBCodes". It consists of several parts, each of them containing logic responsible for different stages of processing input:
-
-- parsers that extract shortcodes from text and transform them to fully configured objects,
-- serializers that allow to convert shortcodes data from and to different formats like XML, JSON, and YAML,
-- processors that take text with shortcodes and allow to replace them using the registered handlers.
-
-Examples of shortcode syntax are shown in the code below:
+Shortcode is a framework agnostic PHP library allowing to find, extract and process text fragments called "shortcodes" or "BBCodes". Examples of their usual syntax and usage are shown below:
 
 ```
 [user-profile /]
@@ -26,9 +20,20 @@ Examples of shortcode syntax are shown in the code below:
 [text color="red"]This is a text.[/text]
 ```
 
+The library is divided into several parts, each of them containing logic responsible for different stages and ways of processing data:
+
+- **parsers** extract shortcodes from text and transform them to objects,
+- **handlers** transform shortcodes into desired replacements,
+- **processors** use parsers and handlers to extract shortcodes, compute replacements, and apply them in text,
+- **events** alter the way processors work to provide better control over the whole process,
+- **serializers** convert shortcodes from and to different formats like Text, XML, JSON, and YAML.
+
+Each part is described in the dedicated section in this document.
+
+
 ## Installation
 
-There are no required dependencies and all PHP versions from 5.3 up to latest 7.0 are supported. This library is available on Composer/Packagist as `thunderer/shortcode`, to install it execute:
+There are no required dependencies and all PHP versions from 5.3 up to latest 7.0 [are tested](https://travis-ci.org/thunderer/Shortcode) and supported. This library is available on Composer/Packagist as `thunderer/shortcode`, to install it execute:
 
 ```
 composer require thunderer/shortcode ^0.5
@@ -50,7 +55,7 @@ and run `composer install` or `composer update` afterwards. If you're not using 
 
 ### Processing
 
-Shortcodes are processed using `Processor` which requires a parser to extract them from source text and handlers to compute their replacements. The example below shows how to implement a simple handler that greets the person with name passed as an argument:
+Shortcodes are processed using `Processor` which requires a parser and handlers. The example below shows how to implement an example that greets the person with name passed as an argument:
 
 ```php
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
@@ -60,20 +65,33 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 $handlers = new HandlerContainer();
 $handlers->add('profile', function(ShortcodeInterface $s) {
-    return sprintf('Hello, my name is %s!', $s->getParameter('name'));
+    return sprintf('Hello, %s!', $s->getParameter('name'));
 });
-
 $processor = new Processor(new RegularParser(), $handlers);
-assert('Hello, my name is Thomas!' === $processor->process('[profile name="Thomas"]'));
+
+$text = '
+    <div class="user">[hello name="Thomas"]</div>
+    <p>Your shortcodes are very good, keep it up!</p>
+    <div class="user">[hello name="Peter"]</div>
+';
+echo $processor->process($text);
+```
+
+The result is:
+
+```
+    <div class="user">Hello, Thomas!</div>
+    <p>Your shortcodes are very good, keep it up!</p>
+    <div class="user">Hello, Peter!</div>
 ```
 
 ### Configuration
 
 `Processor` has several configuration options available as `with*()` methods which return the new, changed instance to keep the object immutable.
 
-- `withRecursionDepth($depth)` controls the nesting level - how many levels of shortcodes are actually processed. If this limit is reached, all shortcodes deeper than level are ignored. If the `$depth` value is null, nesting level is not checked, if it's zero then nesting is disabled (only topmost shortcodes are processed). Any integer greater than zero sets the nesting level limit,
-- `withMaxIterations($iterations)` controls the number of iterations that the source text is processed in. This means that source text is processed internally that number of times until the limit was reached or there are no shortcodes left. If the `$iterations` parameter value is null, there is no iterations limit, any integer greater than zero sets the limit,
-- `withAutoProcessContent($flag)` controls automatic processing of shortcode's content before calling its handler. If the `$flag` parameter is `true` then handler receives shortcode with already processed content, if `false` then handler must process nested shortcodes itself (or leave them for the remaining iterations),
+- `withRecursionDepth($depth)` controls the nesting level - how many levels of shortcodes are actually processed. If this limit is reached, all shortcodes deeper than level are ignored. If the `$depth` value is null (default value), nesting level is not checked, if it's zero then nesting is disabled (only topmost shortcodes are processed). Any integer greater than zero sets the nesting level limit,
+- `withMaxIterations($iterations)` controls the number of iterations that the source text is processed in. This means that source text is processed internally that number of times until the limit was reached or there are no shortcodes left. If the `$iterations` parameter value is null, there is no iterations limit, any integer greater than zero sets the limit. Defaults to one iteration,
+- `withAutoProcessContent($flag)` controls automatic processing of shortcode's content before calling its handler. If the `$flag` parameter is `true` then handler receives shortcode with already processed content, if `false` then handler must process nested shortcodes itself (or leave them for the remaining iterations). This is turned on by default,
 - `withEventContainer($events)` registers event container which provides handlers for all the events fired at various stages of processing text. Read more about events in the section dedicated to them.
 
 ### Events
@@ -83,7 +101,12 @@ If processor was configured with events container there are several possibilitie
 - `Events::FILTER_SHORTCODES` uses `FilterShortcodesEvent` class. It receives current parent shortcode and array of shortcodes from parser. Its purpose is to allow modifying that array before processing them,
 - `Events::REPLACE_SHORTCODES` uses `ReplaceShortcodesEvent` class and receives the parent shortcode, currently processed text, and array of replacements. It can alter the way shortcodes handlers results are applied to the source text. If none of the listeners set the result, the default method is used.
 
-The example below shows how to implement a `[raw]` shortcode that returns its verbatim content without calling any handler for nested shortcodes:
+There are several ready to use event handlers in the `Thunder\Shortcode\EventHandler` namespace:
+
+- `FilterRawEventHandler` implements `FilterShortcodesEvent` and allows to implement any number of "raw" shortcodes whose content is not processed,
+- `ReplaceJoinEventHandler` implements `ReplaceShortcodesEvent` and provides the mechanism to apply shortcode replacements by discarding text and returning just replacements.
+
+The example below shows how to manually implement a `[raw]` shortcode that returns its verbatim content without calling any handler for nested shortcodes:
 
 ```php
 use Thunder\Shortcode\Event\FilterShortcodesEvent;
@@ -118,15 +141,16 @@ assert('n true  [n /] ' === $processor->process('[n /] [c]true[/c] [raw] [n /] [
 
 This section discusses available shortcode parsers. Regardless of the parser that you will choose, remember that:
 
+- shortcode names can be only aplhanumeric characters and dash `-`, basically must conform to the `[a-zA-Z0-9-]+` regular expression,
 - unsupported shortcodes (no registered handler or default handler) will be ignored and left as they are,
 - mismatching closing shortcode (`[code]content[/codex]`) will be ignored, opening tag will be interpreted as self-closing shortcode, eg. `[code /]`,
 - overlapping shortcodes (`[code]content[inner][/code]content[/inner]`) will be interpreted as self-closing, eg. `[code]content[inner /][/code]`, second closing tag will be ignored,
 
 There are three included parsers in this library:
 
-- `RegularParser` is the most powerful and correct parser available in this library. It contains the actual parser designed to handle all the issues with shortcodes like proper nesting or detecting invalid shortcode syntax. It's slighly slower than regex-based parser described below,
-- `RegexParser` uses a regular expression crafted specially to handle shortcode syntax as much as regex engine allows. It is fastest among the parsers included in this library, but it can't handle nesting properly, which means that nested shortcodes with the same name are also considered overlapping, which means that (assume that shortcode `[c]` returns its content) string `[c]x[c]y[/c]z[/c]` will be interpreted as `xyz[/c]` (first closing tag was matched to first opening tag). This can be solved by aliasing given shortcode handler name, because for example `[c]x[d]y[/d]z[/c]` will be processed correctly,
-- `WordpressParser` contains code copied from the latest currently available WordPress (4.3.1). It is also a regex-based parser, but the included regular expression is quite weak, it for example won't support BBCode syntax (`[name="param" /]`). This is intentional to keep the compatibility with what WordPress is capable of if you need that compatibility.
+- `RegularParser` is the most powerful and correct parser available in this library. It contains the actual parser designed to handle all the issues with shortcodes like proper nesting or detecting invalid shortcode syntax. It is slightly slower than regex-based parser described below,
+- `RegexParser` uses a handcrafted regular expression dedicated to handle shortcode syntax as much as regex engine allows. It is fastest among the parsers included in this library, but it can't handle nesting properly, which means that nested shortcodes with the same name are also considered overlapping - (assume that shortcode `[c]` returns its content) string `[c]x[c]y[/c]z[/c]` will be interpreted as `xyz[/c]` (first closing tag was matched to first opening tag). This can be solved by aliasing handler name, because for example `[c]x[d]y[/d]z[/c]` will be processed correctly,
+- `WordpressParser` contains code copied from the latest currently available WordPress (4.3.1). It is also a regex-based parser, but the included regular expression is quite weak, it for example won't support BBCode syntax (`[name="param" /]`). This parser by default supports the shortcode name rule, but can break it when created with one of the named constructors (`createFromHandlers()` or `createFromNames()`) that change its behavior to catch only configured names. All of it is intentional to keep the compatibility with what WordPress is capable of if you need that compatibility.
 
 ### Syntax
 
@@ -266,22 +290,22 @@ assert($unserializedFromXml->getName() === $shortcode->getName());
 
 To be implemented (PR #33). See the current state on `builtin-handlers` branch.
 
-There are several builtin shortcode handlers available as classes in `Thunder\Shortcode\Handler` namespace:
+There are several builtin shortcode handlers available in `Thunder\Shortcode\Handler` namespace. Description below assumes that given handler was registered with `xyz` name:
 
-- `NameHandler` always returns shortcode's name, for example `[pre arg=val]content[/pre]` becomes `pre`,
-- `ContentHandler` always returns shortcode's content. It discards its opening and closing tag, for example, `[var]code[/var]` becomes `code`,
-- `NullHandler` completely discards shortcode with all nested shortcodes,
-- `DeclareHandler` allows to dynamically create shortcode handler with name as first parameter that will also replace all placeholders in text passed as arguments. Example: `[declare user]Your age is %age%.[/declare]` created handler for shortcode `user` and when used like `[user age=18]` the result is `Your age is 18.`,
+- `NameHandler` always returns shortcode's name. `[xyz arg=val]content[/xyz]` becomes `sample`,
+- `ContentHandler` always returns shortcode's content. It discards its opening and closing tag. `[xyz]code[/xyz]` becomes `code`,
+- `NullHandler` completely removes shortcode with all nested shortcodes,
+- `DeclareHandler` allows to dynamically create shortcode handler with name as first parameter that will also replace all placeholders in text passed as arguments. Example: `[declare xyz]Your age is %age%.[/declare]` created handler for shortcode `xyz` and when used like `[xyz age=18]` the result is `Your age is 18.`,
 - `EmailHandler` replaces the email address or shortcode content as clickable `mailto:` link:
-  - `[email="email@example.com" /]` becomes `<a href="email@example.com">email@example.com</a>`,
-  - `[email]email@example.com[/email]` becomes `<a href="email@example.com">email@example.com</a>`,
-  - `[email="email@example.com"]Contact me![/email]` becomes `<a href="email@example.com">Contact me!</a>`,
-- `PlaceholderHandler` replaces all placeholders with arguments values. `[text year=1970]News from year %year%.[/text]` becomes `News from year 1970.`,
-- `SerializerHandler` replaces shortcode with its serialized value using serializer passed as an argument in class' constructor. If configured with `JsonSerializer`, `[json /]` becomes `{"name":"json", "arguments": [], "content": null, "bbCode": null}`. This could be useful for debugging your shortcodes,
+  - `[xyz="email@example.com" /]` becomes `<a href="email@example.com">email@example.com</a>`,
+  - `[xyz]email@example.com[/xyz]` becomes `<a href="email@example.com">email@example.com</a>`,
+  - `[xyz="email@example.com"]Contact me![/xyz]` becomes `<a href="email@example.com">Contact me!</a>`,
+- `PlaceholderHandler` replaces all placeholders in shortcode's content with values of passed arguments. `[xyz year=1970]News from year %year%.[/xyz]` becomes `News from year 1970.`,
+- `SerializerHandler` replaces shortcode with its serialized value using serializer passed as an argument in class' constructor. If configured with `JsonSerializer`, `[xyz /]` becomes `{"name":"json", "arguments": [], "content": null, "bbCode": null}`. This could be useful for debugging your shortcodes,
 - `UrlHandler` replaces its content with a clickable link:
-  - `[url]http://example.com[/url]` becomes `<a href="http://example.com">http://example.com</a>`,
-  - `[url="http://example.com"]Visit my site![/url]` becomes `<a href="http://example.com">Visit my site!</a>`,
-- `WrapHandler` allows to specify the value that should be placed before and after shortcode content. If configured with `<strong>` and `</strong>`, the text `[b]Bold text.[/b]` becomes `<strong>Bold text.</strong>`.
+  - `[xyz]http://example.com[/xyz]` becomes `<a href="http://example.com">http://example.com</a>`,
+  - `[xyz="http://example.com"]Visit my site![/xyz]` becomes `<a href="http://example.com">Visit my site!</a>`,
+- `WrapHandler` allows to specify the value that should be placed before and after shortcode content. If configured with `<strong>` and `</strong>`, the text `[xyz]Bold text.[/xyz]` becomes `<strong>Bold text.</strong>`.
 
 ## Contributing
 
