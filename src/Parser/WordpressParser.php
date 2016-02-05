@@ -28,12 +28,25 @@ final class WordpressParser implements ParserInterface
     private static $shortcodeRegex = '/\\[(\\[?)(<NAMES>)(?![\\w-])([^\\]\\/]*(?:\\/(?!\\])[^\\]\\/]*)*?)(?:(\\/)\\]|\\](?:([^\\[]*+(?:\\[(?!\\/\\2\\])[^\\[]*+)*+)\\[\\/\\2\\])?)(\\]?)/s';
     private static $argumentsRegex = '/([\w-]+)\s*=\s*"([^"]*)"(?:\s|$)|([\w-]+)\s*=\s*\'([^\']*)\'(?:\s|$)|([\w-]+)\s*=\s*([^\s\'"]+)(?:\s|$)|"([^"]*)"(?:\s|$)|(\S+)(?:\s|$)/';
 
-    /** @var HandlerContainer */
-    private $handlers;
+    private $names;
 
-    public function __construct(HandlerContainer $handlers = null)
+    public static function createFromHandlers(HandlerContainer $handlers)
     {
-        $this->handlers = $handlers;
+        return static::createFromNames($handlers->getNames());
+    }
+
+    public static function createFromNames(array $names)
+    {
+        foreach($names as $name) {
+            if(false === is_string($name)) {
+                throw new \InvalidArgumentException('Shortcode name must be a string!');
+            }
+        }
+
+        $self = new self();
+        $self->names = $names;
+
+        return $self;
     }
 
     /**
@@ -43,7 +56,9 @@ final class WordpressParser implements ParserInterface
      */
     public function parse($text)
     {
-        $names = $this->handlers ? implode('|', $this->handlers->getNames()) : '[a-zA-Z-]+';
+        $names = $this->names
+            ? implode('|', array_map('preg_quote', $this->names))
+            : '[a-zA-Z-]+';
         $regex = str_replace('<NAMES>', $names, static::$shortcodeRegex);
         preg_match_all($regex, $text, $matches, PREG_OFFSET_CAPTURE);
 

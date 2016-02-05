@@ -15,7 +15,7 @@
     * `FilterRawEventHandler` allows to automatically configure shortcodes that should not have their content processed,
     * `ReplaceJoinEventHandler` discards the parent shortcode content and returns only concatenated replacements,
   * fixed `HandlerContainer::addAlias()` bug that may have silently added aliases for default handler,
-  * added possibility to pass `HandlerContainer` instance to `WordpressParser` to be truly compliant with WordPress behavior.
+  * added possibility to create `WordpressParser` with names from array or `HandlerContainer` to catch only those like WordPress does.
 
 * v0.5.3 (26.01.2016)
   * massive performance improvements in RegularParser,
