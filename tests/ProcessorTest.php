@@ -1,11 +1,22 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
+use Thunder\Shortcode\Handler\ContentHandler;
+use Thunder\Shortcode\Handler\DeclareHandler;
+use Thunder\Shortcode\Handler\EmailHandler;
+use Thunder\Shortcode\Handler\NameHandler;
+use Thunder\Shortcode\Handler\NullHandler;
+use Thunder\Shortcode\Handler\PlaceholderHandler;
+use Thunder\Shortcode\Handler\SerializerHandler;
+use Thunder\Shortcode\Handler\UrlHandler;
+use Thunder\Shortcode\Handler\WrapHandler;
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegexParser;
 use Thunder\Shortcode\Parser\RegularParser;
 use Thunder\Shortcode\Processor\Processor;
 use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
+use Thunder\Shortcode\Serializer\JsonSerializer;
+use Thunder\Shortcode\Serializer\TextSerializer;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 use Thunder\Shortcode\Tests\Fake\ReverseShortcode;
@@ -137,6 +148,52 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('123', $processor->process('[p][p][p]'), '3p');
         $this->assertSame('113253', $processor->process('[p][n][p][n][p][n]'), 'pnpnpn');
         $this->assertSame('1231567', $processor->process('[p][p][p][n][p][p][p]'), 'pppnppp');
+    }
+
+    /**
+     * @dataProvider provideBuiltInTests
+     */
+    public function testBuiltInHandlers($text, $result)
+    {
+        $handlers = new HandlerContainer();
+        $handlers
+            ->add('content', new ContentHandler())
+            ->add('name', new NameHandler())
+            ->add('null', new NullHandler())
+            ->add('json', new SerializerHandler(new JsonSerializer()))
+            ->add('text', new SerializerHandler(new TextSerializer()))
+            ->add('placeholder', new PlaceholderHandler())
+            ->add('b', new WrapHandler('<b>', '</b>'))
+            ->add('bb', WrapHandler::createBold())
+            ->add('declare', new DeclareHandler($handlers))
+            ->add('url', new UrlHandler())
+            ->add('email', new EmailHandler());
+        $processor = new Processor(new RegexParser(), $handlers);
+
+        $this->assertSame($result, $processor->process($text));
+    }
+
+    public function provideBuiltInTests()
+    {
+        return array(
+            array('[declare date]%year%.%month%.%day%[/declare][date year=2015 month=08 day=26]', '2015.08.26'),
+            array('[declare sample]%param%[/declare][invalid param=value]', '[invalid param=value]'),
+            array('[declare]%param%[/declare][invalid param=value]', '[invalid param=value]'),
+            array('[url]http://kowalczyk.cc[/url]', '<a href="http://kowalczyk.cc">http://kowalczyk.cc</a>'),
+            array('[url="http://kowalczyk.cc"]Visit![/url]', '<a href="http://kowalczyk.cc">Visit!</a>'),
+            array('[email]tomasz@kowalczyk.cc[/email]', '<a href="mailto:tomasz@kowalczyk.cc">tomasz@kowalczyk.cc</a>'),
+            array('[email="tomasz@kowalczyk.cc"]Send![/email]', '<a href="mailto:tomasz@kowalczyk.cc">Send!</a>'),
+            array('[email="tomasz@kowalczyk.cc" /]', '<a href="mailto:tomasz@kowalczyk.cc">tomasz@kowalczyk.cc</a>'),
+            array('[b]text[/b]', '<b>text</b>'),
+            array('[bb]text[/bb]', '<b>text</b>'),
+            array('[json arg=val]value[/json]', '{"name":"json","parameters":{"arg":"val"},"content":"value","bbCode":null}'),
+            array('[text arg=val]value[/text]', '[text arg=val]value[/text]'),
+            array('[null arg=val]value[/null]', ''),
+            array('[name /]', 'name'),
+            array('[content]cnt[/content]', 'cnt'),
+            array('[placeholder param=val]%param%[/placeholder]', 'val'),
+            array('[placeholder param=val]%param%[/placeholder]', 'val'),
+        );
     }
 
     public function testProcessorDeclare()
