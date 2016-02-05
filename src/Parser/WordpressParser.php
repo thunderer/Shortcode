@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Shortcode\Parser;
 
+use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Shortcode\ParsedShortcode;
 use Thunder\Shortcode\Shortcode\Shortcode;
 
@@ -24,8 +25,16 @@ use Thunder\Shortcode\Shortcode\Shortcode;
  */
 final class WordpressParser implements ParserInterface
 {
-    private static $shortcodeRegex = '/\\[(\\[?)([a-zA-Z-]+)(?![\\w-])([^\\]\\/]*(?:\\/(?!\\])[^\\]\\/]*)*?)(?:(\\/)\\]|\\](?:([^\\[]*+(?:\\[(?!\\/\\2\\])[^\\[]*+)*+)\\[\\/\\2\\])?)(\\]?)/s';
+    private static $shortcodeRegex = '/\\[(\\[?)(<NAMES>)(?![\\w-])([^\\]\\/]*(?:\\/(?!\\])[^\\]\\/]*)*?)(?:(\\/)\\]|\\](?:([^\\[]*+(?:\\[(?!\\/\\2\\])[^\\[]*+)*+)\\[\\/\\2\\])?)(\\]?)/s';
     private static $argumentsRegex = '/([\w-]+)\s*=\s*"([^"]*)"(?:\s|$)|([\w-]+)\s*=\s*\'([^\']*)\'(?:\s|$)|([\w-]+)\s*=\s*([^\s\'"]+)(?:\s|$)|"([^"]*)"(?:\s|$)|(\S+)(?:\s|$)/';
+
+    /** @var HandlerContainer */
+    private $handlers;
+
+    public function __construct(HandlerContainer $handlers = null)
+    {
+        $this->handlers = $handlers;
+    }
 
     /**
      * @param string $text
@@ -34,7 +43,9 @@ final class WordpressParser implements ParserInterface
      */
     public function parse($text)
     {
-        preg_match_all(static::$shortcodeRegex, $text, $matches, PREG_OFFSET_CAPTURE);
+        $names = $this->handlers ? implode('|', $this->handlers->getNames()) : '[a-zA-Z-]+';
+        $regex = str_replace('<NAMES>', $names, static::$shortcodeRegex);
+        preg_match_all($regex, $text, $matches, PREG_OFFSET_CAPTURE);
 
         $shortcodes = array();
         $count = count($matches[0]);

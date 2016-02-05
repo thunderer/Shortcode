@@ -16,7 +16,7 @@ final class HandlerContainer implements HandlerContainerInterface
     {
         $this->guardHandler($handler);
 
-        if (!$name || $this->has($name)) {
+        if (empty($name) || $this->has($name)) {
             $msg = 'Invalid name or duplicate shortcode handler for %s!';
             throw new \RuntimeException(sprintf($msg, $name));
         }
@@ -28,21 +28,17 @@ final class HandlerContainer implements HandlerContainerInterface
 
     public function addAlias($alias, $name)
     {
-        $handler = $this->get($name);
-
-        if (!$handler) {
+        if (false === $this->has($name)) {
             $msg = 'Failed to add an alias %s to non existent handler %s!';
             throw new \RuntimeException(sprintf($msg, $alias, $name));
         }
 
-        return $this->add($alias, $handler);
+        return $this->add($alias, $this->get($name));
     }
 
     public function remove($name)
     {
-        $handler = $this->get($name);
-
-        if (!$handler) {
+        if (false === $this->has($name)) {
             $msg = 'Failed to remove non existent handler %s!';
             throw new \RuntimeException(sprintf($msg, $name));
         }

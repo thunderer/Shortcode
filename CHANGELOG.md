@@ -13,7 +13,9 @@
   * introduced `ReplacedShortcode` which represents parsed shortcode data with replacement returned from its handler,
   * introduced ready to use event handlers classes:
     * `FilterRawEventHandler` allows to automatically configure shortcodes that should not have their content processed,
-    * `ReplaceJoinEventHandler` discards the parent shortcode content and returns only concatenated replacements.
+    * `ReplaceJoinEventHandler` discards the parent shortcode content and returns only concatenated replacements,
+  * fixed `HandlerContainer::addAlias()` bug that may have silently added aliases for default handler,
+  * added possibility to pass `HandlerContainer` instance to `WordpressParser` to be truly compliant with WordPress behavior.
 
 * v0.5.3 (26.01.2016)
   * massive performance improvements in RegularParser,
