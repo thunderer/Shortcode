@@ -198,7 +198,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
          *
          * Tests cases from array above with identifiers in the array below must be skipped.
          */
-        $wordpressSkip = array(3, 6, 16, 21, 22, 23, 25, 32, 33, 34, 40);
+        $wordpressSkip = array(3, 6, 16, 21, 22, 23, 25, 32, 33, 34);
         $result = array();
         foreach($tests as $key => $test) {
             $syntax = array_shift($test);

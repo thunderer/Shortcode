@@ -58,7 +58,7 @@ final class WordpressParser implements ParserInterface
     {
         $names = $this->names
             ? implode('|', array_map('preg_quote', $this->names))
-            : '[a-zA-Z-]+';
+            : '[a-zA-Z0-9-]+';
         $regex = str_replace('<NAMES>', $names, static::$shortcodeRegex);
         preg_match_all($regex, $text, $matches, PREG_OFFSET_CAPTURE);
 
