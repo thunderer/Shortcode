@@ -53,6 +53,19 @@ and run `composer install` or `composer update` afterwards. If you're not using 
 
 ## Usage
 
+### Facade
+
+To ease usage of this library there is a class `ShortcodeFacade` configured for most common needs. It contains shortcut methods for all features described in the sections below:
+
+- `addHandler()`: adds shortcode handlers,
+- `addHandlerAlias()`: adds shortcode handler alias,
+- `process()`: processes text and replaces shortcodes,
+- `parse()`: parses text into shortcodes,
+- `setParser()`: changes processor's parser,
+- `addEventHandler()`: adds event handler,
+- `serialize()`: serializes shortcode object to given format,
+- `unserialize()`: creates shortcode object from serialized input.
+
 ### Processing
 
 Shortcodes are processed using `Processor` which requires a parser and handlers. The example below shows how to implement an example that greets the person with name passed as an argument:
@@ -77,7 +90,26 @@ $text = '
 echo $processor->process($text);
 ```
 
-The result is:
+Facade example:
+
+```php
+use Thunder\Shortcode\ShortcodeFacade;
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
+
+$facade = new ShortcodeFacade();
+$facade->addHandler('hello', function(ShortcodeInterface $s) {
+    return sprintf('Hello, %s!', $s->getParameter('name'));
+});
+
+$text = '
+    <div class="user">[hello name="Thomas"]</div>
+    <p>Your shortcodes are very good, keep it up!</p>
+    <div class="user">[hello name="Peter"]</div>
+';
+echo $facade->process($text);
+```
+
+Both result in:
 
 ```
     <div class="user">Hello, Thomas!</div>
@@ -135,6 +167,30 @@ $processor = $processor->withEventContainer($events);
 
 assert(' [n /] [c]cnt[/c] ' === $processor->process('[raw] [n /] [c]cnt[/c] [/raw]'));
 assert('n true  [n /] ' === $processor->process('[n /] [c]true[/c] [raw] [n /] [/raw]'));
+```
+
+Facade example:
+
+```php
+use Thunder\Shortcode\Event\FilterShortcodesEvent;
+use Thunder\Shortcode\Events;
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
+use Thunder\Shortcode\ShortcodeFacade;
+
+$facade = new ShortcodeFacade();
+$facade->addHandler('raw', function(ShortcodeInterface $s) { return $s->getContent(); });
+$facade->addHandler('n', function(ShortcodeInterface $s) { return $s->getName(); });
+$facade->addHandler('c', function(ShortcodeInterface $s) { return $s->getContent(); });
+
+$facade->addEventHandler(Events::FILTER_SHORTCODES, function(FilterShortcodesEvent $event) {
+    $parent = $event->getParent();
+    if($parent && ($parent->getName() === 'raw' || $parent->hasAncestor('raw'))) {
+        $event->setShortcodes(array());
+    }
+});
+
+assert(' [n /] [c]cnt[/c] ' === $facade->process('[raw] [n /] [c]cnt[/c] [/raw]'));
+assert('n true  [n /] ' === $facade->process('[n /] [c]true[/c] [raw] [n /] [/raw]'));
 ```
 
 ## Parsing
@@ -284,6 +340,33 @@ $serializedXml = $xmlSerializer->serialize($shortcode);
 assert($xml === $serializedXml);
 $unserializedFromXml = $xmlSerializer->unserialize($serializedXml);
 assert($unserializedFromXml->getName() === $shortcode->getName());
+```
+
+Facade also supports serialization in all available formats:
+
+```php
+use Thunder\Shortcode\Shortcode\Shortcode;
+use Thunder\Shortcode\ShortcodeFacade;
+
+$facade = new ShortcodeFacade();
+
+$shortcode = new Shortcode('name', array('arg' => 'val'), 'content', 'bbCode');
+
+$text = $facade->serialize($shortcode, 'text');
+$textShortcode = $facade->unserialize($text, 'text');
+assert($shortcode->getName() === $textShortcode->getName());
+
+$json = $facade->serialize($shortcode, 'json');
+$jsonShortcode = $facade->unserialize($json, 'json');
+assert($shortcode->getName() === $jsonShortcode->getName());
+
+$yaml = $facade->serialize($shortcode, 'yaml');
+$yamlShortcode = $facade->unserialize($yaml, 'yaml');
+assert($shortcode->getName() === $yamlShortcode->getName());
+
+$xml = $facade->serialize($shortcode, 'xml');
+$xmlShortcode = $facade->unserialize($xml, 'xml');
+assert($shortcode->getName() === $xmlShortcode->getName());
 ```
 
 ## Handlers

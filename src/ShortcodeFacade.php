@@ -104,6 +104,8 @@ class ShortcodeFacade
     public function addHandlerAlias($alias, $name)
     {
         $this->handlers->addAlias($alias, $name);
+
+        return $this;
     }
 
     public function addEventHandler($name, $handler)
@@ -112,6 +114,8 @@ class ShortcodeFacade
 
         return $this;
     }
+
+    /* --- SERIALIZATION --------------------------------------------------- */
 
     public function serialize(ShortcodeInterface $shortcode, $format)
     {
@@ -135,12 +139,12 @@ class ShortcodeFacade
         }
     }
 
-    /** @deprecated use serialize() */
+    /** @deprecated use serialize($shortcode, $format) */
     public function serializeToText(ShortcodeInterface $s) { return $this->serialize($s, 'text'); }
-    /** @deprecated use serialize() */
+    /** @deprecated use serialize($shortcode, $format) */
     public function serializeToJson(ShortcodeInterface $s) { return $this->serialize($s, 'json'); }
-    /** @deprecated use unserialize() */
+    /** @deprecated use unserialize($shortcode, $format) */
     public function unserializeFromText($text) { return $this->unserialize($text, 'text'); }
-    /** @deprecated use unserialize() */
+    /** @deprecated use unserialize($shortcode, $format) */
     public function unserializeFromJson($text) { return $this->unserialize($text, 'json'); }
 }
