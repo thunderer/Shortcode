@@ -50,9 +50,6 @@ final class RegexParser implements ParserInterface
         preg_match($this->singleShortcodeRegex, $text, $matches, PREG_OFFSET_CAPTURE);
 
         $name = $matches['name'][0];
-        if(!preg_match('~^'.RegexBuilderUtility::buildNameRegex().'$~us', $name)) {
-            return null;
-        }
         $parameters = isset($matches['parameters'][0]) ? $this->parseParameters($matches['parameters'][0]) : array();
         $bbCode = isset($matches['bbCode'][0]) && $matches['bbCode'][1] !== -1
             ? $this->extractValue($matches['bbCode'][0])
