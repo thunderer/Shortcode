@@ -118,9 +118,9 @@ final class Processor implements ProcessorInterface
     {
         return array_reduce(array_reverse($replaces), function($state, ReplacedShortcode $s) {
             $offset = $s->getOffset();
-            $length = mb_strlen($s->getText());
+            $length = mb_strlen($s->getText(), 'utf-8');
 
-            return mb_substr($state, 0, $offset).$s->getReplacement().mb_substr($state, $offset + $length);
+            return mb_substr($state, 0, $offset, 'utf-8').$s->getReplacement().mb_substr($state, $offset + $length, null, 'utf-8');
         }, $text);
     }
 

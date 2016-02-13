@@ -13,7 +13,7 @@
         "php": ">=5.3"
     },
     "require-dev": {
-        "phpunit/phpunit": "~4.1|~5"
+        "phpunit/phpunit": "^4.1|^5.0"
     },
     "suggest": {
         "symfony/yaml": "if you want to use YAML serializer",
