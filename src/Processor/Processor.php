@@ -87,7 +87,9 @@ final class Processor implements ProcessorInterface
         $this->dispatchEvent(Events::FILTER_SHORTCODES, $filterEvent);
         $shortcodes = $filterEvent->getShortcodes();
         $replaces = array();
-        $baseOffset = $parent && $shortcodes ? mb_strpos($parent->getShortcodeText(), $shortcodes[0]->getText()) - $shortcodes[0]->getOffset() + $parent->getOffset() : 0;
+        $baseOffset = $parent && $shortcodes
+            ? mb_strpos($parent->getShortcodeText(), $shortcodes[0]->getText(), null, 'utf-8') - $shortcodes[0]->getOffset() + $parent->getOffset()
+            : 0;
         foreach ($shortcodes as $shortcode) {
             $hasNamePosition = array_key_exists($shortcode->getName(), $context->namePosition);
 
