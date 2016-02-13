@@ -10,7 +10,6 @@ use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Shortcode\ReplacedShortcode;
 use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
-use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -116,11 +115,13 @@ final class Processor implements ProcessorInterface
 
     private function applyReplaces($text, array $replaces)
     {
-        return array_reduce(array_reverse($replaces), function($state, ReplacedShortcode $s) {
+        $textLength = mb_strlen($text, 'utf-8');
+
+        return array_reduce(array_reverse($replaces), function($state, ReplacedShortcode $s) use($textLength) {
             $offset = $s->getOffset();
             $length = mb_strlen($s->getText(), 'utf-8');
 
-            return mb_substr($state, 0, $offset, 'utf-8').$s->getReplacement().mb_substr($state, $offset + $length, null, 'utf-8');
+            return mb_substr($state, 0, $offset, 'utf-8').$s->getReplacement().mb_substr($state, $offset + $length, $textLength, 'utf-8');
         }, $text);
     }
 
