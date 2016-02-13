@@ -18,7 +18,8 @@
   * fixed `HandlerContainer::addAlias()` bug that may have silently added aliases for default handler,
   * added possibility to create `WordpressParser` with names from array or `HandlerContainer` to catch only those like WordPress does,
   * fixed differences between parsers and standardized validating allowed characters in their names in `RegexBuilderUtility::buildNameRegex()`
-  * introduced several ready to use shortcode handlers described in dedicated section of README.
+  * introduced several ready to use shortcode handlers described in dedicated section of README,
+  * refactored `ShortcodeFacade` for better developer experience.
 
 * v0.5.3 (26.01.2016)
   * massive performance improvements in RegularParser,
