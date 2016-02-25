@@ -115,11 +115,10 @@ final class Processor implements ProcessorInterface
 
     private function applyReplaces($text, array $replaces)
     {
-        $textLength = mb_strlen($text, 'utf-8');
-
-        return array_reduce(array_reverse($replaces), function($state, ReplacedShortcode $s) use($textLength) {
+        return array_reduce(array_reverse($replaces), function($state, ReplacedShortcode $s) {
             $offset = $s->getOffset();
             $length = mb_strlen($s->getText(), 'utf-8');
+            $textLength = mb_strlen($state, 'utf-8');
 
             return mb_substr($state, 0, $offset, 'utf-8').$s->getReplacement().mb_substr($state, $offset + $length, $textLength, 'utf-8');
         }, $text);

@@ -111,6 +111,15 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($result.$result, $processor->process($text.$text));
     }
 
+    public function testReplacesLongerThanInputText()
+    {
+        $handlers = new HandlerContainer();
+        $handlers->add('x', function() { return '<length>'; });
+        $processor = new Processor(new RegularParser(), $handlers);
+
+        $this->assertSame('<length><length><length>', $processor->process('[x][x][x]'));
+    }
+
     public function testProcessorWithoutRecursion()
     {
         $processor = new Processor(new RegexParser(), $this->getHandlers());
