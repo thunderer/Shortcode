@@ -191,6 +191,14 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
                 new ParsedShortcode(new Shortcode('n_am_e', array(), null), '[n_am_e]', 24),
                 new ParsedShortcode(new Shortcode('_n_', array(), null), '[_n_]', 32),
             )),
+            array($s, '[x]/[/x] [x]"[/x] [x]=[/x] [x]][/x] [x] [/x] [x]x[/x]', array(
+                new ParsedShortcode(new Shortcode('x', array(), '/'), '[x]/[/x]', 0),
+                new ParsedShortcode(new Shortcode('x', array(), '"'), '[x]"[/x]', 9),
+                new ParsedShortcode(new Shortcode('x', array(), '='), '[x]=[/x]', 18),
+                new ParsedShortcode(new Shortcode('x', array(), ']'), '[x]][/x]', 27),
+                new ParsedShortcode(new Shortcode('x', array(), ' '), '[x] [/x]', 36),
+                new ParsedShortcode(new Shortcode('x', array(), 'x'), '[x]x[/x]', 45),
+            )),
         );
 
         /**

@@ -123,7 +123,8 @@ final class RegularParser implements ParserInterface
         $appendContent = function(array $token) use(&$content) { $content .= $token[1]; };
 
         while($this->position < $this->tokensCount) {
-            while($this->match(array(self::TOKEN_STRING, self::TOKEN_WS), $appendContent)) {
+            while($this->position < $this->tokensCount && false === $this->lookahead(self::TOKEN_OPEN)) {
+                $this->match(null, $appendContent);
                 continue;
             }
 
