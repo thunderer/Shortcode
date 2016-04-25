@@ -77,7 +77,7 @@ use Thunder\Shortcode\Processor\Processor;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 $handlers = new HandlerContainer();
-$handlers->add('profile', function(ShortcodeInterface $s) {
+$handlers->add('hello', function(ShortcodeInterface $s) {
     return sprintf('Hello, %s!', $s->getParameter('name'));
 });
 $processor = new Processor(new RegularParser(), $handlers);
