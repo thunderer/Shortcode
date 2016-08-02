@@ -2,7 +2,15 @@
 
 ## Version 0.*
 
-* v0.6.0 (XX.YY.2016)
+* v0.6.2 (25.04.2016)
+
+  * fixed issue with parsing shortcode tokens inside shortcode content.
+
+* v0.6.1 (25.02.2016)
+
+  * fixed bug with not recalculating new text length after applying shortcode replacement which caused the replacements to be applied only up to the length of source text.
+
+* v0.6.0 (13.02.2016)
 
   * README was completely rewritten to take into account newest additions,
   * introduced `FilterShortcodesEvent` for modifying set of parsed shortcodes before processing them,
