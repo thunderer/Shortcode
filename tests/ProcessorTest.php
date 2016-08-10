@@ -206,6 +206,7 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             array('[placeholder param=val]%param%[/placeholder]', 'val'),
             array('[placeholder param=val]%param%[/placeholder]', 'val'),
             array('[raw][null][content]cnt[/content][name /][/raw]', '[null][content]cnt[/content][name /]'),
+            array('[listing-link id="12345"]Holá[/listing-link]', '[listing-link id="12345"]Holá[/listing-link]'),
         );
     }
 
