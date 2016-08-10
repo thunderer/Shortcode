@@ -135,9 +135,10 @@ final class Processor implements ProcessorInterface
         }
 
         $state = $parsed->getText();
-        $offset = mb_strrpos($state, $processed->getTextContent());
+        $length = mb_strlen($processed->getTextContent(), 'utf-8');
+        $offset = mb_strrpos($state, $processed->getTextContent(), 'utf-8');
 
-        return mb_substr($state, 0, $offset, 'utf-8').$processed->getContent().mb_substr($state, $offset + mb_strlen($parsed->getContent()), mb_strlen($state), 'utf-8');
+        return mb_substr($state, 0, $offset, 'utf-8').$processed->getContent().mb_substr($state, $offset + $length, mb_strlen($state, 'utf-8'), 'utf-8');
     }
 
     private function processRecursion(ParsedShortcodeInterface $shortcode, ProcessorContext $context)
