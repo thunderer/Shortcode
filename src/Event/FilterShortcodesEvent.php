@@ -5,7 +5,7 @@ use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 
 /**
- * This event is salled immediately after receiving shortcodes from parser to
+ * This event is called immediately after receiving shortcodes from parser to
  * make changes before processing with registered handler. Result of this event
  * is used directly in processor.
  *
