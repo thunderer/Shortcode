@@ -231,6 +231,24 @@ final class ProcessorTest extends \PHPUnit_Framework_TestCase
             ')));
     }
 
+    public function testPatterns()
+    {
+        $handlers = new HandlerContainer();
+        $handlers->add('lang-php', new NameHandler());
+        $handlers->addPattern('~^lang-([a-z]+)$~', new NameHandler());
+        $handlers->addPattern('~^type-([0-9]{3})$~', new NameHandler());
+        $processor = new Processor(new RegularParser(), $handlers);
+
+        $this->assertSame('lang-php', $processor->process('[lang-php]'));
+        $this->assertSame('lang-lisp', $processor->process('[lang-lisp]'));
+        $this->assertSame('lang-php lang-haskell', $processor->process('[lang-php] [lang-haskell]'));
+        $this->assertSame('lang-php', $processor->process('[lang-php] [lang-haskell] [/lang-php]'));
+        $this->assertSame('[lang-PHP]', $processor->process('[lang-PHP]'));
+        $this->assertSame('type-512', $processor->process('[type-512]'));
+        $this->assertSame('[type-1024]', $processor->process('[type-1024]'));
+        $this->assertSame('[type-64]', $processor->process('[type-64]'));
+    }
+
     public function testBaseOffset()
     {
         $handlers = new HandlerContainer();

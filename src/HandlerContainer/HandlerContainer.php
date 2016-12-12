@@ -9,6 +9,9 @@ final class HandlerContainer implements HandlerContainerInterface
     /** @var callable[] */
     private $handlers = array();
 
+    /** @var callable[] */
+    private $patterns = array();
+
     /** @var callable */
     private $default;
 
@@ -24,6 +27,18 @@ final class HandlerContainer implements HandlerContainerInterface
         $this->handlers[$name] = $handler;
 
         return $this;
+    }
+
+    public function addPattern($pattern, $handler)
+    {
+        $this->guardHandler($handler);
+
+        if (empty($pattern) || $this->hasPattern($pattern)) {
+            $msg = 'Invalid name or duplicate shortcode handler pattern for `%s`!';
+            throw new \RuntimeException(sprintf($msg, $pattern));
+        }
+
+        $this->patterns[$pattern] = $handler;
     }
 
     public function addAlias($alias, $name)
@@ -62,12 +77,27 @@ final class HandlerContainer implements HandlerContainerInterface
 
     public function get($name)
     {
-        return $this->has($name) ? $this->handlers[$name] : ($this->default ?: null);
+        if($this->has($name)) {
+            return $this->handlers[$name];
+        }
+
+        foreach($this->patterns as $pattern => $handler) {
+            if(preg_match($pattern, $name)) {
+                return $handler;
+            }
+        }
+
+        return $this->default ?: null;
     }
 
     public function has($name)
     {
         return array_key_exists($name, $this->handlers);
+    }
+
+    private function hasPattern($pattern)
+    {
+        return array_key_exists($pattern, $this->patterns);
     }
 
     private function guardHandler($handler)

@@ -10,6 +10,39 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
  */
 final class HandlerContainerTest extends \PHPUnit_Framework_TestCase
 {
+    public function testPattern()
+    {
+        $directHandlerOne = function() {};
+        $directHandlerTwo = function() {};
+        $regexOne = function() {};
+        $regexTwo = function() {};
+
+        $handlers = new HandlerContainer();
+        $handlers->addPattern('~^type-([a-z_]+)$~', $regexOne);
+        $handlers->addPattern('~^value_([A-Z]+)$~', $regexTwo);
+        $handlers->add('type-wow', $directHandlerOne);
+        $handlers->add('value_RANDOM', $directHandlerTwo);
+
+        // direct handlers override patterns
+        $this->assertSame($directHandlerOne, $handlers->get('type-wow'));
+        $this->assertSame($directHandlerTwo, $handlers->get('value_RANDOM'));
+        // search patterns when no direct handlers are available
+        $this->assertSame($regexOne, $handlers->get('type-x'));
+        $this->assertSame($regexOne, $handlers->get('type-is_other'));
+        $this->assertSame($regexTwo, $handlers->get('value_YES'));
+        // regular null when no handlers and patterns are found
+        $this->assertNull($handlers->get('type-val.ue'));
+        $this->assertNull($handlers->get('value_VALUe'));
+    }
+
+    public function testExceptionWhenAddingDuplicatePattern()
+    {
+        $handlers = new HandlerContainer();
+        $handlers->addPattern('~^type-([a-z_]+)$~', function() {});
+        $this->setExpectedException('RuntimeException');
+        $handlers->addPattern('~^type-([a-z_]+)$~', function() {});
+    }
+
     public function testExceptionOnDuplicateHandler()
     {
         $handlers = new HandlerContainer();
