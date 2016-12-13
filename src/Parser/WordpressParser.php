@@ -31,7 +31,6 @@ final class WordpressParser implements ParserInterface
 
     private $names;
 
-    // FIXME: BC break!
     /* private function __construct() {} */
 
     public static function createFromHandlers(HandlerContainer $handlers)
