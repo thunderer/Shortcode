@@ -31,6 +31,9 @@ final class WordpressParser implements ParserInterface
 
     private $names;
 
+    // FIXME: BC break!
+    /* private function __construct() {} */
+
     public static function createFromHandlers(HandlerContainer $handlers)
     {
         return static::createFromNames($handlers->getNames());
@@ -68,7 +71,7 @@ final class WordpressParser implements ParserInterface
         for($i = 0; $i < $count; $i++) {
             $name = $matches[2][$i][0];
             $parameters = static::parseParameters($matches[3][$i][0]);
-            $content = $matches[5][$i][0] ?: null;
+            $content = $matches[5][$i][1] !== -1 ? $matches[5][$i][0] : null;
             $match = $matches[0][$i][0];
             $offset = mb_strlen(substr($text, 0, $matches[0][$i][1]), 'utf-8');
 
