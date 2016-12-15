@@ -28,7 +28,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
         $parsed = $parser->parse($code);
 
         $count = count($tested);
-        $this->assertSame($count, count($parsed), 'counts');
+        $this->assertCount($count, $parsed, 'counts');
         for ($i = 0; $i < $count; $i++) {
             $this->assertSame($tested[$i]->getName(), $parsed[$i]->getName(), 'name');
             $this->assertSame($tested[$i]->getParameters(), $parsed[$i]->getParameters(), 'parameters');
@@ -202,6 +202,17 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
             array($s, '[a]0[/a]', array(
                 new ParsedShortcode(new Shortcode('a', array(), '0'), '[a]0[/a]', 0),
             )),
+            array($s, '[fa icon=fa-camera /] [fa icon=fa-camera extras=fa-4x /]', array(
+                new ParsedShortcode(new Shortcode('fa', array('icon' => 'fa-camera'), null), '[fa icon=fa-camera /]', 0),
+                new ParsedShortcode(new Shortcode('fa', array('icon' => 'fa-camera', 'extras' => 'fa-4x'), null), '[fa icon=fa-camera extras=fa-4x /]', 22),
+            )),
+            array($s, '[fa icon=fa-circle-o-notch extras=fa-spin,fa-3x /]', array(
+                new ParsedShortcode(new Shortcode('fa', array('icon' => 'fa-circle-o-notch', 'extras' => 'fa-spin,fa-3x'), null), '[fa icon=fa-circle-o-notch extras=fa-spin,fa-3x /]', 0),
+            )),
+            array($s, '[z =]', array()),
+            array($s, '[x=#F00 one=#F00 two="#F00"]', array(
+                new ParsedShortcode(new Shortcode('x', array('one' => '#F00', 'two' => '#F00'), null, '#F00'), '[x=#F00 one=#F00 two="#F00"]', 0),
+            )),
         );
 
         /**
@@ -216,7 +227,7 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
          *
          * Tests cases from array above with identifiers in the array below must be skipped.
          */
-        $wordpressSkip = array(3, 6, 16, 21, 22, 23, 25, 32, 33, 34);
+        $wordpressSkip = array(3, 6, 16, 21, 22, 23, 25, 32, 33, 34, 46, 47);
         $result = array();
         foreach($tests as $key => $test) {
             $syntax = array_shift($test);
@@ -240,6 +251,10 @@ final class ParserTest extends \PHPUnit_Framework_TestCase
         ));
         $this->testParser($parser, '[code "xxx"]', array(
             new ParsedShortcode(new Shortcode('code', array('xxx' => null), null, null), '[code "xxx"]', 0)
+        ));
+        $this->testParser($parser, '[code="xxx"] [code=yyy-aaa]', array(
+            new ParsedShortcode(new Shortcode('code', array('="xxx"' => null), null), '[code="xxx"]', 0),
+            new ParsedShortcode(new Shortcode('code', array('=yyy-aaa' => null), null), '[code=yyy-aaa]', 13)
         ));
 
         $handlers = new HandlerContainer();
