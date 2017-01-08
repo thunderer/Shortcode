@@ -212,7 +212,15 @@ final class RegularParser implements ParserInterface
             return $this->match(self::TOKEN_DELIMITER) ? $value : false;
         }
 
-        return $this->match(self::TOKEN_STRING, $appendValue) ? $value : false;
+        if($this->match(self::TOKEN_STRING, $appendValue)) {
+            while($this->match(self::TOKEN_STRING, $appendValue)) {
+                continue;
+            }
+
+            return $value;
+        }
+
+        return false;
     }
 
     /* --- PARSER ---------------------------------------------------------- */
