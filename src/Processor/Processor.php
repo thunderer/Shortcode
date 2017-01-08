@@ -101,6 +101,9 @@ final class Processor implements ProcessorInterface
             $context->textContent = $shortcode->getContent();
 
             $handler = $this->handlers->get($shortcode->getName());
+            if (is_null($handler)) {
+                continue;
+            }
             $replace = $this->processHandler($shortcode, $context, $handler);
 
             $replaces[] = new ReplacedShortcode($shortcode, $replace);
