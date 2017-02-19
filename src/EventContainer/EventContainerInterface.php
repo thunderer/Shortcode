@@ -6,5 +6,10 @@ namespace Thunder\Shortcode\EventContainer;
  */
 interface EventContainerInterface
 {
+    /**
+     * @param string $event
+     *
+     * @return callable[]
+     */
     public function getListeners($event);
 }

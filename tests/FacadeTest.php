@@ -13,7 +13,7 @@ use Thunder\Shortcode\Syntax\CommonSyntax;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class FacadeTest extends \PHPUnit_Framework_TestCase
+final class FacadeTest extends AbstractTestCase
 {
     public function testFacade()
     {
@@ -84,14 +84,14 @@ EOF;
 
     public function testInvalidSerializationFormatException()
     {
-        $this->setExpectedException('InvalidArgumentException');
+        $this->expectException('InvalidArgumentException');
         $facade = new ShortcodeFacade();
         $facade->serialize(new Shortcode('name', array(), null), 'invalid');
     }
 
     public function testInvalidUnserializationFormatException()
     {
-        $this->setExpectedException('InvalidArgumentException');
+        $this->expectException('InvalidArgumentException');
         $facade = new ShortcodeFacade();
         $facade->unserialize('[c]', 'invalid');
     }
