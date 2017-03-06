@@ -13,7 +13,7 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class SerializerTest extends \PHPUnit_Framework_TestCase
+final class SerializerTest extends AbstractTestCase
 {
     /**
      * @dataProvider provideShortcodes
@@ -23,10 +23,10 @@ final class SerializerTest extends \PHPUnit_Framework_TestCase
         $result = $serializer->serialize($test);
         $tested = $serializer->unserialize($result);
 
-        $this->assertSame($test->getName(), $tested->getName(), 'name: '.$result);
-        $this->assertSame($test->getParameters(), $tested->getParameters(), 'parameters: '.$result);
-        $this->assertSame($test->getContent(), $tested->getContent(), 'content: '.$result);
-        $this->assertSame($test->getBbCode(), $tested->getBbCode(), 'bbCode: '.$result);
+        static::assertSame($test->getName(), $tested->getName(), 'name: '.$result);
+        static::assertSame($test->getParameters(), $tested->getParameters(), 'parameters: '.$result);
+        static::assertSame($test->getContent(), $tested->getContent(), 'content: '.$result);
+        static::assertSame($test->getBbCode(), $tested->getBbCode(), 'bbCode: '.$result);
     }
 
     public function provideShortcodes()
@@ -65,10 +65,10 @@ final class SerializerTest extends \PHPUnit_Framework_TestCase
     {
         $tested = $serializer->unserialize($text);
 
-        $this->assertSame($test->getName(), $tested->getName(), 'name: '.$text);
-        $this->assertSame($test->getParameters(), $tested->getParameters(), 'parameters: '.$text);
-        $this->assertSame($test->getContent(), $tested->getContent(), 'content: '.$text);
-        $this->assertSame($test->getBbCode(), $tested->getBbCode(), 'bbCode: '.$text);
+        static::assertSame($test->getName(), $tested->getName(), 'name: '.$text);
+        static::assertSame($test->getParameters(), $tested->getParameters(), 'parameters: '.$text);
+        static::assertSame($test->getContent(), $tested->getContent(), 'content: '.$text);
+        static::assertSame($test->getBbCode(), $tested->getBbCode(), 'bbCode: '.$text);
     }
 
     public function provideUnserialized()
@@ -91,7 +91,7 @@ final class SerializerTest extends \PHPUnit_Framework_TestCase
      */
     public function testSerializerExceptions(SerializerInterface $serializer, $value, $exceptionClass)
     {
-        $this->setExpectedException($exceptionClass);
+        $this->expectException($exceptionClass);
         $serializer->unserialize($value);
     }
 

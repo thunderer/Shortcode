@@ -16,7 +16,7 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class EventsTest extends \PHPUnit_Framework_TestCase
+final class EventsTest extends AbstractTestCase
 {
     public function testRaw()
     {
@@ -79,19 +79,19 @@ final class EventsTest extends \PHPUnit_Framework_TestCase
     public function testExceptionOnHandlerForUnknownEvent()
     {
         $events = new EventContainer();
-        $this->setExpectedException('InvalidArgumentException');
+        $this->expectException('InvalidArgumentException');
         $events->addListener('invalid', function() {});
     }
 
     public function testInvalidFilterRawShortcodesNames()
     {
-        $this->setExpectedException('InvalidArgumentException');
+        $this->expectException('InvalidArgumentException');
         new FilterRawEventHandler(array(new \stdClass()));
     }
 
     public function testInvalidReplaceJoinNames()
     {
-        $this->setExpectedException('InvalidArgumentException');
+        $this->expectException('InvalidArgumentException');
         new ReplaceJoinEventHandler(array(new \stdClass()));
     }
 }

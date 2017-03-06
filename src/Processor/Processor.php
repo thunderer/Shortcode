@@ -68,7 +68,7 @@ final class Processor implements ProcessorInterface
 
         $handlers = $this->eventContainer->getListeners($name);
         foreach($handlers as $handler) {
-            call_user_func_array($handler, array($event));
+            $handler($event);
         }
 
         return $event;
@@ -90,17 +90,18 @@ final class Processor implements ProcessorInterface
             ? mb_strpos($parent->getShortcodeText(), $shortcodes[0]->getText(), null, 'utf-8') - $shortcodes[0]->getOffset() + $parent->getOffset()
             : 0;
         foreach ($shortcodes as $shortcode) {
-            $hasNamePosition = array_key_exists($shortcode->getName(), $context->namePosition);
+            $name = $shortcode->getName();
+            $hasNamePosition = array_key_exists($name, $context->namePosition);
 
             $context->baseOffset = $baseOffset + $shortcode->getOffset();
             $context->position++;
-            $context->namePosition[$shortcode->getName()] = $hasNamePosition ? $context->namePosition[$shortcode->getName()] + 1 : 1;
+            $context->namePosition[$name] = $hasNamePosition ? $context->namePosition[$name] + 1 : 1;
             $context->shortcodeText = $shortcode->getText();
             $context->offset = $shortcode->getOffset();
             $context->shortcode = $shortcode;
             $context->textContent = $shortcode->getContent();
 
-            $handler = $this->handlers->get($shortcode->getName());
+            $handler = $this->handlers->get($name);
             $replace = $this->processHandler($shortcode, $context, $handler);
 
             $replaces[] = new ReplacedShortcode($shortcode, $replace);
@@ -131,7 +132,7 @@ final class Processor implements ProcessorInterface
         $processed = $processed->withContent($content);
 
         if($handler) {
-            return call_user_func_array($handler, array($processed));
+            return $handler($processed);
         }
 
         $state = $parsed->getText();

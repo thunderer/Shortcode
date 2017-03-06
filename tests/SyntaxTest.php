@@ -9,18 +9,18 @@ use Thunder\Shortcode\Syntax\SyntaxInterface;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class SyntaxTest extends \PHPUnit_Framework_TestCase
+final class SyntaxTest extends AbstractTestCase
 {
     /**
      * @dataProvider provideSyntaxes
      */
     public function testSyntax(SyntaxInterface $syntax, $open, $close, $slash, $parameter, $value)
     {
-        $this->assertSame($open, $syntax->getOpeningTag());
-        $this->assertSame($close, $syntax->getClosingTag());
-        $this->assertSame($slash, $syntax->getClosingTagMarker());
-        $this->assertSame($parameter, $syntax->getParameterValueSeparator());
-        $this->assertSame($value, $syntax->getParameterValueDelimiter());
+        static::assertSame($open, $syntax->getOpeningTag());
+        static::assertSame($close, $syntax->getClosingTag());
+        static::assertSame($slash, $syntax->getClosingTagMarker());
+        static::assertSame($parameter, $syntax->getParameterValueSeparator());
+        static::assertSame($value, $syntax->getParameterValueDelimiter());
     }
 
     public function provideSyntaxes()
@@ -29,7 +29,7 @@ final class SyntaxTest extends \PHPUnit_Framework_TestCase
             array(new Syntax(), '[', ']', '/', '=', '"'),
             array(new Syntax('[[', ']]', '//', '==', '""'), '[[', ']]', '//', '==', '""'),
             array(new CommonSyntax(), '[', ']', '/', '=', '"'),
-            );
+        );
     }
 
     /**
