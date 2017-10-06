@@ -156,7 +156,21 @@ final class Processor implements ProcessorInterface
     }
 
     /**
-     * Container for event handlers used in this processor.
+     * Set container for event handlers used in this processor.
+     *
+     * @param EventContainerInterface $eventContainer
+     *
+     * @return self
+     */
+    public function setEventContainer(EventContainerInterface $eventContainer)
+    {
+        $this->eventContainer = $eventContainer;
+
+        return $this;
+    }
+
+    /**
+     * Create a new Processor using a given event container
      *
      * @param EventContainerInterface $eventContainer
      *
@@ -165,13 +179,14 @@ final class Processor implements ProcessorInterface
     public function withEventContainer(EventContainerInterface $eventContainer)
     {
         $self = clone $this;
-        $self->eventContainer = $eventContainer;
 
-        return $self;
+        return $self->setEventContainer($eventContainer);
     }
 
     /**
-     * Recursion depth level, null means infinite, any integer greater than or
+     * Set recursion depth level
+     *
+     * Null means infinite, any integer greater than or
      * equal to zero sets value (number of recursion levels). Zero disables
      * recursion. Defaults to null.
      *
@@ -179,21 +194,36 @@ final class Processor implements ProcessorInterface
      *
      * @return self
      */
-    public function withRecursionDepth($depth)
+    public function setRecursionDepth($depth)
     {
         if (null !== $depth && !(is_int($depth) && $depth >= 0)) {
             $msg = 'Recursion depth must be null (infinite) or integer >= 0!';
             throw new \InvalidArgumentException($msg);
         }
 
-        $self = clone $this;
-        $self->recursionDepth = $depth;
+        $this->recursionDepth = $depth;
 
-        return $self;
+        return $this;
     }
 
     /**
-     * Maximum number of iterations, null means infinite, any integer greater
+     * Create a new Processor using a given resursion depth
+     *
+     * @param int|null $depth
+     *
+     * @return self
+     */
+    public function withRecursionDepth($depth)
+    {
+        $self = clone $this;
+
+        return $self->setRecursionDepth($depth);
+    }
+
+    /**
+     * Set maximum number of iterations
+     *
+     * Null means infinite, any integer greater
      * than zero sets value. Zero is invalid because there must be at least one
      * iteration. Defaults to 1. Loop breaks if result of two consequent
      * iterations shows no change in processed text.
@@ -202,23 +232,57 @@ final class Processor implements ProcessorInterface
      *
      * @return self
      */
-    public function withMaxIterations($iterations)
+    public function setMaxIterations($iterations)
     {
         if (null !== $iterations && !(is_int($iterations) && $iterations > 0)) {
             $msg = 'Maximum number of iterations must be null (infinite) or integer > 0!';
             throw new \InvalidArgumentException($msg);
         }
 
-        $self = clone $this;
-        $self->maxIterations = $iterations;
+        $this->maxIterations = $iterations;
 
-        return $self;
+        return $this;
     }
 
     /**
-     * Whether shortcode content will be automatically processed and handler
-     * already receives shortcode with processed content. If false, every
-     * shortcode handler needs to process content on its own. Default true.
+     * Create a new Processor using a given maximum number of iterations
+     *
+     * @param int|null $iterations
+     *
+     * @return self
+     */
+    public function withMaxIterations($iterations)
+    {
+        $self = clone $this;
+
+        return $self->setMaxIterations($iterations);
+    }
+
+    /**
+     * Sets whether shortcode content will be automatically processed and handler
+     * already receives shortcode with processed content.
+     *
+     * If false, every shortcode handler needs to process content on its own.
+     * Default true.
+     *
+     * @param bool $flag True if enabled (default), false otherwise
+     *
+     * @return self
+     */
+    public function setAutoProcessContent($flag)
+    {
+        if (!is_bool($flag)) {
+            $msg = 'Auto processing flag must be a boolean value!';
+            throw new \InvalidArgumentException($msg);
+        }
+
+        $this->autoProcessContent = (bool)$flag;
+
+        return $this;
+    }
+
+    /**
+     * Creates a new Processor with a given setting for automatic content processing
      *
      * @param bool $flag True if enabled (default), false otherwise
      *
@@ -226,14 +290,8 @@ final class Processor implements ProcessorInterface
      */
     public function withAutoProcessContent($flag)
     {
-        if (!is_bool($flag)) {
-            $msg = 'Auto processing flag must be a boolean value!';
-            throw new \InvalidArgumentException($msg);
-        }
-
         $self = clone $this;
-        $self->autoProcessContent = (bool)$flag;
 
-        return $self;
+        return $self->setAutoProcessContent($flag);
     }
 }
