@@ -10,7 +10,7 @@ final class RegexBuilderUtility
 {
     public static function buildNameRegex()
     {
-        return '[a-zA-Z0-9-_]+';
+        return '[a-zA-Z0-9-_\\*]+';
     }
 
     public static function buildShortcodeRegex(SyntaxInterface $syntax)

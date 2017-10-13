@@ -114,7 +114,7 @@ final class ParserTest extends AbstractTestCase
 
             // multiple shortcodes
             array($s, 'Lorem [ipsum] random [code-code arg=val] which is here', array(
-                new ParsedShortcode(new Shortcode('ipsum', array(), null), '[ipsum]', 6, array('name' => 1)),
+                new ParsedShortcode(new Shortcode('ipsum', array(), null), '[ipsum]', 6),
                 new ParsedShortcode(new Shortcode('code-code', array('arg' => 'val'), null), '[code-code arg=val]', 21),
             )),
             array($s, 'x [aa] x [aa] x', array(
@@ -213,6 +213,13 @@ final class ParserTest extends AbstractTestCase
             array($s, '[x=#F00 one=#F00 two="#F00"]', array(
                 new ParsedShortcode(new Shortcode('x', array('one' => '#F00', 'two' => '#F00'), null, '#F00'), '[x=#F00 one=#F00 two="#F00"]', 0),
             )),
+            array($s, '[*] [* xyz arg=val]', array(
+                new ParsedShortcode(new Shortcode('*', array(), null, null), '[*]', 0),
+                new ParsedShortcode(new Shortcode('*', array('xyz' => null, 'arg' => 'val'), null, null), '[* xyz arg=val]', 4),
+            )),
+            array($s, '[*=bb x=y]cnt[/*]', array(
+                new ParsedShortcode(new Shortcode('*', array('x' => 'y'), 'cnt', 'bb'), '[*=bb x=y]cnt[/*]', 0),
+            )),
             array($s, '[ [] ] [x] [ ] [/x] ] [] [ [y] ] [] [ [z] [/#] [/z] [ [] ] [/] [/y] ] [z] [ [/ [/] /] ] [/z]', array(
                 new ParsedShortcode(new Shortcode('x', array(), ' [ ] ', null), '[x] [ ] [/x]', 7),
                 new ParsedShortcode(new Shortcode('y', array(), ' ] [] [ [z] [/#] [/z] [ [] ] [/] ', null), '[y] ] [] [ [z] [/#] [/z] [ [] ] [/] [/y]', 27),
@@ -232,14 +239,14 @@ final class ParserTest extends AbstractTestCase
          *
          * Tests cases from array above with identifiers in the array below must be skipped.
          */
-        $wordpressSkip = array(3, 6, 16, 21, 22, 23, 25, 32, 33, 34, 46, 47);
+        $wordpressSkip = array(3, 6, 16, 21, 22, 23, 25, 32, 33, 34, 46, 47, 49);
         $result = array();
         foreach($tests as $key => $test) {
             $syntax = array_shift($test);
 
             $result[] = array_merge(array(new RegexParser($syntax)), $test);
             $result[] = array_merge(array(new RegularParser($syntax)), $test);
-            if(!in_array($key, $wordpressSkip)) {
+            if(!in_array($key, $wordpressSkip, true)) {
                 $result[] = array_merge(array(new WordpressParser()), $test);
             }
         }
