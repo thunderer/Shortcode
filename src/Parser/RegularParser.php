@@ -124,7 +124,12 @@ final class RegularParser implements ParserInterface
 
         while($this->position < $this->tokensCount) {
             while($this->position < $this->tokensCount && false === $this->lookahead(self::TOKEN_OPEN)) {
-                $this->match(null, $appendContent);
+                $this->match(null, $appendContent, true);
+            }
+            $isShortcode = $this->lookaheadN(array(self::TOKEN_OPEN, self::TOKEN_STRING));
+            $isCloser = $this->lookaheadN(array(self::TOKEN_OPEN, self::TOKEN_MARKER));
+            if(false === ($isShortcode || $isCloser)) {
+                $this->match(null, $appendContent, true);
                 continue;
             }
 
@@ -253,6 +258,25 @@ final class RegularParser implements ParserInterface
         }
 
         return implode('', array_map(function(array $token) { return $token[1]; }, $tokens));
+    }
+
+    private function lookaheadN(array $types)
+    {
+        $position = $this->position;
+        foreach($types as $type) {
+            if($position >= $this->tokensCount) {
+                return false;
+            }
+            if($this->tokens[$position][0] === self::TOKEN_WS) {
+                $position++;
+            }
+            if($this->tokens[$position][0] !== $type) {
+                return false;
+            }
+            $position++;
+        }
+
+        return true;
     }
 
     private function lookahead($type, $callback = null)
