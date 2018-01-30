@@ -45,7 +45,7 @@ final class RegularParser implements ParserInterface
 
         $shortcodes = array();
         while($this->position < $this->tokensCount) {
-            while($this->position < $this->tokensCount && !$this->lookahead(self::TOKEN_OPEN)) {
+            while($this->position < $this->tokensCount && false === $this->lookahead(self::TOKEN_OPEN)) {
                 $this->position++;
             }
             $names = array();
@@ -78,7 +78,7 @@ final class RegularParser implements ParserInterface
 
         if(!$this->match(self::TOKEN_OPEN, $setOffset, true)) { return false; }
         if(!$this->match(self::TOKEN_STRING, $setName, false)) { return false; }
-        if($this->lookahead(self::TOKEN_STRING, null)) { return false; }
+        if($this->lookahead(self::TOKEN_STRING)) { return false; }
         if(!preg_match_all('~^'.RegexBuilderUtility::buildNameRegex().'$~us', $name, $matches)) { return false; }
         $this->match(self::TOKEN_WS);
         if(false === ($bbCode = $this->bbCode())) { return false; }
@@ -127,8 +127,8 @@ final class RegularParser implements ParserInterface
                 $this->match(null, $appendContent, true);
             }
             $isShortcode = $this->lookaheadN(array(self::TOKEN_OPEN, self::TOKEN_STRING));
-            $isCloser = $this->lookaheadN(array(self::TOKEN_OPEN, self::TOKEN_MARKER));
-            if(false === ($isShortcode || $isCloser)) {
+            $isMarker = $this->lookaheadN(array(self::TOKEN_OPEN, self::TOKEN_MARKER));
+            if(false === ($isShortcode || $isMarker)) {
                 $this->match(null, $appendContent, true);
                 continue;
             }
@@ -192,7 +192,7 @@ final class RegularParser implements ParserInterface
             $name = null;
 
             $this->match(self::TOKEN_WS);
-            if($this->lookahead(array(self::TOKEN_MARKER, self::TOKEN_CLOSE))) { break; }
+            if($this->lookahead(self::TOKEN_MARKER) || $this->lookahead(self::TOKEN_CLOSE)) { break; }
             if(!$this->match(self::TOKEN_STRING, $setName, true)) { return false; }
             if(!$this->match(self::TOKEN_SEPARATOR, null, true)) { $parameters[$name] = null; continue; }
             if(false === ($value = $this->value())) { return false; }
@@ -210,7 +210,7 @@ final class RegularParser implements ParserInterface
         $appendValue = function(array $token) use(&$value) { $value .= $token[1]; };
 
         if($this->match(self::TOKEN_DELIMITER)) {
-            while($this->position < $this->tokensCount && !$this->lookahead(self::TOKEN_DELIMITER)) {
+            while($this->position < $this->tokensCount && false === $this->lookahead(self::TOKEN_DELIMITER)) {
                 $this->match(null, $appendValue);
             }
 
@@ -279,22 +279,9 @@ final class RegularParser implements ParserInterface
         return true;
     }
 
-    private function lookahead($type, $callback = null)
+    private function lookahead($type)
     {
-        if($this->position >= $this->tokensCount) {
-            return false;
-        }
-
-        $type = (array)$type;
-        $token = $this->tokens[$this->position];
-        if(!empty($type) && !in_array($token[0], $type)) {
-            return false;
-        }
-
-        /** @var $callback callable */
-        $callback && $callback($token);
-
-        return true;
+        return $this->position < $this->tokensCount && (empty($type) || $this->tokens[$this->position][0] === $type);
     }
 
     private function match($type, $callbacks = null, $ws = false)
