@@ -314,18 +314,28 @@ final class RegularParser implements ParserInterface
 
     private function getTokenizerRegex(SyntaxInterface $syntax)
     {
-        $quote = function($text, $group) {
+        $group = function($text, $group) {
             return '(?<'.$group.'>'.preg_replace('/(.)/us', '\\\\$0', $text).')';
+        };
+        $quote = function($text) {
+            return preg_replace('/(.)/us', '\\\\$0', $text);
         };
 
         $rules = array(
-            $quote($syntax->getOpeningTag(), 'open'),
-            $quote($syntax->getClosingTag(), 'close'),
-            $quote($syntax->getClosingTagMarker(), 'marker'),
-            $quote($syntax->getParameterValueSeparator(), 'separator'),
-            $quote($syntax->getParameterValueDelimiter(), 'delimiter'),
+            $group($syntax->getOpeningTag(), 'open'),
+            $group($syntax->getClosingTag(), 'close'),
+            $group($syntax->getClosingTagMarker(), 'marker'),
+            $group($syntax->getParameterValueSeparator(), 'separator'),
+            $group($syntax->getParameterValueDelimiter(), 'delimiter'),
             '(?<ws>\s+)',
-            '(?<string>[\w-]+|\\\\.|.)',
+            '(?<string>\\\\.|(?:(?!'.implode('|', array(
+                $quote($syntax->getOpeningTag()),
+                $quote($syntax->getClosingTag()),
+                $quote($syntax->getClosingTagMarker()),
+                $quote($syntax->getParameterValueSeparator()),
+                $quote($syntax->getParameterValueDelimiter()),
+                '\s+',
+            )).').)+)',
         );
 
         return '~('.implode('|', $rules).')~us';
