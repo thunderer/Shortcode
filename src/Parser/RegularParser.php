@@ -258,27 +258,31 @@ final class RegularParser implements ParserInterface
         return $this->position < $this->tokensCount && (empty($type) || $this->tokens[$this->position][0] === $type);
     }
 
-    private function match($type, $callbacks = null, $ws = false)
+    private function match($type, $callback = null, $ws = false)
     {
         if($this->position >= $this->tokensCount) {
             return false;
         }
 
-        $type = (array)$type;
         $token = $this->tokens[$this->position];
-        if(!empty($type) && !in_array($token[0], $type)) {
+        if(!empty($type) && $token[0] !== $type) {
             return false;
         }
         foreach($this->backtracks as &$backtrack) {
             $backtrack[] = $token;
         }
+        unset($backtrack);
 
+        $callback && $callback($token);
         $this->position++;
-        foreach((array)$callbacks as $callback) {
-            $callback($token);
-        }
 
-        $ws && $this->match(self::TOKEN_WS);
+        if($ws && $this->position < $this->tokensCount && $this->tokens[$this->position][0] === self::TOKEN_WS) {
+            $token = $this->tokens[$this->position];
+            $this->position++;
+            foreach($this->backtracks as &$backtrack) {
+                $backtrack[] = $token;
+            }
+        }
 
         return true;
     }
