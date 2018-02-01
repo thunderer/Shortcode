@@ -16,6 +16,7 @@ final class RegularParser implements ParserInterface
     private $tokens;
     private $tokensCount;
     private $position;
+    /** @var array[] */
     private $backtracks;
 
     const TOKEN_OPEN = 1;
@@ -126,12 +127,6 @@ final class RegularParser implements ParserInterface
             while($this->position < $this->tokensCount && false === $this->lookahead(self::TOKEN_OPEN)) {
                 $this->match(null, $appendContent, true);
             }
-            $isShortcode = $this->lookaheadN(array(self::TOKEN_OPEN, self::TOKEN_STRING));
-            $isMarker = $this->lookaheadN(array(self::TOKEN_OPEN, self::TOKEN_MARKER));
-            if(false === ($isShortcode || $isMarker)) {
-                $this->match(null, $appendContent, true);
-                continue;
-            }
 
             $this->beginBacktrack();
             $matchedShortcodes = $this->shortcode($names);
@@ -139,8 +134,10 @@ final class RegularParser implements ParserInterface
                 $closingName = $matchedShortcodes;
                 break;
             }
-            if(false !== $matchedShortcodes) {
-                $shortcodes = array_merge($shortcodes, $matchedShortcodes);
+            if(is_array($matchedShortcodes)) {
+                foreach($matchedShortcodes as $matchedShortcode) {
+                    $shortcodes[] = $matchedShortcode;
+                }
                 continue;
             }
             $this->backtrack();
@@ -154,10 +151,6 @@ final class RegularParser implements ParserInterface
             }
             $closingName = null;
             $this->backtrack();
-            if($this->position < $this->tokensCount) {
-                $shortcodes = array();
-                break;
-            }
 
             $this->match(null, $appendContent);
         }
@@ -175,7 +168,7 @@ final class RegularParser implements ParserInterface
         if(!$this->match(self::TOKEN_STRING, $setName, true)) { return false; }
         if(!$this->match(self::TOKEN_CLOSE)) { return false; }
 
-        return in_array($closingName, $names) ? $closingName : false;
+        return in_array($closingName, $names, true) ? $closingName : false;
     }
 
     private function bbCode()
@@ -258,25 +251,6 @@ final class RegularParser implements ParserInterface
         }
 
         return implode('', array_map(function(array $token) { return $token[1]; }, $tokens));
-    }
-
-    private function lookaheadN(array $types)
-    {
-        $position = $this->position;
-        foreach($types as $type) {
-            if($position >= $this->tokensCount) {
-                return false;
-            }
-            if($this->tokens[$position][0] === self::TOKEN_WS) {
-                $position++;
-            }
-            if($this->tokens[$position][0] !== $type) {
-                return false;
-            }
-            $position++;
-        }
-
-        return true;
     }
 
     private function lookahead($type)
