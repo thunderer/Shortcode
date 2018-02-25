@@ -232,6 +232,12 @@ final class ParserTest extends AbstractTestCase
             array($s, '[a=0 b=0]0[/a]', array(
                 new ParsedShortcode(new Shortcode('a', array('b' => '0'), '0', '0'), '[a=0 b=0]0[/a]', 0),
             )),
+            array($s, '[x=/[/] [y a=/"//] [z=http://url/] [a=http://url ]', array(
+                new ParsedShortcode(new Shortcode('x', array(), null, '/['), '[x=/[/]', 0),
+                new ParsedShortcode(new Shortcode('y', array('a' => '/"/'), null, null), '[y a=/"//]', 8),
+                new ParsedShortcode(new Shortcode('z', array(), null, 'http://url'), '[z=http://url/]', 19),
+                new ParsedShortcode(new Shortcode('a', array(), null, 'http://url'), '[a=http://url ]', 35),
+            )),
         );
 
         /**
