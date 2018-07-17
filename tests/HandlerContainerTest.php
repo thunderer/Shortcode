@@ -4,45 +4,46 @@ namespace Thunder\Shortcode\Tests;
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\HandlerContainer\ImmutableHandlerContainer;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class HandlerContainerTest extends AbstractTestCase
+final class HandlerContainerTest extends TestCase
 {
     public function testExceptionOnDuplicateHandler()
     {
         $handlers = new HandlerContainer();
         $handlers->add('name', function () {});
-        $this->expectException('RuntimeException');
+        $this->expectException(\RuntimeException::class);
         $handlers->add('name', function () {});
     }
 
     public function testRemove()
     {
         $handlers = new HandlerContainer();
-        static::assertFalse($handlers->has('code'));
+        $this->assertFalse($handlers->has('code'));
         $handlers->add('code', function(ShortcodeInterface $s) {});
-        static::assertTrue($handlers->has('code'));
+        $this->assertTrue($handlers->has('code'));
         $handlers->remove('code');
-        static::assertFalse($handlers->has('code'));
+        $this->assertFalse($handlers->has('code'));
     }
 
     public function testRemoveException()
     {
         $handlers = new HandlerContainer();
-        $this->expectException('RuntimeException');
+        $this->expectException(\RuntimeException::class);
         $handlers->remove('code');
     }
 
     public function testNames()
     {
         $handlers = new HandlerContainer();
-        static::assertEmpty($handlers->getNames());
+        $this->assertEmpty($handlers->getNames());
         $handlers->add('code', function(ShortcodeInterface $s) {});
-        static::assertSame(array('code'), $handlers->getNames());
+        $this->assertSame(array('code'), $handlers->getNames());
         $handlers->addAlias('c', 'code');
-        static::assertSame(array('code', 'c'), $handlers->getNames());
+        $this->assertSame(array('code', 'c'), $handlers->getNames());
     }
 
     public function testHandlerContainer()
@@ -53,29 +54,29 @@ final class HandlerContainerTest extends AbstractTestCase
         $handler->add('x', $x);
         $handler->addAlias('y', 'x');
 
-        static::assertSame($x, $handler->get('x'));
+        $this->assertSame($x, $handler->get('x'));
     }
 
     public function testInvalidHandler()
     {
         $handlers = new HandlerContainer();
-        $this->expectException('RuntimeException');
+        $this->expectException(\RuntimeException::class);
         $handlers->add('invalid', new \stdClass());
     }
 
     public function testDefaultHandler()
     {
         $handlers = new HandlerContainer();
-        static::assertNull($handlers->get('missing'));
+        $this->assertNull($handlers->get('missing'));
 
         $handlers->setDefault(function () {});
-        static::assertNotNull($handlers->get('missing'));
+        $this->assertNotNull($handlers->get('missing'));
     }
 
     public function testExceptionIfAliasingNonExistentHandler()
     {
         $handlers = new HandlerContainer();
-        $this->expectException('RuntimeException');
+        $this->expectException(\RuntimeException::class);
         $handlers->addAlias('m', 'missing');
     }
 
@@ -87,14 +88,14 @@ final class HandlerContainerTest extends AbstractTestCase
         $imHandlers = new ImmutableHandlerContainer($handlers);
         $handlers->add('not', function() {});
 
-        static::assertNull($imHandlers->get('missing'));
-        static::assertNotNull($imHandlers->get('code'));
-        static::assertNotNull($imHandlers->get('c'));
-        static::assertNull($imHandlers->get('not'));
+        $this->assertNull($imHandlers->get('missing'));
+        $this->assertNotNull($imHandlers->get('code'));
+        $this->assertNotNull($imHandlers->get('c'));
+        $this->assertNull($imHandlers->get('not'));
 
         $defaultHandlers = new HandlerContainer();
         $defaultHandlers->setDefault(function () {});
         $imDefaultHandlers = new ImmutableHandlerContainer($defaultHandlers);
-        static::assertNotNull($imDefaultHandlers->get('missing'));
+        $this->assertNotNull($imDefaultHandlers->get('missing'));
     }
 }

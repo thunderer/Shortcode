@@ -12,11 +12,12 @@ use Thunder\Shortcode\Processor\Processor;
 use Thunder\Shortcode\Shortcode\ReplacedShortcode;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class EventsTest extends AbstractTestCase
+final class EventsTest extends TestCase
 {
     public function testRaw()
     {
@@ -79,19 +80,19 @@ final class EventsTest extends AbstractTestCase
     public function testExceptionOnHandlerForUnknownEvent()
     {
         $events = new EventContainer();
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(\InvalidArgumentException::class);
         $events->addListener('invalid', function() {});
     }
 
     public function testInvalidFilterRawShortcodesNames()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(\InvalidArgumentException::class);
         new FilterRawEventHandler(array(new \stdClass()));
     }
 
     public function testInvalidReplaceJoinNames()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(\InvalidArgumentException::class);
         new ReplaceJoinEventHandler(array(new \stdClass()));
     }
 }

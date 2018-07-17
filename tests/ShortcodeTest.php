@@ -9,11 +9,12 @@ use Thunder\Shortcode\Serializer\TextSerializer;
 use Thunder\Shortcode\Shortcode\ParsedShortcode;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 use Thunder\Shortcode\Shortcode\Shortcode;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class ShortcodeTest extends AbstractTestCase
+final class ShortcodeTest extends TestCase
 {
     /**
      * @dataProvider provideShortcodes
@@ -23,12 +24,12 @@ final class ShortcodeTest extends AbstractTestCase
         $s = new Shortcode($name, $args, $content);
         $textSerializer = new TextSerializer();
 
-        static::assertSame($name, $s->getName());
-        static::assertSame($args, $s->getParameters());
-        static::assertSame($content, $s->getContent());
-        static::assertSame($expected, $textSerializer->serialize($s));
-        static::assertSame('arg', $s->getParameterAt(0));
-        static::assertTrue($s->hasParameters());
+        $this->assertSame($name, $s->getName());
+        $this->assertSame($args, $s->getParameters());
+        $this->assertSame($content, $s->getContent());
+        $this->assertSame($expected, $textSerializer->serialize($s));
+        $this->assertSame('arg', $s->getParameterAt(0));
+        $this->assertTrue($s->hasParameters());
     }
 
     public function provideShortcodes()
@@ -45,14 +46,14 @@ final class ShortcodeTest extends AbstractTestCase
     {
         $shortcode = new Shortcode('random', array('arg' => 'value', 'none' => null), 'something');
 
-        static::assertTrue($shortcode->hasParameter('arg'));
-        static::assertFalse($shortcode->hasParameter('invalid'));
-        static::assertNull($shortcode->getParameter('none'));
-        static::assertSame('value', $shortcode->getParameter('arg'));
-        static::assertSame('', $shortcode->getParameter('invalid', ''));
-        static::assertSame(42, $shortcode->getParameter('invalid', 42));
+        $this->assertTrue($shortcode->hasParameter('arg'));
+        $this->assertFalse($shortcode->hasParameter('invalid'));
+        $this->assertNull($shortcode->getParameter('none'));
+        $this->assertSame('value', $shortcode->getParameter('arg'));
+        $this->assertSame('', $shortcode->getParameter('invalid', ''));
+        $this->assertSame(42, $shortcode->getParameter('invalid', 42));
 
-        static::assertNotSame($shortcode, $shortcode->withContent('x'));
+        $this->assertNotSame($shortcode, $shortcode->withContent('x'));
     }
 
     public function testProcessedShortcode()
@@ -73,19 +74,19 @@ final class ShortcodeTest extends AbstractTestCase
 
         $processed = ProcessedShortcode::createFromContext($context);
 
-        static::assertSame('code', $processed->getName());
-        static::assertSame(array('arg' => 'val'), $processed->getParameters());
-        static::assertSame('content', $processed->getContent());
+        $this->assertSame('code', $processed->getName());
+        $this->assertSame(array('arg' => 'val'), $processed->getParameters());
+        $this->assertSame('content', $processed->getContent());
 
-        static::assertSame(20, $processed->getPosition());
-        static::assertSame(10, $processed->getNamePosition());
-        static::assertSame(' [code] ', $processed->getText());
-        static::assertSame(1, $processed->getOffset());
-        static::assertSame('[code]', $processed->getShortcodeText());
-        static::assertSame(1, $processed->getIterationNumber());
-        static::assertSame(0, $processed->getRecursionLevel());
-        static::assertSame(null, $processed->getParent());
-        static::assertSame($processor, $processed->getProcessor());
+        $this->assertSame(20, $processed->getPosition());
+        $this->assertSame(10, $processed->getNamePosition());
+        $this->assertSame(' [code] ', $processed->getText());
+        $this->assertSame(1, $processed->getOffset());
+        $this->assertSame('[code]', $processed->getShortcodeText());
+        $this->assertSame(1, $processed->getIterationNumber());
+        $this->assertSame(0, $processed->getRecursionLevel());
+        $this->assertNull($processed->getParent());
+        $this->assertSame($processor, $processed->getProcessor());
     }
 
     public function testProcessedShortcodeParents()
@@ -102,36 +103,36 @@ final class ShortcodeTest extends AbstractTestCase
         $context->parent = $p2;
         $p3 = ProcessedShortcode::createFromContext($context);
 
-        static::assertSame('p3', $p3->getName());
-        static::assertSame('p2', $p3->getParent()->getName());
-        static::assertSame('p1', $p3->getParent()->getParent()->getName());
-        static::assertFalse($p1->hasAncestor('p3'));
-        static::assertFalse($p1->hasAncestor('p1'));
-        static::assertTrue($p2->hasAncestor('p1'));
-        static::assertFalse($p2->hasAncestor('p3'));
-        static::assertTrue($p3->hasAncestor('p1'));
-        static::assertTrue($p3->hasAncestor('p2'));
-        static::assertFalse($p3->hasAncestor('p4'));
+        $this->assertSame('p3', $p3->getName());
+        $this->assertSame('p2', $p3->getParent()->getName());
+        $this->assertSame('p1', $p3->getParent()->getParent()->getName());
+        $this->assertFalse($p1->hasAncestor('p3'));
+        $this->assertFalse($p1->hasAncestor('p1'));
+        $this->assertTrue($p2->hasAncestor('p1'));
+        $this->assertFalse($p2->hasAncestor('p3'));
+        $this->assertTrue($p3->hasAncestor('p1'));
+        $this->assertTrue($p3->hasAncestor('p2'));
+        $this->assertFalse($p3->hasAncestor('p4'));
     }
 
     public function testParsedShortcode()
     {
         $shortcode = new ParsedShortcode(new Shortcode('name', array('arg' => 'val'), 'content'), 'text', 12);
 
-        static::assertSame('name', $shortcode->getName());
-        static::assertSame(array('arg' => 'val'), $shortcode->getParameters());
-        static::assertSame('content', $shortcode->getContent());
-        static::assertSame('text', $shortcode->getText());
-        static::assertSame(12, $shortcode->getOffset());
-        static::assertTrue($shortcode->hasContent());
+        $this->assertSame('name', $shortcode->getName());
+        $this->assertSame(array('arg' => 'val'), $shortcode->getParameters());
+        $this->assertSame('content', $shortcode->getContent());
+        $this->assertSame('text', $shortcode->getText());
+        $this->assertSame(12, $shortcode->getOffset());
+        $this->assertTrue($shortcode->hasContent());
 
-        static::assertFalse($shortcode->withContent(null)->hasContent());
-        static::assertSame('another', $shortcode->withContent('another')->getContent());
+        $this->assertFalse($shortcode->withContent(null)->hasContent());
+        $this->assertSame('another', $shortcode->withContent('another')->getContent());
     }
 
     public function testShortcodeEmptyNameException()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(\InvalidArgumentException::class);
         new Shortcode('', array(), null);
     }
 }

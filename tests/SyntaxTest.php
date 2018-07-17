@@ -5,11 +5,12 @@ use Thunder\Shortcode\Syntax\Syntax;
 use Thunder\Shortcode\Syntax\CommonSyntax;
 use Thunder\Shortcode\Syntax\SyntaxBuilder;
 use Thunder\Shortcode\Syntax\SyntaxInterface;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class SyntaxTest extends AbstractTestCase
+final class SyntaxTest extends TestCase
 {
     /**
      * @dataProvider provideSyntaxes

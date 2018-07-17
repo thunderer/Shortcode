@@ -10,11 +10,12 @@ use Thunder\Shortcode\Shortcode\ParsedShortcode;
 use Thunder\Shortcode\Shortcode\Shortcode;
 use Thunder\Shortcode\Syntax\CommonSyntax;
 use Thunder\Shortcode\Syntax\Syntax;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class ParserTest extends AbstractTestCase
+final class ParserTest extends TestCase
 {
     /**
      * @param ParserInterface $parser
@@ -28,14 +29,14 @@ final class ParserTest extends AbstractTestCase
         $parsed = $parser->parse($code);
 
         $count = count($tested);
-        static::assertCount($count, $parsed, 'counts');
+        $this->assertCount($count, $parsed, 'counts');
         for ($i = 0; $i < $count; $i++) {
-            static::assertSame($tested[$i]->getName(), $parsed[$i]->getName(), 'name');
-            static::assertSame($tested[$i]->getParameters(), $parsed[$i]->getParameters(), 'parameters');
-            static::assertSame($tested[$i]->getContent(), $parsed[$i]->getContent(), 'content');
-            static::assertSame($tested[$i]->getText(), $parsed[$i]->getText(), 'text');
-            static::assertSame($tested[$i]->getOffset(), $parsed[$i]->getOffset(), 'offset');
-            static::assertSame($tested[$i]->getBbCode(), $parsed[$i]->getBbCode(), 'bbCode');
+            $this->assertSame($tested[$i]->getName(), $parsed[$i]->getName(), 'name');
+            $this->assertSame($tested[$i]->getParameters(), $parsed[$i]->getParameters(), 'parameters');
+            $this->assertSame($tested[$i]->getContent(), $parsed[$i]->getContent(), 'content');
+            $this->assertSame($tested[$i]->getText(), $parsed[$i]->getText(), 'text');
+            $this->assertSame($tested[$i]->getOffset(), $parsed[$i]->getOffset(), 'offset');
+            $this->assertSame($tested[$i]->getBbCode(), $parsed[$i]->getBbCode(), 'bbCode');
         }
     }
 
@@ -287,13 +288,13 @@ final class ParserTest extends AbstractTestCase
 
     public function testWordpressInvalidNamesException()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(\InvalidArgumentException::class);
         WordpressParser::createFromNames(array('string', new \stdClass()));
     }
 
     public function testInstances()
     {
-        static::assertInstanceOf('Thunder\Shortcode\Parser\WordPressParser', new WordpressParser());
-        static::assertInstanceOf('Thunder\Shortcode\Parser\RegularParser', new RegularParser());
+        $this->assertInstanceOf(\Thunder\Shortcode\Parser\WordpressParser::class, new WordpressParser());
+        $this->assertInstanceOf(\Thunder\Shortcode\Parser\RegularParser::class, new RegularParser());
     }
 }

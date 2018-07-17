@@ -10,11 +10,12 @@
         }
     ],
     "require": {
-        "php": ">=5.3"
+        "php": ">=5.6"
     },
     "require-dev": {
-        "phpunit/phpunit": "^4.1|^5.0|^6.0",
-        "symfony/yaml": "^2.0|^3.0"
+        "phpunit/phpunit": "^5.0|^6.0",
+        "symfony/yaml": "^2.0|^3.0",
+        "ext-mbstring": "*"
     },
     "suggest": {
         "symfony/yaml": "if you want to use YAML serializer",
@@ -23,7 +24,11 @@
     },
     "autoload": {
         "psr-4": {
-            "Thunder\\Shortcode\\": "src/",
+            "Thunder\\Shortcode\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
             "Thunder\\Shortcode\\Tests\\": "tests/"
         }
     }

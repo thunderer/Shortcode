@@ -7,13 +7,15 @@ use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegexParser;
 use Thunder\Shortcode\Shortcode\Shortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
+use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
 use Thunder\Shortcode\ShortcodeFacade;
 use Thunder\Shortcode\Syntax\CommonSyntax;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class FacadeTest extends AbstractTestCase
+final class FacadeTest extends TestCase
 {
     public function testFacade()
     {
@@ -31,7 +33,7 @@ final class FacadeTest extends AbstractTestCase
         $this->assertSame('c', $facade->process('[c]c[/c]'));
 
         $shortcodes = $facade->parse('[b]');
-        $this->assertInstanceOf('Thunder\\Shortcode\\Shortcode\\ParsedShortcodeInterface', $shortcodes[0]);
+        $this->assertInstanceOf(ParsedShortcodeInterface::class, $shortcodes[0]);
     }
 
     public function testFacadeEvents()
@@ -84,14 +86,14 @@ EOF;
 
     public function testInvalidSerializationFormatException()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(\InvalidArgumentException::class);
         $facade = new ShortcodeFacade();
         $facade->serialize(new Shortcode('name', array(), null), 'invalid');
     }
 
     public function testInvalidUnserializationFormatException()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(\InvalidArgumentException::class);
         $facade = new ShortcodeFacade();
         $facade->unserialize('[c]', 'invalid');
     }

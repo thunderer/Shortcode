@@ -22,11 +22,12 @@ use Thunder\Shortcode\Shortcode\ProcessedShortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 use Thunder\Shortcode\Syntax\CommonSyntax;
 use Thunder\Shortcode\Tests\Fake\ReverseShortcode;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class ProcessorTest extends AbstractTestCase
+final class ProcessorTest extends TestCase
 {
     private function getHandlers()
     {
@@ -53,7 +54,7 @@ final class ProcessorTest extends AbstractTestCase
 
         $processor = new Processor(new RegexParser(), $this->getHandlers());
 
-        static::assertSame($result, $processor->process($text));
+        $this->assertSame($result, $processor->process($text));
     }
 
     /**
@@ -66,7 +67,7 @@ final class ProcessorTest extends AbstractTestCase
     {
         $processor = new Processor(new RegexParser(), $this->getHandlers());
 
-        static::assertSame($result, $processor->process($text));
+        $this->assertSame($result, $processor->process($text));
     }
 
     public function provideTexts()
@@ -107,8 +108,8 @@ final class ProcessorTest extends AbstractTestCase
 
         $text = 'x [outer]a [inner]c [level]x[/level] d[/inner] b[/outer] y';
         $result = 'x root[a outer[c inner[x] d] b] y';
-        static::assertSame($result, $processor->process($text));
-        static::assertSame($result.$result, $processor->process($text.$text));
+        $this->assertSame($result, $processor->process($text));
+        $this->assertSame($result.$result, $processor->process($text.$text));
     }
 
     public function testReplacesLongerThanInputText()
@@ -117,7 +118,7 @@ final class ProcessorTest extends AbstractTestCase
         $handlers->add('x', function() { return '<length>'; });
         $processor = new Processor(new RegularParser(), $handlers);
 
-        static::assertSame('<length><length><length>', $processor->process('[x][x][x]'));
+        $this->assertSame('<length><length><length>', $processor->process('[x][x][x]'));
     }
 
     public function testProcessorWithoutRecursion()
@@ -125,7 +126,7 @@ final class ProcessorTest extends AbstractTestCase
         $processor = new Processor(new RegexParser(), $this->getHandlers());
         $text = 'x [content]a-[name][/name]-b[/content] y';
 
-        static::assertSame('x a-[name][/name]-b y', $processor->withRecursionDepth(0)->process($text));
+        $this->assertSame('x a-[name][/name]-b y', $processor->withRecursionDepth(0)->process($text));
     }
 
     public function testProcessContentIfHasChildHandlerButNotParent()
@@ -136,8 +137,8 @@ final class ProcessorTest extends AbstractTestCase
         $text = 'x [invalid   ] [valid /] [/invalid] y';
         $processor = new Processor(new RegexParser(), $handlers);
 
-        static::assertSame('x [invalid   ] valid [/invalid] y', $processor->withAutoProcessContent(true)->process($text));
-        static::assertSame('x [invalid   ] [valid /] [/invalid] y', $processor->withAutoProcessContent(false)->process($text));
+        $this->assertSame('x [invalid   ] valid [/invalid] y', $processor->withAutoProcessContent(true)->process($text));
+        $this->assertSame('x [invalid   ] [valid /] [/invalid] y', $processor->withAutoProcessContent(false)->process($text));
     }
 
     public function testProcessorWithoutContentAutoProcessing()
@@ -145,7 +146,7 @@ final class ProcessorTest extends AbstractTestCase
         $processor = new Processor(new RegexParser(), $this->getHandlers());
         $text = 'x [content]a-[name][/name]-b[/content] y';
 
-        static::assertSame('x a-[name][/name]-b y', $processor->withAutoProcessContent(false)->process($text));
+        $this->assertSame('x a-[name][/name]-b y', $processor->withAutoProcessContent(false)->process($text));
     }
 
     public function testProcessorShortcodePositions()
@@ -155,10 +156,10 @@ final class ProcessorTest extends AbstractTestCase
         $handlers->add('n', function (ProcessedShortcode $s) { return $s->getNamePosition(); });
         $processor = new Processor(new RegexParser(), $handlers);
 
-        static::assertSame('123', $processor->process('[n][n][n]'), '3n');
-        static::assertSame('123', $processor->process('[p][p][p]'), '3p');
-        static::assertSame('113253', $processor->process('[p][n][p][n][p][n]'), 'pnpnpn');
-        static::assertSame('1231567', $processor->process('[p][p][p][n][p][p][p]'), 'pppnppp');
+        $this->assertSame('123', $processor->process('[n][n][n]'), '3n');
+        $this->assertSame('123', $processor->process('[p][p][p]'), '3p');
+        $this->assertSame('113253', $processor->process('[p][n][p][n][p][n]'), 'pnpnpn');
+        $this->assertSame('1231567', $processor->process('[p][p][p][n][p][p][p]'), 'pppnppp');
     }
 
     /**
@@ -182,7 +183,7 @@ final class ProcessorTest extends AbstractTestCase
             ->add('raw', new RawHandler());
         $processor = new Processor(new RegexParser(), $handlers);
 
-        static::assertSame($result, $processor->process($text));
+        $this->assertSame($result, $processor->process($text));
     }
 
     public function provideBuiltInTests()
@@ -225,7 +226,7 @@ final class ProcessorTest extends AbstractTestCase
             });
         $processor = new Processor(new RegexParser(), $handlers);
 
-        static::assertSame('You are 18 years old.', trim($processor->process('
+        $this->assertSame('You are 18 years old.', trim($processor->process('
             [declare age]You are %age% years old.[/declare]
             [age age=18]
             ')));
@@ -239,7 +240,7 @@ final class ProcessorTest extends AbstractTestCase
         });
         $processor = new Processor(new RegularParser(new CommonSyntax()), $handlers);
 
-        static::assertSame('[0][3] ’[8][11]’ [20]', $processor->process('[a][b] ’[c][d]’ [/b][e]'));
+        $this->assertSame('[0][3] ’[8][11]’ [20]', $processor->process('[a][b] ’[c][d]’ [/b][e]'));
     }
 
     public function testProcessorIterative()
@@ -256,32 +257,32 @@ final class ProcessorTest extends AbstractTestCase
 
         /** @var $processor Processor */
         $processor = $processor->withRecursionDepth(0)->withMaxIterations(2);
-        static::assertSame('x a y', $processor->process('x [c]a[/c] y'));
-        static::assertSame('x abc y', $processor->process('x [c]a[d]b[/d]c[/c] y'));
-        static::assertSame('x ab[e]c[/e]de y', $processor->process('x [c]a[d]b[e]c[/e]d[/d]e[/c] y'));
+        $this->assertSame('x a y', $processor->process('x [c]a[/c] y'));
+        $this->assertSame('x abc y', $processor->process('x [c]a[d]b[/d]c[/c] y'));
+        $this->assertSame('x ab[e]c[/e]de y', $processor->process('x [c]a[d]b[e]c[/e]d[/d]e[/c] y'));
 
         $processor = $processor->withMaxIterations(null);
-        static::assertSame('x abcde y', $processor->process('x [c]a[d]b[e]c[/e]d[/d]e[/c] y'));
+        $this->assertSame('x abcde y', $processor->process('x [c]a[d]b[e]c[/e]d[/d]e[/c] y'));
     }
 
     public function testExceptionOnInvalidRecursionDepth()
     {
         $processor = new Processor(new RegularParser(), new HandlerContainer());
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(\InvalidArgumentException::class);
         $processor->withRecursionDepth(new \stdClass());
     }
 
     public function testExceptionOnInvalidMaxIterations()
     {
         $processor = new Processor(new RegularParser(), new HandlerContainer());
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(\InvalidArgumentException::class);
         $processor->withMaxIterations(new \stdClass());
     }
 
     public function testExceptionOnInvalidAutoProcessFlag()
     {
         $processor = new Processor(new RegularParser(), new HandlerContainer());
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(\InvalidArgumentException::class);
         $processor->withAutoProcessContent(new \stdClass());
     }
 
@@ -291,7 +292,7 @@ final class ProcessorTest extends AbstractTestCase
         $handlers->setDefault(function (ShortcodeInterface $s) { return $s->getName(); });
         $processor = new Processor(new RegexParser(), $handlers);
 
-        static::assertSame('namerandom', $processor->process('[name][other][/name][random]'));
+        $this->assertSame('namerandom', $processor->process('[name][other][/name][random]'));
     }
 
     public function testStripOuter()
@@ -311,8 +312,8 @@ final class ProcessorTest extends AbstractTestCase
         });
         $processor = new Processor(new RegexParser(), $handlers);
 
-        static::assertSame('x ab y', $processor->process('x [p] [q]a[/q] [q]b[/q] [/p] y'));
-        static::assertSame('x ab c y', $processor->process('x [p] [q]a[/q] [q]b [q]c[/q][/q] [/p] y'));
+        $this->assertSame('x ab y', $processor->process('x [p] [q]a[/q] [q]b[/q] [/p] y'));
+        $this->assertSame('x ab c y', $processor->process('x [p] [q]a[/q] [q]b [q]c[/q][/q] [/p] y'));
     }
 
     public function testOriginalContent()
@@ -322,7 +323,7 @@ final class ProcessorTest extends AbstractTestCase
         $handlers->addAlias('q', 'p');
         $processor = new Processor(new RegexParser(), $handlers);
 
-        static::assertSame('x  [q]a[/q] [q]b[/q]  y', $processor->process('x [p] [q]a[/q] [q]b[/q] [/p] y'));
+        $this->assertSame('x  [q]a[/q] [q]b[/q]  y', $processor->process('x [p] [q]a[/q] [q]b[/q] [/p] y'));
     }
 
     public function testMultipleParent()
@@ -334,7 +335,7 @@ final class ProcessorTest extends AbstractTestCase
         $processor = new Processor(new RegexParser(), $handlers);
         $processor->process('x [p] [q]a[/q] [q]b[/q] [q]c[/q] [/p] y');
 
-        static::assertSame(3, $parents);
+        $this->assertSame(3, $parents);
     }
 
     public function testPreventInfiniteLoop()
@@ -347,9 +348,9 @@ final class ProcessorTest extends AbstractTestCase
         $processor = new Processor(new RegexParser(), $handlers);
         $processor->withMaxIterations(null);
 
-        static::assertSame('[self]', $processor->process('[self]'));
-        static::assertSame('[self]', $processor->process('[other]'));
-        static::assertSame('[other]', $processor->process('[random]'));
+        $this->assertSame('[self]', $processor->process('[self]'));
+        $this->assertSame('[self]', $processor->process('[other]'));
+        $this->assertSame('[other]', $processor->process('[random]'));
     }
 
     public function testValidProcessAfterHandlerRemoval()
@@ -358,10 +359,10 @@ final class ProcessorTest extends AbstractTestCase
         $handlers->add('name', function(ShortcodeInterface $s) { return $s->getName(); });
         $handlers->addAlias('n', 'name');
         $processor = new Processor(new RegexParser(), $handlers);
-        static::assertSame('n', $processor->process('[n]'));
-        static::assertSame('name', $processor->process('[name]'));
+        $this->assertSame('n', $processor->process('[n]'));
+        $this->assertSame('name', $processor->process('[name]'));
         $handlers->remove('name');
-        static::assertSame('n', $processor->process('[n]'));
-        static::assertSame('[name]', $processor->process('[name]'));
+        $this->assertSame('n', $processor->process('[n]'));
+        $this->assertSame('[name]', $processor->process('[name]'));
     }
 }

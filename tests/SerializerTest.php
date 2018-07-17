@@ -9,11 +9,12 @@ use Thunder\Shortcode\Serializer\YamlSerializer;
 use Thunder\Shortcode\Shortcode\ParsedShortcode;
 use Thunder\Shortcode\Shortcode\Shortcode;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
-final class SerializerTest extends AbstractTestCase
+final class SerializerTest extends TestCase
 {
     /**
      * @dataProvider provideShortcodes
@@ -23,10 +24,10 @@ final class SerializerTest extends AbstractTestCase
         $result = $serializer->serialize($test);
         $tested = $serializer->unserialize($result);
 
-        static::assertSame($test->getName(), $tested->getName(), 'name: '.$result);
-        static::assertSame($test->getParameters(), $tested->getParameters(), 'parameters: '.$result);
-        static::assertSame($test->getContent(), $tested->getContent(), 'content: '.$result);
-        static::assertSame($test->getBbCode(), $tested->getBbCode(), 'bbCode: '.$result);
+        $this->assertSame($test->getName(), $tested->getName(), 'name: '.$result);
+        $this->assertSame($test->getParameters(), $tested->getParameters(), 'parameters: '.$result);
+        $this->assertSame($test->getContent(), $tested->getContent(), 'content: '.$result);
+        $this->assertSame($test->getBbCode(), $tested->getBbCode(), 'bbCode: '.$result);
     }
 
     public function provideShortcodes()
@@ -65,10 +66,10 @@ final class SerializerTest extends AbstractTestCase
     {
         $tested = $serializer->unserialize($text);
 
-        static::assertSame($test->getName(), $tested->getName(), 'name: '.$text);
-        static::assertSame($test->getParameters(), $tested->getParameters(), 'parameters: '.$text);
-        static::assertSame($test->getContent(), $tested->getContent(), 'content: '.$text);
-        static::assertSame($test->getBbCode(), $tested->getBbCode(), 'bbCode: '.$text);
+        $this->assertSame($test->getName(), $tested->getName(), 'name: '.$text);
+        $this->assertSame($test->getParameters(), $tested->getParameters(), 'parameters: '.$text);
+        $this->assertSame($test->getContent(), $tested->getContent(), 'content: '.$text);
+        $this->assertSame($test->getBbCode(), $tested->getBbCode(), 'bbCode: '.$text);
     }
 
     public function provideUnserialized()
@@ -103,22 +104,22 @@ final class SerializerTest extends AbstractTestCase
         $json = new JsonSerializer();
 
         return array(
-            array($text, '[sc /] c [xx]', 'InvalidArgumentException'),
-            array($text, '[/sc]', 'InvalidArgumentException'),
-            array($json, '{}', 'InvalidArgumentException'),
-            array($json, '', 'InvalidArgumentException'),
-            array($json, '{"name":"x","parameters":null}', 'InvalidArgumentException'),
-            array($json, '{"name":"x","parameters":{"key":[]}}', 'InvalidArgumentException'),
-            array($yaml, 'shortcode: ', 'InvalidArgumentException'),
-            array($yaml, '', 'InvalidArgumentException'),
-            array($yaml, 'name: x'."\n".'parameters: string', 'InvalidArgumentException'),
-            array($xml, '<shortcode />', 'InvalidArgumentException'),
-            array($xml, '<shortcode name=""><content>sss</content></shortcode>', 'InvalidArgumentException'),
-            array($xml, '<shortcode name="x"><parameters><parameter>xx</parameter></parameters><content>sss</content></shortcode>', 'InvalidArgumentException'),
-            array($xml, '<shortcode name="x"><parameters><parameter name="">xx</parameter></parameters><content>sss</content></shortcode>', 'InvalidArgumentException'),
-            array($xml, '<shortcode name="x"><parameters><parameter name=>xx</parameter></parameters><content>sss</content></shortcode>', 'InvalidArgumentException'),
-            array($xml, '<invalid />', 'InvalidArgumentException'),
-            array($xml, '', 'InvalidArgumentException'),
+            array($text, '[sc /] c [xx]', \InvalidArgumentException::class),
+            array($text, '[/sc]', \InvalidArgumentException::class),
+            array($json, '{}', \InvalidArgumentException::class),
+            array($json, '', \InvalidArgumentException::class),
+            array($json, '{"name":"x","parameters":null}', \InvalidArgumentException::class),
+            array($json, '{"name":"x","parameters":{"key":[]}}', \InvalidArgumentException::class),
+            array($yaml, 'shortcode: ', \InvalidArgumentException::class),
+            array($yaml, '', \InvalidArgumentException::class),
+            array($yaml, 'name: x'."\n".'parameters: string', \InvalidArgumentException::class),
+            array($xml, '<shortcode />', \InvalidArgumentException::class),
+            array($xml, '<shortcode name=""><content>sss</content></shortcode>', \InvalidArgumentException::class),
+            array($xml, '<shortcode name="x"><parameters><parameter>xx</parameter></parameters><content>sss</content></shortcode>', \InvalidArgumentException::class),
+            array($xml, '<shortcode name="x"><parameters><parameter name="">xx</parameter></parameters><content>sss</content></shortcode>', \InvalidArgumentException::class),
+            array($xml, '<shortcode name="x"><parameters><parameter name=>xx</parameter></parameters><content>sss</content></shortcode>', \InvalidArgumentException::class),
+            array($xml, '<invalid />', \InvalidArgumentException::class),
+            array($xml, '', \InvalidArgumentException::class),
         );
     }
 }
