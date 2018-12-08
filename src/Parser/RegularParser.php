@@ -16,8 +16,9 @@ final class RegularParser implements ParserInterface
     private $tokens;
     private $tokensCount;
     private $position;
-    /** @var array[] */
+    /** @var int[] */
     private $backtracks;
+    private $lastBacktrack;
 
     const TOKEN_OPEN = 1;
     const TOKEN_CLOSE = 2;
@@ -41,6 +42,7 @@ final class RegularParser implements ParserInterface
     {
         $this->tokens = $this->tokenize($text);
         $this->backtracks = array();
+        $this->lastBacktrack = 0;
         $this->position = 0;
         $this->tokensCount = \count($this->tokens);
 
@@ -225,32 +227,35 @@ final class RegularParser implements ParserInterface
 
     private function beginBacktrack()
     {
-        $this->backtracks[] = array();
+        $this->backtracks[] = $this->position;
+        $this->lastBacktrack = $this->position;
     }
 
     private function getBacktrack()
     {
-        // switch from array_map() to array_column() when dropping support for PHP <5.5
-        return implode('', array_map(function(array $token) { return $token[1]; }, array_pop($this->backtracks)));
+        $position = array_pop($this->backtracks);
+        $backtrack = '';
+        for($i = $position; $i < $this->position; $i++) {
+            $backtrack .= $this->tokens[$i][1];
+        }
+
+        return $backtrack;
     }
 
     private function backtrack($modifyPosition = true)
     {
-        $tokens = array_pop($this->backtracks);
-        $count = \count($tokens);
+        $position = array_pop($this->backtracks);
         if($modifyPosition) {
-            $this->position -= $count;
+            $this->position = $position;
         }
 
-        foreach($this->backtracks as &$backtrack) {
-            // array_pop() in loop is much faster than array_slice() because
-            // it operates directly on the passed array
-            for($i = 0; $i < $count; $i++) {
-                array_pop($backtrack);
-            }
+        $backtrack = '';
+        for($i = $position; $i < $this->lastBacktrack; $i++) {
+            $backtrack .= $this->tokens[$i][1];
         }
+        $this->lastBacktrack = $position;
 
-        return implode('', array_map(function(array $token) { return $token[1]; }, $tokens));
+        return $backtrack;
     }
 
     private function lookahead($type)
@@ -268,21 +273,13 @@ final class RegularParser implements ParserInterface
         if(!empty($type) && $token[0] !== $type) {
             return false;
         }
-        foreach($this->backtracks as &$backtrack) {
-            $backtrack[] = $token;
-        }
-        unset($backtrack);
 
         /** @var callable $callback */
         $callback && $callback($token);
         $this->position++;
 
         if($ws && $this->position < $this->tokensCount && $this->tokens[$this->position][0] === self::TOKEN_WS) {
-            $token = $this->tokens[$this->position];
             $this->position++;
-            foreach($this->backtracks as &$backtrack) {
-                $backtrack[] = $token;
-            }
         }
 
         return true;
