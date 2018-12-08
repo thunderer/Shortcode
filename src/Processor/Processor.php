@@ -106,7 +106,6 @@ final class Processor implements ProcessorInterface
 
             $replaces[] = new ReplacedShortcode($shortcode, $replace);
         }
-        $replaces = array_filter($replaces);
 
         $applyEvent = new ReplaceShortcodesEvent($text, $replaces, $parent);
         $this->dispatchEvent(Events::REPLACE_SHORTCODES, $applyEvent);
@@ -116,13 +115,16 @@ final class Processor implements ProcessorInterface
 
     private function applyReplaces($text, array $replaces)
     {
-        return array_reduce(array_reverse($replaces), function($state, ReplacedShortcode $s) {
+        /** @var ReplacedShortcode $s */
+        foreach(array_reverse($replaces) as $s) {
             $offset = $s->getOffset();
             $length = mb_strlen($s->getText(), 'utf-8');
-            $textLength = mb_strlen($state, 'utf-8');
+            $textLength = mb_strlen($text, 'utf-8');
 
-            return mb_substr($state, 0, $offset, 'utf-8').$s->getReplacement().mb_substr($state, $offset + $length, $textLength, 'utf-8');
-        }, $text);
+            $text = mb_substr($text, 0, $offset, 'utf-8').$s->getReplacement().mb_substr($text, $offset + $length, $textLength, 'utf-8');
+        }
+
+        return $text;
     }
 
     private function processHandler(ParsedShortcodeInterface $parsed, ProcessorContext $context, $handler)
