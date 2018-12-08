@@ -42,7 +42,7 @@ final class RegularParser implements ParserInterface
         $this->tokens = $this->tokenize($text);
         $this->backtracks = array();
         $this->position = 0;
-        $this->tokensCount = count($this->tokens);
+        $this->tokensCount = \count($this->tokens);
 
         $shortcodes = array();
         while($this->position < $this->tokensCount) {
@@ -52,7 +52,7 @@ final class RegularParser implements ParserInterface
             $names = array();
             $this->beginBacktrack();
             $matches = $this->shortcode($names);
-            if(is_array($matches)) {
+            if(\is_array($matches)) {
                 foreach($matches as $shortcode) {
                     $shortcodes[] = $shortcode;
                 }
@@ -130,11 +130,11 @@ final class RegularParser implements ParserInterface
 
             $this->beginBacktrack();
             $matchedShortcodes = $this->shortcode($names);
-            if(is_string($matchedShortcodes)) {
+            if(\is_string($matchedShortcodes)) {
                 $closingName = $matchedShortcodes;
                 break;
             }
-            if(is_array($matchedShortcodes)) {
+            if(\is_array($matchedShortcodes)) {
                 foreach($matchedShortcodes as $matchedShortcode) {
                     $shortcodes[] = $matchedShortcode;
                 }
@@ -168,7 +168,7 @@ final class RegularParser implements ParserInterface
         if(!$this->match(self::TOKEN_STRING, $setName, true)) { return false; }
         if(!$this->match(self::TOKEN_CLOSE)) { return false; }
 
-        return in_array($closingName, $names, true) ? $closingName : false;
+        return \in_array($closingName, $names, true) ? $closingName : false;
     }
 
     private function bbCode()
@@ -237,7 +237,7 @@ final class RegularParser implements ParserInterface
     private function backtrack($modifyPosition = true)
     {
         $tokens = array_pop($this->backtracks);
-        $count = count($tokens);
+        $count = \count($tokens);
         if($modifyPosition) {
             $this->position -= $count;
         }
@@ -273,6 +273,7 @@ final class RegularParser implements ParserInterface
         }
         unset($backtrack);
 
+        /** @var callable $callback */
         $callback && $callback($token);
         $this->position++;
 
@@ -321,6 +322,13 @@ final class RegularParser implements ParserInterface
             return preg_replace('/(.)/us', '\\\\$0', $text);
         };
 
+        $symbols = array_map($quote, [
+            $syntax->getOpeningTag(),
+            $syntax->getClosingTag(),
+            $syntax->getClosingTagMarker(),
+            $syntax->getParameterValueSeparator(),
+            $syntax->getParameterValueDelimiter(),
+        ]);
         $rules = array(
             $group($syntax->getOpeningTag(), 'open'),
             $group($syntax->getClosingTag(), 'close'),
@@ -328,14 +336,7 @@ final class RegularParser implements ParserInterface
             $group($syntax->getParameterValueSeparator(), 'separator'),
             $group($syntax->getParameterValueDelimiter(), 'delimiter'),
             '(?<ws>\s+)',
-            '(?<string>\\\\.|(?:(?!'.implode('|', array(
-                $quote($syntax->getOpeningTag()),
-                $quote($syntax->getClosingTag()),
-                $quote($syntax->getClosingTagMarker()),
-                $quote($syntax->getParameterValueSeparator()),
-                $quote($syntax->getParameterValueDelimiter()),
-                '\s+',
-            )).').)+)',
+            '(?<string>(?:(?!'.implode('|', $symbols).'|\s)(?:\\\\.|.))+)',
         );
 
         return '~('.implode('|', $rules).')~us';
