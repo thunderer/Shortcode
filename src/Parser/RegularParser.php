@@ -20,7 +20,6 @@ final class RegularParser implements ParserInterface
     /** @var int[] */
     private $backtracks;
     private $lastBacktrack;
-    private $tokenMap;
 
     const TOKEN_OPEN = 1;
     const TOKEN_CLOSE = 2;
@@ -276,19 +275,27 @@ final class RegularParser implements ParserInterface
 
     private function tokenize($text)
     {
-        preg_match_all($this->lexerRegex, $text, $matches, PREG_OFFSET_CAPTURE);
-        if(preg_last_error() !== PREG_NO_ERROR) {
+        $count = preg_match_all($this->lexerRegex, $text, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+        if(false === $count || preg_last_error() !== PREG_NO_ERROR) {
             throw new \RuntimeException(sprintf('PCRE failure `%s`.', preg_last_error()));
         }
 
         $tokens = array();
         $position = 0;
-        foreach($matches[0] as $match) {
-            $type = isset($this->tokenMap[$match[0]])
-                ? $this->tokenMap[$match[0]]
-                : (ctype_space($match[0]) ? self::TOKEN_WS : self::TOKEN_STRING);
-            $tokens[] = array($type, $match[0], $position);
-            $position += mb_strlen($match[0], 'utf-8');
+
+        foreach($matches as $match) {
+            switch(true) {
+                case -1 !== $match['string'][1]: { $token = $match['string'][0]; $type = self::TOKEN_STRING; break; }
+                case -1 !== $match['ws'][1]: { $token = $match['ws'][0]; $type = self::TOKEN_WS; break; }
+                case -1 !== $match['marker'][1]: { $token = $match['marker'][0]; $type = self::TOKEN_MARKER; break; }
+                case -1 !== $match['delimiter'][1]: { $token = $match['delimiter'][0]; $type = self::TOKEN_DELIMITER; break; }
+                case -1 !== $match['separator'][1]: { $token = $match['separator'][0]; $type = self::TOKEN_SEPARATOR; break; }
+                case -1 !== $match['open'][1]: { $token = $match['open'][0]; $type = self::TOKEN_OPEN; break; }
+                case -1 !== $match['close'][1]: { $token = $match['close'][0]; $type = self::TOKEN_CLOSE; break; }
+                default: { throw new \RuntimeException(sprintf('Invalid token.')); }
+            }
+            $tokens[] = array($type, $token, $position);
+            $position += mb_strlen($token, 'utf-8');
         }
 
         return $tokens;
@@ -296,19 +303,30 @@ final class RegularParser implements ParserInterface
 
     private function prepareLexer(SyntaxInterface $syntax)
     {
-        $this->tokenMap = array(
-            $syntax->getOpeningTag() => self::TOKEN_OPEN,
-            $syntax->getClosingTag() => self::TOKEN_CLOSE,
-            $syntax->getClosingTagMarker() => self::TOKEN_MARKER,
-            $syntax->getParameterValueSeparator() => self::TOKEN_SEPARATOR,
-            $syntax->getParameterValueDelimiter() => self::TOKEN_DELIMITER,
-        );
-
+        $group = function($text, $group) {
+            return '(?<'.$group.'>'.preg_replace('/(.)/us', '\\\\$0', $text).')';
+        };
         $quote = function($text) {
             return preg_replace('/(.)/us', '\\\\$0', $text);
         };
-        $symbols = array_map($quote, array_keys($this->tokenMap));
 
-        return '~('.implode('|', $symbols).'|\s+|\\\\.|[\w-]+|.)~us';
+        $rules = array(
+            '(?<string>\\\\.|(?:(?!'.implode('|', array(
+                $quote($syntax->getOpeningTag()),
+                $quote($syntax->getClosingTag()),
+                $quote($syntax->getClosingTagMarker()),
+                $quote($syntax->getParameterValueSeparator()),
+                $quote($syntax->getParameterValueDelimiter()),
+                '\s+',
+            )).').)+)',
+            '(?<ws>\s+)',
+            $group($syntax->getClosingTagMarker(), 'marker'),
+            $group($syntax->getParameterValueDelimiter(), 'delimiter'),
+            $group($syntax->getParameterValueSeparator(), 'separator'),
+            $group($syntax->getOpeningTag(), 'open'),
+            $group($syntax->getClosingTag(), 'close'),
+        );
+
+        return '~('.implode('|', $rules).')~us';
     }
 }
