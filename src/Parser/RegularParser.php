@@ -100,28 +100,8 @@ final class RegularParser implements ParserInterface
         if(!$this->match(self::TOKEN_CLOSE, false)) { return false; }
         $this->beginBacktrack();
         $names[] = $name;
-        list($content, $shortcodes, $closingName) = $this->content($names);
-        if(null !== $closingName && $closingName !== $name) {
-            array_pop($names);
-            array_pop($this->backtracks);
-            array_pop($this->backtracks);
 
-            return $closingName;
-        }
-        if(false === $content || $closingName !== $name) {
-            $this->backtrack(false);
-            $text = $this->backtrack(false);
-
-            return array_merge(array($this->getObject($name, $parameters, $bbCode, $offset, null, $text)), $shortcodes);
-        }
-        $content = $this->getBacktrack();
-        if(!$this->close($names)) { return false; }
-
-        return array($this->getObject($name, $parameters, $bbCode, $offset, $content, $this->getBacktrack()));
-    }
-
-    private function content(array &$names)
-    {
+        // begin inlined content()
         $content = '';
         $shortcodes = array();
         $closingName = null;
@@ -132,13 +112,13 @@ final class RegularParser implements ParserInterface
             }
 
             $this->beginBacktrack();
-            $matchedShortcodes = $this->shortcode($names);
-            if(\is_string($matchedShortcodes)) {
-                $closingName = $matchedShortcodes;
+            $contentMatchedShortcodes = $this->shortcode($names);
+            if(\is_string($contentMatchedShortcodes)) {
+                $closingName = $contentMatchedShortcodes;
                 break;
             }
-            if(\is_array($matchedShortcodes)) {
-                foreach($matchedShortcodes as $matchedShortcode) {
+            if(\is_array($contentMatchedShortcodes)) {
+                foreach($contentMatchedShortcodes as $matchedShortcode) {
                     $shortcodes[] = $matchedShortcode;
                 }
                 continue;
@@ -157,8 +137,26 @@ final class RegularParser implements ParserInterface
 
             $content .= $this->match(null, false);
         }
+        $content = $this->position < $this->tokensCount ? $content : false;
+        // end inlined content()
 
-        return array($this->position < $this->tokensCount ? $content : false, $shortcodes, $closingName);
+        if(null !== $closingName && $closingName !== $name) {
+            array_pop($names);
+            array_pop($this->backtracks);
+            array_pop($this->backtracks);
+
+            return $closingName;
+        }
+        if(false === $content || $closingName !== $name) {
+            $this->backtrack(false);
+            $text = $this->backtrack(false);
+
+            return array_merge(array($this->getObject($name, $parameters, $bbCode, $offset, null, $text)), $shortcodes);
+        }
+        $content = $this->getBacktrack();
+        if(!$this->close($names)) { return false; }
+
+        return array($this->getObject($name, $parameters, $bbCode, $offset, $content, $this->getBacktrack()));
     }
 
     private function close(array &$names)
@@ -250,7 +248,7 @@ final class RegularParser implements ParserInterface
 
     private function lookahead($type)
     {
-        return $this->position < $this->tokensCount && (empty($type) || $this->tokens[$this->position][0] === $type);
+        return $this->position < $this->tokensCount && $this->tokens[$this->position][0] === $type;
     }
 
     private function match($type, $ws)
