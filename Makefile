@@ -7,7 +7,7 @@ composer-update:
 
 test:
 	docker-compose run --rm php-${PHP} php -v
-	docker-compose run --rm php-${PHP} php /app/vendor/bin/phpunit -c /app/phpunit.xml.dist
+	docker-compose run --rm php-${PHP} php /app/vendor/bin/phpunit -c /app/phpunit.xml.dist --filter "${TEST}"
 test-local:
 	php -v
 	php vendor/bin/phpunit

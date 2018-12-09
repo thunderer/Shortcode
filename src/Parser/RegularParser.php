@@ -35,6 +35,12 @@ final class RegularParser implements ParserInterface
     const TOKEN_STRING = 6;
     const TOKEN_WS = 7;
 
+    const VALUE_REGULAR = 0x01;
+    const VALUE_AGGRESSIVE = 0x02;
+
+    /** @var int */
+    public $valueMode = self::VALUE_REGULAR;
+
     public function __construct(SyntaxInterface $syntax = null)
     {
         $this->lexerRegex = $this->prepareLexer($syntax ?: new CommonSyntax());
@@ -239,7 +245,16 @@ final class RegularParser implements ParserInterface
         }
 
         if($this->lookahead(self::TOKEN_STRING) || $this->lookahead(self::TOKEN_MARKER)) {
-            while(false === ($this->lookahead(self::TOKEN_WS) || $this->lookahead(self::TOKEN_CLOSE) || $this->lookaheadN(array(self::TOKEN_MARKER, self::TOKEN_CLOSE)))) {
+            while(true) {
+                if($this->lookahead(self::TOKEN_WS) || $this->lookahead(self::TOKEN_CLOSE)) {
+                    break;
+                }
+                if($this->lookaheadN(array(self::TOKEN_MARKER, self::TOKEN_CLOSE))) {
+                    if($this->valueMode === self::VALUE_AGGRESSIVE) {
+                        $value .= $this->match(null, false);
+                    }
+                    break;
+                }
                 $value .= $this->match(null, false);
             }
 
@@ -301,6 +316,11 @@ final class RegularParser implements ParserInterface
         return $this->position < $this->tokensCount && $this->tokens[$this->position][0] === $type;
     }
 
+    /**
+     * @param int[] $types
+     *
+     * @return bool
+     */
     private function lookaheadN(array $types)
     {
         $count = count($types);
@@ -323,6 +343,12 @@ final class RegularParser implements ParserInterface
         return true;
     }
 
+    /**
+     * @param int|null $type
+     * @param bool $ws
+     *
+     * @return string
+     */
     private function match($type, $ws)
     {
         if($this->position >= $this->tokensCount) {
