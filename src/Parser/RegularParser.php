@@ -43,6 +43,7 @@ final class RegularParser implements ParserInterface
      */
     public function parse($text)
     {
+        $nestingLevel = ini_set('xdebug.max_nesting_level', -1);
         $this->tokens = $this->tokenize($text);
         $this->backtracks = array();
         $this->lastBacktrack = 0;
@@ -63,6 +64,7 @@ final class RegularParser implements ParserInterface
                 }
             }
         }
+        ini_set('xdebug.max_nesting_level', $nestingLevel);
 
         return $shortcodes;
     }
