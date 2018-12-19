@@ -23,7 +23,6 @@ class ReplaceShortcodesEvent
     {
         $this->shortcode = $shortcode;
         $this->text = $text;
-        $this->result = null;
 
         $this->setReplacements($replacements);
     }

@@ -6,7 +6,7 @@ services:
     image: 'composer:1.6'
     volumes: ['.:/app']
 
-  # FIXME: PHP 5.3 contains neither mbstring extension nor docker-php-ext-install script
+  # PHP 5.3 contains neither mbstring extension nor docker-php-ext-install script
   # Original Dockerfile can be found here https://github.com/docker-library/php/pull/20/files
   # Unfortunately it fails to build now because GPG signatures do not exist anymore
   # php-5.3: { build: 'docker/php-5.3', volumes: ['.:/app'] }

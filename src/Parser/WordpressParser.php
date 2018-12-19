@@ -97,7 +97,7 @@ final class WordpressParser implements ParserInterface
                 $parameters[strtolower($match[3])] = stripcslashes($match[4]);
             } elseif(!empty($match[5])) {
                 $parameters[strtolower($match[5])] = stripcslashes($match[6]);
-            } elseif(isset($match[7]) && strlen($match[7])) {
+            } elseif(isset($match[7]) && $match[7] !== '') {
                 $parameters[stripcslashes($match[7])] = null;
             } elseif(isset($match[8])) {
                 $parameters[stripcslashes($match[8])] = null;

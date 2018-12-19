@@ -16,7 +16,7 @@ final class EventContainer implements EventContainerInterface
 
     public function addListener($event, $handler)
     {
-        if(!in_array($event, Events::getEvents())) {
+        if(!\in_array($event, Events::getEvents(), true)) {
             throw new \InvalidArgumentException(sprintf('Unsupported event %s!', $event));
         }
 

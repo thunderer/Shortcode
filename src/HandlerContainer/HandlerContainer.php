@@ -62,7 +62,7 @@ final class HandlerContainer implements HandlerContainerInterface
 
     public function get($name)
     {
-        return $this->has($name) ? $this->handlers[$name] : ($this->default ?: null);
+        return $this->has($name) ? $this->handlers[$name] : $this->default;
     }
 
     public function has($name)

@@ -1,4 +1,4 @@
-PHP ?= 7.2
+PHP ?= 7.3
 
 composer-update:
 	docker-compose run --rm composer composer config platform.php ${PHP}
@@ -8,3 +8,6 @@ composer-update:
 test:
 	docker-compose run --rm php-${PHP} php -v
 	docker-compose run --rm php-${PHP} php /app/vendor/bin/phpunit -c /app/phpunit.xml.dist
+test-local:
+	php -v
+	php vendor/bin/phpunit
