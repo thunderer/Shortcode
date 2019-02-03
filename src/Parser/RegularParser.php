@@ -200,9 +200,9 @@ final class RegularParser implements ParserInterface
             return $this->match(self::TOKEN_DELIMITER, false) ? $value : false;
         }
 
-        if($tmp = $this->match(self::TOKEN_STRING, false)) {
+        if('' !== $tmp = $this->match(self::TOKEN_STRING, false)) {
             $value .= $tmp;
-            while($tmp = $this->match(self::TOKEN_STRING, false)) {
+            while('' !== $tmp = $this->match(self::TOKEN_STRING, false)) {
                 $value .= $tmp;
             }
 
