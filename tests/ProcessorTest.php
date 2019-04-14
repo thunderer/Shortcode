@@ -267,21 +267,21 @@ final class ProcessorTest extends AbstractTestCase
     public function testExceptionOnInvalidRecursionDepth()
     {
         $processor = new Processor(new RegularParser(), new HandlerContainer());
-        $this->expectException('InvalidArgumentException');
+        $this->willThrowException('InvalidArgumentException');
         $processor->withRecursionDepth(new \stdClass());
     }
 
     public function testExceptionOnInvalidMaxIterations()
     {
         $processor = new Processor(new RegularParser(), new HandlerContainer());
-        $this->expectException('InvalidArgumentException');
+        $this->willThrowException('InvalidArgumentException');
         $processor->withMaxIterations(new \stdClass());
     }
 
     public function testExceptionOnInvalidAutoProcessFlag()
     {
         $processor = new Processor(new RegularParser(), new HandlerContainer());
-        $this->expectException('InvalidArgumentException');
+        $this->willThrowException('InvalidArgumentException');
         $processor->withAutoProcessContent(new \stdClass());
     }
 

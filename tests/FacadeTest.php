@@ -84,14 +84,14 @@ EOF;
 
     public function testInvalidSerializationFormatException()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->willThrowException('InvalidArgumentException');
         $facade = new ShortcodeFacade();
         $facade->serialize(new Shortcode('name', array(), null), 'invalid');
     }
 
     public function testInvalidUnserializationFormatException()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->willThrowException('InvalidArgumentException');
         $facade = new ShortcodeFacade();
         $facade->unserialize('[c]', 'invalid');
     }

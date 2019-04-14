@@ -131,7 +131,7 @@ final class ShortcodeTest extends AbstractTestCase
 
     public function testShortcodeEmptyNameException()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->willThrowException('InvalidArgumentException');
         new Shortcode('', array(), null);
     }
 }

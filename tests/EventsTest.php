@@ -79,19 +79,19 @@ final class EventsTest extends AbstractTestCase
     public function testExceptionOnHandlerForUnknownEvent()
     {
         $events = new EventContainer();
-        $this->expectException('InvalidArgumentException');
+        $this->willThrowException('InvalidArgumentException');
         $events->addListener('invalid', function() {});
     }
 
     public function testInvalidFilterRawShortcodesNames()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->willThrowException('InvalidArgumentException');
         new FilterRawEventHandler(array(new \stdClass()));
     }
 
     public function testInvalidReplaceJoinNames()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->willThrowException('InvalidArgumentException');
         new ReplaceJoinEventHandler(array(new \stdClass()));
     }
 }

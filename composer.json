@@ -13,18 +13,22 @@
         "php": ">=5.3"
     },
     "require-dev": {
-        "phpunit/phpunit": "^4.1|^5.0|^6.0",
-        "symfony/yaml": "^2.0|^3.0"
+        "phpunit/phpunit": ">=4.1",
+        "symfony/yaml": ">=2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Thunder\\Shortcode\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Thunder\\Shortcode\\Tests\\": "tests/"
+        }
     },
     "suggest": {
         "symfony/yaml": "if you want to use YAML serializer",
         "ext-dom": "if you want to use XML serializer",
         "ext-json": "if you want to use JSON serializer"
-    },
-    "autoload": {
-        "psr-4": {
-            "Thunder\\Shortcode\\": "src/",
-            "Thunder\\Shortcode\\Tests\\": "tests/"
-        }
     }
 }

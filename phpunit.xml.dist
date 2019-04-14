@@ -8,7 +8,6 @@
     convertWarningsToExceptions = "true"
     processIsolation = "false"
     stopOnFailure = "false"
-    syntaxCheck = "false"
     bootstrap = "vendor/autoload.php"
     >
 
@@ -19,8 +18,7 @@
     </testsuites>
 
     <logging>
-        <log type="coverage-html" target="coverage" charset="UTF-8"
-             yui="true" highlight="false" lowUpperBound="50" highLowerBound="90"/>
+        <log type="coverage-html" target="coverage" lowUpperBound="50" highLowerBound="90"/>
         <log type="coverage-clover" target="coverage.xml"/>
     </logging>
 

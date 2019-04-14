@@ -8,10 +8,10 @@ use PHPUnit\Framework\TestCase;
  */
 abstract class AbstractTestCase extends TestCase
 {
-    public function expectException($exception)
+    public function willThrowException($exception)
     {
         version_compare(phpversion(), '7.0.0') > 0
-            ? parent::expectException($exception)
+            ? $this->expectException($exception)
             : $this->setExpectedException($exception);
     }
 }
