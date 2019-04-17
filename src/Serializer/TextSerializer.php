@@ -56,7 +56,7 @@ final class TextSerializer implements SerializerInterface
         $delimiter = $this->syntax->getParameterValueDelimiter();
         $separator = $this->syntax->getParameterValueSeparator();
 
-        return $separator.(preg_match('/^\w+$/us', $value)
+        return $separator.(preg_match('/^\w+$/u', $value)
             ? $value
             : $delimiter.$value.$delimiter);
     }

@@ -9,21 +9,21 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 final class ProcessorContext
 {
     /** @var ShortcodeInterface */
-    public $shortcode = null;
+    public $shortcode;
 
     /** @var ShortcodeInterface */
-    public $parent = null;
+    public $parent;
 
     /** @var ProcessorInterface */
-    public $processor = null;
+    public $processor;
 
-    public $textContent = null;
+    public $textContent;
     public $position = 0;
     public $namePosition = array();
     public $text = '';
     public $shortcodeText = '';
     public $iterationNumber = 0;
     public $recursionLevel = 0;
-    public $offset = null;
-    public $baseOffset = null;
+    public $offset;
+    public $baseOffset;
 }

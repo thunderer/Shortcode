@@ -25,7 +25,7 @@ final class FilterRawEventHandler
     public function __invoke(FilterShortcodesEvent $event)
     {
         $parent = $event->getParent();
-        if($parent && in_array($parent->getName(), $this->names)) {
+        if($parent && \in_array($parent->getName(), $this->names, true)) {
             $event->setShortcodes(array());
 
             return;
