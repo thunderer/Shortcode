@@ -25,3 +25,4 @@ after_script:
 matrix:
   allow_failures:
     - php: nightly
+    - php: hhvm

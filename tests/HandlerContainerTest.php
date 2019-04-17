@@ -14,7 +14,7 @@ final class HandlerContainerTest extends AbstractTestCase
     {
         $handlers = new HandlerContainer();
         $handlers->add('name', function () {});
-        $this->expectException('RuntimeException');
+        $this->willThrowException('RuntimeException');
         $handlers->add('name', function () {});
     }
 
@@ -31,7 +31,7 @@ final class HandlerContainerTest extends AbstractTestCase
     public function testRemoveException()
     {
         $handlers = new HandlerContainer();
-        $this->expectException('RuntimeException');
+        $this->willThrowException('RuntimeException');
         $handlers->remove('code');
     }
 
@@ -59,7 +59,7 @@ final class HandlerContainerTest extends AbstractTestCase
     public function testInvalidHandler()
     {
         $handlers = new HandlerContainer();
-        $this->expectException('RuntimeException');
+        $this->willThrowException('RuntimeException');
         $handlers->add('invalid', new \stdClass());
     }
 
@@ -75,7 +75,7 @@ final class HandlerContainerTest extends AbstractTestCase
     public function testExceptionIfAliasingNonExistentHandler()
     {
         $handlers = new HandlerContainer();
-        $this->expectException('RuntimeException');
+        $this->willThrowException('RuntimeException');
         $handlers->addAlias('m', 'missing');
     }
 

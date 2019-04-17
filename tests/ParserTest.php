@@ -19,23 +19,26 @@ final class ParserTest extends AbstractTestCase
     /**
      * @param ParserInterface $parser
      * @param string $code
-     * @param ParsedShortcode[] $tested
+     * @param ParsedShortcode[] $expected
      *
      * @dataProvider provideShortcodes
      */
-    public function testParser(ParserInterface $parser, $code, array $tested)
+    public function testParser(ParserInterface $parser, $code, array $expected)
     {
-        $parsed = $parser->parse($code);
+        $this->assertShortcodes($parser->parse($code), $expected);
+    }
 
-        $count = count($tested);
-        static::assertCount($count, $parsed, 'counts');
+    private function assertShortcodes(array $actual, array $expected)
+    {
+        $count = count($actual);
+        static::assertCount($count, $expected, 'counts');
         for ($i = 0; $i < $count; $i++) {
-            static::assertSame($tested[$i]->getName(), $parsed[$i]->getName(), 'name');
-            static::assertSame($tested[$i]->getParameters(), $parsed[$i]->getParameters(), 'parameters');
-            static::assertSame($tested[$i]->getContent(), $parsed[$i]->getContent(), 'content');
-            static::assertSame($tested[$i]->getText(), $parsed[$i]->getText(), 'text');
-            static::assertSame($tested[$i]->getOffset(), $parsed[$i]->getOffset(), 'offset');
-            static::assertSame($tested[$i]->getBbCode(), $parsed[$i]->getBbCode(), 'bbCode');
+            static::assertSame($actual[$i]->getName(), $expected[$i]->getName(), 'name');
+            static::assertSame($actual[$i]->getParameters(), $expected[$i]->getParameters(), 'parameters');
+            static::assertSame($actual[$i]->getContent(), $expected[$i]->getContent(), 'content');
+            static::assertSame($actual[$i]->getText(), $expected[$i]->getText(), 'text');
+            static::assertSame($actual[$i]->getOffset(), $expected[$i]->getOffset(), 'offset');
+            static::assertSame($actual[$i]->getBbCode(), $expected[$i]->getBbCode(), 'bbCode');
         }
     }
 
@@ -258,6 +261,21 @@ final class ParserTest extends AbstractTestCase
         return $result;
     }
 
+    public function testIssue77()
+    {
+        $parser = new RegularParser();
+
+        $this->assertShortcodes($parser->parse('[a][x][/x][x k="v][/x][y]x[/y]'), array(
+            new ParsedShortcode(new Shortcode('a', array(), null, null), '[a]', 0),
+            new ParsedShortcode(new Shortcode('x', array(), '', null), '[x][/x]', 3),
+            new ParsedShortcode(new Shortcode('y', array(), 'x', null), '[y]x[/y]', 22),
+        ));
+
+        $this->assertShortcodes($parser->parse('[a k="v][x][/x]'), array(
+            new ParsedShortcode(new Shortcode('x', array(), '', null), '[x][/x]', 8),
+        ));
+    }
+
     public function testWordPress()
     {
         $parser = new WordpressParser();
@@ -291,7 +309,7 @@ final class ParserTest extends AbstractTestCase
 
     public function testWordpressInvalidNamesException()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->willThrowException('InvalidArgumentException');
         WordpressParser::createFromNames(array('string', new \stdClass()));
     }
 

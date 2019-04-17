@@ -91,7 +91,7 @@ final class SerializerTest extends AbstractTestCase
      */
     public function testSerializerExceptions(SerializerInterface $serializer, $value, $exceptionClass)
     {
-        $this->expectException($exceptionClass);
+        $this->willThrowException($exceptionClass);
         $serializer->unserialize($value);
     }
 
