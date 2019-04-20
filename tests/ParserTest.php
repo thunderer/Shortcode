@@ -274,6 +274,9 @@ final class ParserTest extends AbstractTestCase
         $this->assertShortcodes($parser->parse('[a k="v][x][/x]'), array(
             new ParsedShortcode(new Shortcode('x', array(), '', null), '[x][/x]', 8),
         ));
+        $this->assertShortcodes($parser->parse('[a k="v\]\[a k="v]'), array(
+            new ParsedShortcode(new Shortcode('a', ['k' => 'v\]\[a k=', 'v' => null], null, null), '[a k="v\]\[a k="v]', 0),
+        ));
     }
 
     public function testWordPress()

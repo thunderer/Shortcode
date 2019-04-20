@@ -200,7 +200,7 @@ final class RegularParser implements ParserInterface
         $value = '';
 
         if($this->match(self::TOKEN_DELIMITER, false)) {
-            while($this->position < $this->tokensCount && false === $this->lookahead(self::TOKEN_DELIMITER)) {
+            while($this->position < $this->tokensCount && false === $this->lookahead(self::TOKEN_DELIMITER) && false === $this->lookahead(self::TOKEN_OPEN) && false === $this->lookahead(self::TOKEN_CLOSE)) {
                 $value .= $this->match(null, false);
             }
 
@@ -324,6 +324,7 @@ final class RegularParser implements ParserInterface
                 $quote($syntax->getClosingTagMarker()),
                 $quote($syntax->getParameterValueSeparator()),
                 $quote($syntax->getParameterValueDelimiter()),
+                '\\\\',
                 '\s+',
             )).').)+)',
             '(?<ws>\s+)',
