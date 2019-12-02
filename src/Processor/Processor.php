@@ -140,7 +140,7 @@ final class Processor implements ProcessorInterface
 
         $state = $parsed->getText();
         $length = mb_strlen($processed->getTextContent(), 'utf-8');
-        $offset = mb_strrpos($state, $processed->getTextContent(), 'utf-8');
+        $offset = mb_strrpos($state, $processed->getTextContent(), 0, 'utf-8');
 
         return mb_substr($state, 0, $offset, 'utf-8').$processed->getContent().mb_substr($state, $offset + $length, mb_strlen($state, 'utf-8'), 'utf-8');
     }
