@@ -17,3 +17,4 @@ services:
   php-7.1: { image: 'php:7.1', volumes: ['.:/app'] }
   php-7.2: { image: 'php:7.2', volumes: ['.:/app'] }
   php-7.3: { image: 'php:7.3', volumes: ['.:/app'] }
+  php-7.4: { image: 'php:7.4', volumes: ['.:/app'] }
