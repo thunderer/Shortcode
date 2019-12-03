@@ -1,4 +1,4 @@
-PHP ?= 7.3
+PHP ?= 7.4
 
 composer-update:
 	docker-compose run --rm composer composer config platform.php ${PHP}
