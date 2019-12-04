@@ -36,7 +36,7 @@ Each part is described in the dedicated section in this document.
 There are no required dependencies and all PHP versions from 5.3 up to latest 7.0 [are tested](https://travis-ci.org/thunderer/Shortcode) and supported. This library is available on Composer/Packagist as `thunderer/shortcode`, to install it execute:
 
 ```
-composer require thunderer/shortcode=^0.6.5
+composer require thunderer/shortcode=^0.7.3
 ```
 
 or manually update your `composer.json` with:
@@ -44,7 +44,7 @@ or manually update your `composer.json` with:
 ```
 (...)
 "require": {
-    "thunderer/shortcode": "^0.6.5"
+    "thunderer/shortcode": "^0.7.3"
 }
 (...)
 ```
