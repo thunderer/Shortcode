@@ -34,7 +34,7 @@ interface ShortcodeInterface
      * without value
      *
      * @param string $name Parameter name
-     * @param null $default Value returned if there is no parameter with given name
+     * @param mixed $default Value returned if there is no parameter with given name
      *
      * @return mixed
      */
