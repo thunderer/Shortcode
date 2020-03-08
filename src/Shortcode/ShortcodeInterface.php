@@ -34,9 +34,9 @@ interface ShortcodeInterface
      * without value
      *
      * @param string $name Parameter name
-     * @param null $default Value returned if there is no parameter with given name
+     * @param string|null $default Value returned if there is no parameter with given name
      *
-     * @return mixed
+     * @return string|null
      */
     public function getParameter($name, $default = null);
 
