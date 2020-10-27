@@ -35,6 +35,12 @@ final class RegularParser implements ParserInterface
     const TOKEN_STRING = 6;
     const TOKEN_WS = 7;
 
+    const VALUE_REGULAR = 0x01;
+    const VALUE_AGGRESSIVE = 0x02;
+
+    /** @var int */
+    public $valueMode = self::VALUE_REGULAR;
+
     public function __construct(SyntaxInterface $syntax = null)
     {
         $this->lexerRegex = $this->prepareLexer($syntax ?: new CommonSyntax());
@@ -238,10 +244,18 @@ final class RegularParser implements ParserInterface
             return $this->match(self::TOKEN_DELIMITER, false) ? $value : false;
         }
 
-        if('' !== $tmp = $this->match(self::TOKEN_STRING, false)) {
-            $value .= $tmp;
-            while('' !== $tmp = $this->match(self::TOKEN_STRING, false)) {
-                $value .= $tmp;
+        if($this->lookahead(self::TOKEN_STRING) || $this->lookahead(self::TOKEN_MARKER)) {
+            while(true) {
+                if($this->lookahead(self::TOKEN_WS) || $this->lookahead(self::TOKEN_CLOSE)) {
+                    break;
+                }
+                if($this->lookaheadN(array(self::TOKEN_MARKER, self::TOKEN_CLOSE))) {
+                    if($this->valueMode === self::VALUE_AGGRESSIVE) {
+                        $value .= $this->match(null, false);
+                    }
+                    break;
+                }
+                $value .= $this->match(null, false);
             }
 
             return $value;
@@ -300,6 +314,33 @@ final class RegularParser implements ParserInterface
     private function lookahead($type)
     {
         return $this->position < $this->tokensCount && $this->tokens[$this->position][0] === $type;
+    }
+
+    /**
+     * @param int[] $types
+     *
+     * @return bool
+     */
+    private function lookaheadN(array $types)
+    {
+        $count = count($types);
+        if($this->position + $count > $this->tokensCount) {
+            return false;
+        }
+
+        $position = $this->position;
+        foreach($types as $type) {
+            // note: automatically skips whitespace tokens
+            if($this->tokens[$position][0] === self::TOKEN_WS) {
+                $position++;
+            }
+            if($type !== $this->tokens[$position][0]) {
+                return false;
+            }
+            $position++;
+        }
+
+        return true;
     }
 
     /**

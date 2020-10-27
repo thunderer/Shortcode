@@ -232,6 +232,12 @@ final class ParserTest extends AbstractTestCase
             array($s, '[a=0 b=0]0[/a]', array(
                 new ParsedShortcode(new Shortcode('a', array('b' => '0'), '0', '0'), '[a=0 b=0]0[/a]', 0),
             )),
+            array($s, '[x=/[/] [y a=/"//] [z=http://url/] [a=http://url ]', array(
+                new ParsedShortcode(new Shortcode('x', array(), null, '/['), '[x=/[/]', 0),
+                new ParsedShortcode(new Shortcode('y', array('a' => '/"/'), null, null), '[y a=/"//]', 8),
+                new ParsedShortcode(new Shortcode('z', array(), null, 'http://url'), '[z=http://url/]', 19),
+                new ParsedShortcode(new Shortcode('a', array(), null, 'http://url'), '[a=http://url ]', 35),
+            )),
         );
 
         /**
@@ -246,7 +252,7 @@ final class ParserTest extends AbstractTestCase
          *
          * Tests cases from array above with identifiers in the array below must be skipped.
          */
-        $wordpressSkip = array(3, 6, 16, 21, 22, 23, 25, 32, 33, 34, 46, 47, 49, 51);
+        $wordpressSkip = array(3, 6, 16, 21, 22, 23, 25, 32, 33, 34, 46, 47, 49, 51, 52);
         $result = array();
         foreach($tests as $key => $test) {
             $syntax = array_shift($test);
@@ -270,10 +276,33 @@ final class ParserTest extends AbstractTestCase
             new ParsedShortcode(new Shortcode('x', array(), '', null), '[x][/x]', 3),
             new ParsedShortcode(new Shortcode('y', array(), 'x', null), '[y]x[/y]', 22),
         ));
-
         $this->assertShortcodes($parser->parse('[a k="v][x][/x]'), array(
             new ParsedShortcode(new Shortcode('x', array(), '', null), '[x][/x]', 8),
         ));
+    }
+
+    public function testValueModeAggressive()
+    {
+        $parser = new RegularParser(new CommonSyntax());
+        $parser->valueMode = RegularParser::VALUE_AGGRESSIVE;
+        $parsed = $parser->parse('[x=/[/] [y a=/"//] [z=http://url/] [a=http://url ]');
+        $tested = array(
+            new ParsedShortcode(new Shortcode('x', array(), null, '/[/'), '[x=/[/]', 0),
+            new ParsedShortcode(new Shortcode('y', array('a' => '/"//'), null, null), '[y a=/"//]', 8),
+            new ParsedShortcode(new Shortcode('z', array(), null, 'http://url/'), '[z=http://url/]', 19),
+            new ParsedShortcode(new Shortcode('a', array(), null, 'http://url'), '[a=http://url ]', 35),
+        );
+
+        $count = count($tested);
+        static::assertCount($count, $parsed, 'counts');
+        for ($i = 0; $i < $count; $i++) {
+            static::assertSame($tested[$i]->getName(), $parsed[$i]->getName(), 'name');
+            static::assertSame($tested[$i]->getParameters(), $parsed[$i]->getParameters(), 'parameters');
+            static::assertSame($tested[$i]->getContent(), $parsed[$i]->getContent(), 'content');
+            static::assertSame($tested[$i]->getText(), $parsed[$i]->getText(), 'text');
+            static::assertSame($tested[$i]->getOffset(), $parsed[$i]->getOffset(), 'offset');
+            static::assertSame($tested[$i]->getBbCode(), $parsed[$i]->getBbCode(), 'bbCode');
+        }
     }
 
     public function testWordPress()
