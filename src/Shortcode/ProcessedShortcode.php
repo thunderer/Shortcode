@@ -9,54 +9,66 @@ use Thunder\Shortcode\Processor\ProcessorInterface;
  */
 final class ProcessedShortcode extends AbstractShortcode implements ParsedShortcodeInterface
 {
-    /** @var ShortcodeInterface */
+    /** @var ProcessedShortcode|null */
     private $parent;
+    /** @var int */
     private $position;
+    /** @var int */
     private $namePosition;
+    /** @var string */
     private $text;
+    /** @var string */
     private $textContent;
+    /** @var int */
     private $offset;
+    /** @var int */
     private $baseOffset;
+    /** @var string */
     private $shortcodeText;
+    /** @var int */
     private $iterationNumber;
+    /** @var int */
     private $recursionLevel;
     /** @var ProcessorInterface */
     private $processor;
 
-    private function __construct()
+    private function __construct(ProcessorContext $context)
     {
-    }
-
-    public static function createFromContext(ProcessorContext $context)
-    {
-        $self = new self();
-
         // basic properties
-        $self->name = $context->shortcode->getName();
-        $self->parameters = $context->shortcode->getParameters();
-        $self->content = $context->shortcode->getContent();
-        $self->bbCode = $context->shortcode->getBbCode();
-        $self->textContent = $context->textContent;
+        $this->name = $context->shortcode->getName();
+        $this->parameters = $context->shortcode->getParameters();
+        $this->content = $context->shortcode->getContent();
+        $this->bbCode = $context->shortcode->getBbCode();
+        $this->textContent = $context->textContent;
 
         // runtime context
-        $self->parent = $context->parent;
-        $self->position = $context->position;
-        $self->namePosition = $context->namePosition[$self->name];
-        $self->text = $context->text;
-        $self->shortcodeText = $context->shortcodeText;
+        $this->parent = $context->parent;
+        $this->position = $context->position;
+        $this->namePosition = $context->namePosition[$this->name];
+        $this->text = $context->text;
+        $this->shortcodeText = $context->shortcodeText;
 
         // processor state
-        $self->iterationNumber = $context->iterationNumber;
-        $self->recursionLevel = $context->recursionLevel;
-        $self->processor = $context->processor;
+        $this->iterationNumber = $context->iterationNumber;
+        $this->recursionLevel = $context->recursionLevel;
+        $this->processor = $context->processor;
 
         // text context
-        $self->offset = $context->offset;
-        $self->baseOffset = $context->baseOffset;
-
-        return $self;
+        $this->offset = $context->offset;
+        $this->baseOffset = $context->baseOffset;
     }
 
+    /** @return self */
+    public static function createFromContext(ProcessorContext $context)
+    {
+        return new self($context);
+    }
+
+    /**
+     * @param string|null $content
+     *
+     * @return self
+     */
     public function withContent($content)
     {
         $self = clone $this;
@@ -65,6 +77,11 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
         return $self;
     }
 
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
     public function hasAncestor($name)
     {
         $self = $this;
@@ -78,56 +95,67 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
         return false;
     }
 
+    /** @return ProcessedShortcode|null */
     public function getParent()
     {
         return $this->parent;
     }
 
+    /** @return string */
     public function getTextContent()
     {
         return $this->textContent;
     }
 
+    /** @return int */
     public function getPosition()
     {
         return $this->position;
     }
 
+    /** @return int */
     public function getNamePosition()
     {
         return $this->namePosition;
     }
 
+    /** @return string */
     public function getText()
     {
         return $this->text;
     }
 
+    /** @return string */
     public function getShortcodeText()
     {
         return $this->shortcodeText;
     }
 
+    /** @return int */
     public function getOffset()
     {
         return $this->offset;
     }
 
+    /** @return int */
     public function getBaseOffset()
     {
         return $this->baseOffset;
     }
 
+    /** @return int */
     public function getIterationNumber()
     {
         return $this->iterationNumber;
     }
 
+    /** @return int */
     public function getRecursionLevel()
     {
         return $this->recursionLevel;
     }
 
+    /** @return ProcessorInterface */
     public function getProcessor()
     {
         return $this->processor;

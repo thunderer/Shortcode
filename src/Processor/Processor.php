@@ -10,6 +10,7 @@ use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Shortcode\ReplacedShortcode;
 use Thunder\Shortcode\Shortcode\ParsedShortcodeInterface;
 use Thunder\Shortcode\Shortcode\ProcessedShortcode;
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
@@ -20,12 +21,14 @@ final class Processor implements ProcessorInterface
     private $handlers;
     /** @var ParserInterface */
     private $parser;
-    /** @var EventContainerInterface */
+    /** @var EventContainerInterface|null */
     private $eventContainer;
 
     /** @var int|null */
     private $recursionDepth; // infinite recursion
+    /** @var int|null */
     private $maxIterations = 1; // one iteration
+    /** @var bool */
     private $autoProcessContent = true; // automatically process shortcode content
 
     public function __construct(ParserInterface $parser, Handlers $handlers)
@@ -61,6 +64,12 @@ final class Processor implements ProcessorInterface
         return $text;
     }
 
+    /**
+     * @param string $name
+     * @param object $event
+     *
+     * @return object
+     */
     private function dispatchEvent($name, $event)
     {
         if(null === $this->eventContainer) {
@@ -75,6 +84,11 @@ final class Processor implements ProcessorInterface
         return $event;
     }
 
+    /**
+     * @param string $text
+     *
+     * @return string
+     */
     private function processIteration($text, ProcessorContext $context, ProcessedShortcode $parent = null)
     {
         if (null !== $this->recursionDepth && $context->recursionLevel > $this->recursionDepth) {
@@ -88,7 +102,7 @@ final class Processor implements ProcessorInterface
         $shortcodes = $filterEvent->getShortcodes();
         $replaces = array();
         $baseOffset = $parent && $shortcodes
-            ? mb_strpos($parent->getShortcodeText(), $shortcodes[0]->getText(), null, 'utf-8') - $shortcodes[0]->getOffset() + $parent->getOffset()
+            ? (int)mb_strpos($parent->getShortcodeText(), $shortcodes[0]->getText(), 0, 'utf-8') - $shortcodes[0]->getOffset() + $parent->getOffset()
             : 0;
         foreach ($shortcodes as $shortcode) {
             $name = $shortcode->getName();
@@ -100,7 +114,7 @@ final class Processor implements ProcessorInterface
             $context->shortcodeText = $shortcode->getText();
             $context->offset = $shortcode->getOffset();
             $context->shortcode = $shortcode;
-            $context->textContent = $shortcode->getContent();
+            $context->textContent = (string)$shortcode->getContent();
 
             $handler = $this->handlers->get($name);
             $replace = $this->processHandler($shortcode, $context, $handler);
@@ -111,12 +125,17 @@ final class Processor implements ProcessorInterface
         $applyEvent = new ReplaceShortcodesEvent($text, $replaces, $parent);
         $this->dispatchEvent(Events::REPLACE_SHORTCODES, $applyEvent);
 
-        return $applyEvent->hasResult() ? $applyEvent->getResult() : $this->applyReplaces($text, $replaces);
+        return $applyEvent->hasResult() ? (string)$applyEvent->getResult() : $this->applyReplaces($text, $replaces);
     }
 
+    /**
+     * @param string $text
+     * @param ReplacedShortcode[] $replaces
+     *
+     * @return string
+     */
     private function applyReplaces($text, array $replaces)
     {
-        /** @var ReplacedShortcode $s */
         foreach(array_reverse($replaces) as $s) {
             $offset = $s->getOffset();
             $length = mb_strlen($s->getText(), 'utf-8');
@@ -128,6 +147,10 @@ final class Processor implements ProcessorInterface
         return $text;
     }
 
+    /**
+     * @psalm-param (callable(ShortcodeInterface):string)|null $handler
+     * @return string
+     */
     private function processHandler(ParsedShortcodeInterface $parsed, ProcessorContext $context, $handler)
     {
         $processed = ProcessedShortcode::createFromContext(clone $context);
@@ -139,24 +162,26 @@ final class Processor implements ProcessorInterface
         }
 
         $state = $parsed->getText();
-        $length = mb_strlen($processed->getTextContent(), 'utf-8');
-        $offset = mb_strrpos($state, $processed->getTextContent(), 0, 'utf-8');
+        $length = (int)mb_strlen($processed->getTextContent(), 'utf-8');
+        $offset = (int)mb_strrpos($state, $processed->getTextContent(), 0, 'utf-8');
 
-        return mb_substr($state, 0, $offset, 'utf-8').$processed->getContent().mb_substr($state, $offset + $length, mb_strlen($state, 'utf-8'), 'utf-8');
+        return mb_substr($state, 0, $offset, 'utf-8').(string)$processed->getContent().mb_substr($state, $offset + $length, mb_strlen($state, 'utf-8'), 'utf-8');
     }
 
+    /** @return string|null */
     private function processRecursion(ProcessedShortcode $shortcode, ProcessorContext $context)
     {
-        if ($this->autoProcessContent && null !== $shortcode->getContent()) {
+        $content = $shortcode->getContent();
+        if ($this->autoProcessContent && null !== $content) {
             $context->recursionLevel++;
             // this is safe from using max iterations value because it's manipulated in process() method
-            $content = $this->processIteration($shortcode->getContent(), clone $context, $shortcode);
+            $content = $this->processIteration($content, clone $context, $shortcode);
             $context->recursionLevel--;
 
             return $content;
         }
 
-        return $shortcode->getContent();
+        return $content;
     }
 
     /**
@@ -185,6 +210,7 @@ final class Processor implements ProcessorInterface
      */
     public function withRecursionDepth($depth)
     {
+        /** @psalm-suppress DocblockTypeContradiction */
         if (null !== $depth && !(is_int($depth) && $depth >= 0)) {
             $msg = 'Recursion depth must be null (infinite) or integer >= 0!';
             throw new \InvalidArgumentException($msg);
@@ -208,6 +234,7 @@ final class Processor implements ProcessorInterface
      */
     public function withMaxIterations($iterations)
     {
+        /** @psalm-suppress DocblockTypeContradiction */
         if (null !== $iterations && !(is_int($iterations) && $iterations > 0)) {
             $msg = 'Maximum number of iterations must be null (infinite) or integer > 0!';
             throw new \InvalidArgumentException($msg);
@@ -230,6 +257,7 @@ final class Processor implements ProcessorInterface
      */
     public function withAutoProcessContent($flag)
     {
+        /** @psalm-suppress DocblockTypeContradiction */
         if (!is_bool($flag)) {
             $msg = 'Auto processing flag must be a boolean value!';
             throw new \InvalidArgumentException($msg);

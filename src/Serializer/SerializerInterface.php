@@ -20,7 +20,7 @@ interface SerializerInterface
     /**
      * Loads back Shortcode instance from serialized format
      *
-     * @param $text
+     * @param string $text
      *
      * @return ShortcodeInterface
      */

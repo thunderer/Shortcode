@@ -26,21 +26,33 @@ use Thunder\Shortcode\Utility\RegexBuilderUtility;
  */
 final class WordpressParser implements ParserInterface
 {
+    /** @var string */
     private static $shortcodeRegex = '/\\[(\\[?)(<NAMES>)(?![\\w-])([^\\]\\/]*(?:\\/(?!\\])[^\\]\\/]*)*?)(?:(\\/)\\]|\\](?:([^\\[]*+(?:\\[(?!\\/\\2\\])[^\\[]*+)*+)\\[\\/\\2\\])?)(\\]?)/s';
+    /** @var string */
     private static $argumentsRegex = '/([\w-]+)\s*=\s*"([^"]*)"(?:\s|$)|([\w-]+)\s*=\s*\'([^\']*)\'(?:\s|$)|([\w-]+)\s*=\s*([^\s\'"]+)(?:\s|$)|"([^"]*)"(?:\s|$)|(\S+)(?:\s|$)/';
 
-    private $names;
+    /** @var string[] */
+    private $names = array();
 
-    /* private function __construct() {} */
+    public function __construct()
+    {
+    }
 
+    /** @return self */
     public static function createFromHandlers(HandlerContainer $handlers)
     {
         return static::createFromNames($handlers->getNames());
     }
 
+    /**
+     * @param string[] $names
+     *
+     * @return self
+     */
     public static function createFromNames(array $names)
     {
         foreach($names as $name) {
+            /** @psalm-suppress DocblockTypeContradiction, RedundantConditionGivenDocblockType */
             if(false === is_string($name)) {
                 throw new \InvalidArgumentException('Shortcode name must be a string!');
             }
@@ -81,6 +93,11 @@ final class WordpressParser implements ParserInterface
         return $shortcodes;
     }
 
+    /**
+     * @param string $text
+     *
+     * @psalm-return array<string,string|null>
+     */
     private static function parseParameters($text)
     {
         $text = preg_replace('/[\x{00a0}\x{200b}]+/u', ' ', $text);
@@ -105,6 +122,8 @@ final class WordpressParser implements ParserInterface
         }
 
         foreach($parameters as $key => $value) {
+            // NOTE: the `?: ''` fallback is the only change from the way WordPress parses shortcodes to satisfy Psalm's PossiblyNullArgument
+            $value = $value ?: '';
             if(false !== strpos($value, '<') && 1 !== preg_match('/^[^<]*+(?:<[^>]*+>[^<]*+)*+$/', $value)) {
                 $parameters[$key] = '';
             }

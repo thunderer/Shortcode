@@ -26,6 +26,7 @@ final class JsonSerializer implements SerializerInterface
      */
     public function unserialize($text)
     {
+        /** @psalm-var array{name:string,parameters:array<string,string|null>,bbCode:string|null,content:string|null}|null $data */
         $data = json_decode($text, true);
 
         if (!is_array($data)) {
@@ -35,11 +36,13 @@ final class JsonSerializer implements SerializerInterface
             throw new \InvalidArgumentException('Malformed Shortcode JSON, expected name, parameters, and content!');
         }
 
+        /** @var string $name */
         $name = array_key_exists('name', $data) ? $data['name'] : null;
         $parameters = array_key_exists('parameters', $data) ? $data['parameters'] : array();
         $content = array_key_exists('content', $data) ? $data['content'] : null;
         $bbCode = array_key_exists('bbCode', $data) ? $data['bbCode'] : null;
 
+        /** @psalm-suppress DocblockTypeContradiction */
         if(!is_array($parameters)) {
             throw new \InvalidArgumentException('Parameters must be an array!');
         }

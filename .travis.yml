@@ -10,7 +10,7 @@ php:
   - 7.1
   - 7.2
   - 7.3
-  - 7.4snapshot
+  - 7.4
   - hhvm
   - nightly
 
@@ -21,6 +21,10 @@ before_script:
 
 script:
  - vendor/bin/phpunit --coverage-text
+ - |
+  if php -r 'exit((int)(version_compare(PHP_VERSION, "7.1", ">=") === false));';
+  then composer require --dev vimeo/psalm && vendor/bin/psalm --threads=8 --no-cache --shepherd --find-unused-psalm-suppress;
+  fi;
 
 after_script:
   - wget https://scrutinizer-ci.com/ocular.phar
@@ -31,4 +35,3 @@ matrix:
     - php: 5.3
     - php: hhvm
     - php: nightly
-    - php: hhvm

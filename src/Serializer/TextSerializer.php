@@ -12,6 +12,7 @@ use Thunder\Shortcode\Syntax\SyntaxInterface;
  */
 final class TextSerializer implements SerializerInterface
 {
+    /** @var SyntaxInterface */
     private $syntax;
 
     public function __construct(SyntaxInterface $syntax = null)
@@ -19,6 +20,7 @@ final class TextSerializer implements SerializerInterface
         $this->syntax = $syntax ?: new Syntax();
     }
 
+    /** @inheritDoc */
     public function serialize(ShortcodeInterface $shortcode)
     {
         $open = $this->syntax->getOpeningTag();
@@ -33,9 +35,14 @@ final class TextSerializer implements SerializerInterface
 
         return null === $shortcode->getContent()
             ? $return.' '.$marker.$close
-            : $return.$close.$shortcode->getContent().$open.$marker.$shortcode->getName().$close;
+            : $return.$close.(string)$shortcode->getContent().$open.$marker.$shortcode->getName().$close;
     }
 
+    /**
+     * @psalm-param array<string,string|null> $parameters
+     *
+     * @return string
+     */
     private function serializeParameters(array $parameters)
     {
         // unfortunately array_reduce() does not support keys
@@ -47,6 +54,11 @@ final class TextSerializer implements SerializerInterface
         return $return;
     }
 
+    /**
+     * @param string|null $value
+     *
+     * @return string
+     */
     private function serializeValue($value)
     {
         if (null === $value) {
@@ -76,7 +88,7 @@ final class TextSerializer implements SerializerInterface
             throw new \InvalidArgumentException(sprintf($msg, $text));
         }
 
-        /** @var $parsed ShortcodeInterface */
+        /** @var ShortcodeInterface $parsed */
         $parsed = array_shift($shortcodes);
 
         $name = $parsed->getName();

@@ -22,6 +22,6 @@ final class EmailHandler
         $email = $shortcode->getBbCode() ?: $shortcode->getContent();
         $content = $shortcode->getContent() === null ? $email : $shortcode->getContent();
 
-        return '<a href="mailto:'.$email.'">'.$content.'</a>';
+        return '<a href="mailto:'.(string)$email.'">'.(string)$content.'</a>';
     }
 }

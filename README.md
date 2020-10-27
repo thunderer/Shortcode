@@ -1,11 +1,11 @@
 # Shortcode
 
-[![Build Status](https://travis-ci.org/thunderer/Shortcode.png?branch=master)](https://travis-ci.org/thunderer/Shortcode)
+[![Build Status](https://travis-ci.com/thunderer/Shortcode.svg?branch=master)](https://travis-ci.com/thunderer/Shortcode)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/5235d5e3-d112-48df-bc07-d4555aef293d/mini.png)](https://insight.sensiolabs.com/projects/5235d5e3-d112-48df-bc07-d4555aef293d)
 [![License](https://poser.pugx.org/thunderer/shortcode/license.svg)](https://packagist.org/packages/thunderer/shortcode)
 [![Latest Stable Version](https://poser.pugx.org/thunderer/shortcode/v/stable.svg)](https://packagist.org/packages/thunderer/shortcode)
 [![Total Downloads](https://poser.pugx.org/thunderer/shortcode/downloads)](https://packagist.org/packages/thunderer/shortcode)
-[![Dependency Status](https://www.versioneye.com/user/projects/551d5385971f7847ca000002/badge.svg)](https://www.versioneye.com/user/projects/551d5385971f7847ca000002)
+[![Psalm coverage](https://shepherd.dev/github/thunderer/Shortcode/coverage.svg?)](https://shepherd.dev/github/thunderer/Shortcode)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/thunderer/Shortcode/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/thunderer/Shortcode/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/thunderer/Shortcode/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/thunderer/Shortcode/?branch=master)
 [![Code Climate](https://codeclimate.com/github/thunderer/Shortcode/badges/gpa.svg)](https://codeclimate.com/github/thunderer/Shortcode)
@@ -33,10 +33,10 @@ Each part is described in the dedicated section in this document.
 
 ## Installation
 
-There are no required dependencies and all PHP versions from 5.3 up to latest 7.0 [are tested](https://travis-ci.org/thunderer/Shortcode) and supported. This library is available on Composer/Packagist as `thunderer/shortcode`, to install it execute:
+There are no required dependencies and all PHP versions from 5.3 up to latest 7.4 [are tested](https://travis-ci.org/thunderer/Shortcode) and supported. This library is available on Composer/Packagist as `thunderer/shortcode`, to install it execute:
 
 ```
-composer require thunderer/shortcode=^0.7.3
+composer require thunderer/shortcode=^0.7
 ```
 
 or manually update your `composer.json` with:
@@ -44,7 +44,7 @@ or manually update your `composer.json` with:
 ```
 (...)
 "require": {
-    "thunderer/shortcode": "^0.7.3"
+    "thunderer/shortcode": "^0.7"
 }
 (...)
 ```

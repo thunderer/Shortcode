@@ -21,6 +21,6 @@ final class UrlHandler
     {
         $url = $shortcode->getBbCode() ?: $shortcode->getContent();
 
-        return '<a href="'.$url.'">'.$shortcode->getContent().'</a>';
+        return '<a href="'.(string)$url.'">'.(string)$shortcode->getContent().'</a>';
     }
 }
