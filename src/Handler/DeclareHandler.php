@@ -11,8 +11,10 @@ final class DeclareHandler
 {
     /** @var HandlerContainer */
     private $handlers;
+    /** @var string */
     private $delimiter;
 
+    /** @param string $delimiter */
     public function __construct(HandlerContainer $container, $delimiter = '%')
     {
         $this->handlers = $container;
@@ -33,12 +35,13 @@ final class DeclareHandler
         }
         $keys = array_keys($args);
         $name = array_shift($keys);
-        $content = $shortcode->getContent();
+        $content = (string)$shortcode->getContent();
         $delimiter = $this->delimiter;
 
         $this->handlers->add($name, function(ShortcodeInterface $shortcode) use($content, $delimiter) {
             $args = $shortcode->getParameters();
             $keys = array_map(function($key) use($delimiter) { return $delimiter.$key.$delimiter; }, array_keys($args));
+            /** @var string[] $values */
             $values = array_values($args);
 
             return str_replace($keys, $values, $content);

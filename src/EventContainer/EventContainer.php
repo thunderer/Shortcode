@@ -8,12 +8,19 @@ use Thunder\Shortcode\Events;
  */
 final class EventContainer implements EventContainerInterface
 {
+    /** @psalm-var array<string,list<callable>> */
     private $listeners = array();
 
     public function __construct()
     {
     }
 
+    /**
+     * @param string $event
+     * @param callable $handler
+     *
+     * @return void
+     */
     public function addListener($event, $handler)
     {
         if(!\in_array($event, Events::getEvents(), true)) {
@@ -27,11 +34,21 @@ final class EventContainer implements EventContainerInterface
         $this->listeners[$event][] = $handler;
     }
 
+    /**
+     * @param string $event
+     *
+     * @psalm-return list<callable>
+     */
     public function getListeners($event)
     {
         return $this->hasEvent($event) ? $this->listeners[$event] : array();
     }
 
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
     private function hasEvent($name)
     {
         return array_key_exists($name, $this->listeners);

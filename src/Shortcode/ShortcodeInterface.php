@@ -26,6 +26,7 @@ interface ShortcodeInterface
      * Returns associative array(name => value) of shortcode parameters
      *
      * @return array
+     * @psalm-return array<string,string|null>
      */
     public function getParameters();
 
@@ -53,7 +54,7 @@ interface ShortcodeInterface
      * Returns the so-called "BBCode" fragment when shortcode name is treated
      * like a parameter, eg.: [name="value" /]
      *
-     * @return string
+     * @return string|null
      */
     public function getBbCode();
 }

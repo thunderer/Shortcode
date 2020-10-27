@@ -13,28 +13,35 @@ use Thunder\Shortcode\Shortcode\ProcessedShortcode;
  */
 class FilterShortcodesEvent
 {
+    /** @var ProcessedShortcode|null */
     private $parent;
-    private $shortcodes;
+    /** @var ParsedShortcodeInterface[] */
+    private $shortcodes = array();
 
+    /** @param ParsedShortcodeInterface[] $shortcodes */
     public function __construct(array $shortcodes, ProcessedShortcode $parent = null)
     {
         $this->parent = $parent;
         $this->setShortcodes($shortcodes);
     }
 
-    /**
-     * @return ParsedShortcodeInterface[]
-     */
+    /** @return ParsedShortcodeInterface[] */
     public function getShortcodes()
     {
         return $this->shortcodes;
     }
 
+    /** @return ProcessedShortcode|null */
     public function getParent()
     {
         return $this->parent;
     }
 
+    /**
+     * @param ParsedShortcodeInterface[] $shortcodes
+     *
+     * @return void
+     */
     public function setShortcodes(array $shortcodes)
     {
         $this->shortcodes = array();
@@ -43,6 +50,11 @@ class FilterShortcodesEvent
         }
     }
 
+    /**
+     * @param ParsedShortcodeInterface $shortcode
+     *
+     * @return void
+     */
     private function addShortcode(ParsedShortcodeInterface $shortcode)
     {
         $this->shortcodes[] = $shortcode;

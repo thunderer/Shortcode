@@ -24,7 +24,8 @@ final class ReplaceJoinEventHandler
 
     public function __invoke(ReplaceShortcodesEvent $event)
     {
-        if($event->getShortcode() && in_array($event->getShortcode()->getName(), $this->names)) {
+        $shortcode = $event->getShortcode();
+        if($shortcode && in_array($shortcode->getName(), $this->names)) {
             $replaces = array();
             foreach($event->getReplacements() as $r) {
                 $replaces[] = $r->getReplacement();

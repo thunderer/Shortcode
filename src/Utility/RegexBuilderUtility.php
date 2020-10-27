@@ -8,21 +8,25 @@ use Thunder\Shortcode\Syntax\SyntaxInterface;
  */
 final class RegexBuilderUtility
 {
+    /** @return string */
     public static function buildNameRegex()
     {
         return '[a-zA-Z0-9-_\\*]+';
     }
 
+    /** @return string */
     public static function buildShortcodeRegex(SyntaxInterface $syntax)
     {
         return '~('.self::createShortcodeRegexContent($syntax).')~us';
     }
 
+    /** @return string */
     public static function buildSingleShortcodeRegex(SyntaxInterface $syntax)
     {
         return '~(\A'.self::createShortcodeRegexContent($syntax).'\Z)~us';
     }
 
+    /** @return string */
     public static function buildParametersRegex(SyntaxInterface $syntax)
     {
         $equals = self::quote($syntax->getParameterValueSeparator());
@@ -39,6 +43,7 @@ final class RegexBuilderUtility
         return '~(?:\s*(\w+(?:'.$complex.'|'.$simple.'|'.$empty.')))~us';
     }
 
+    /** @return string */
     private static function createShortcodeRegexContent(SyntaxInterface $syntax)
     {
         $open = self::quote($syntax->getOpeningTag());
@@ -78,6 +83,11 @@ final class RegexBuilderUtility
         return '(?:'.$common.'(?:'.$withContent.'|'.$justClosed.'|'.$selfClosed.'))';
     }
 
+    /**
+     * @param string $text
+     *
+     * @return string
+     */
     private static function quote($text)
     {
         return preg_replace('/(.)/us', '\\\\$0', $text);

@@ -6,16 +6,22 @@ namespace Thunder\Shortcode\Syntax;
  */
 final class SyntaxBuilder
 {
+    /** @var string|null */
     private $openingTag;
+    /** @var string|null */
     private $closingTag;
+    /** @var string|null */
     private $closingTagMarker;
+    /** @var string|null */
     private $parameterValueSeparator;
+    /** @var string|null */
     private $parameterValueDelimiter;
 
     public function __construct()
     {
     }
 
+    /** @return Syntax */
     public function getSyntax()
     {
         return new Syntax(
@@ -27,6 +33,11 @@ final class SyntaxBuilder
         );
     }
 
+    /**
+     * @param string $tag
+     *
+     * @return $this
+     */
     public function setOpeningTag($tag)
     {
         $this->openingTag = $tag;
@@ -34,6 +45,11 @@ final class SyntaxBuilder
         return $this;
     }
 
+    /**
+     * @param string $tag
+     *
+     * @return $this
+     */
     public function setClosingTag($tag)
     {
         $this->closingTag = $tag;
@@ -41,6 +57,11 @@ final class SyntaxBuilder
         return $this;
     }
 
+    /**
+     * @param string $marker
+     *
+     * @return $this
+     */
     public function setClosingTagMarker($marker)
     {
         $this->closingTagMarker = $marker;
@@ -48,6 +69,11 @@ final class SyntaxBuilder
         return $this;
     }
 
+    /**
+     * @param string $separator
+     *
+     * @return $this
+     */
     public function setParameterValueSeparator($separator)
     {
         $this->parameterValueSeparator = $separator;
@@ -55,6 +81,11 @@ final class SyntaxBuilder
         return $this;
     }
 
+    /**
+     * @param string $delimiter
+     *
+     * @return $this
+     */
     public function setParameterValueDelimiter($delimiter)
     {
         $this->parameterValueDelimiter = $delimiter;

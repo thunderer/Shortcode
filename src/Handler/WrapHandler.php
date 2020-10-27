@@ -8,15 +8,22 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
  */
 final class WrapHandler
 {
+    /** @var string */
     private $before;
+    /** @var string */
     private $after;
 
+    /**
+     * @param string $before
+     * @param string $after
+     */
     public function __construct($before, $after)
     {
         $this->before = $before;
         $this->after = $after;
     }
 
+    /** @return self */
     public static function createBold()
     {
         return new self('<b>', '</b>');
@@ -32,6 +39,6 @@ final class WrapHandler
      */
     public function __invoke(ShortcodeInterface $shortcode)
     {
-        return $this->before.$shortcode->getContent().$this->after;
+        return $this->before.(string)$shortcode->getContent().$this->after;
     }
 }

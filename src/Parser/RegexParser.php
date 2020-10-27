@@ -14,8 +14,11 @@ final class RegexParser implements ParserInterface
 {
     /** @var SyntaxInterface */
     private $syntax;
+    /** @var string */
     private $shortcodeRegex;
+    /** @var string */
     private $singleShortcodeRegex;
+    /** @var string */
     private $parametersRegex;
 
     public function __construct(SyntaxInterface $syntax = null)
@@ -45,10 +48,17 @@ final class RegexParser implements ParserInterface
         return array_filter($shortcodes);
     }
 
+    /**
+     * @param string $text
+     * @param int $offset
+     *
+     * @return ParsedShortcode
+     */
     private function parseSingle($text, $offset)
     {
         preg_match($this->singleShortcodeRegex, $text, $matches, PREG_OFFSET_CAPTURE);
 
+        /** @psalm-var array<string,array{0:string,1:int}> $matches */
         $name = $matches['name'][0];
         $parameters = isset($matches['parameters'][0]) ? $this->parseParameters($matches['parameters'][0]) : array();
         $bbCode = isset($matches['bbCode'][0]) && $matches['bbCode'][1] !== -1
@@ -59,6 +69,11 @@ final class RegexParser implements ParserInterface
         return new ParsedShortcode(new Shortcode($name, $parameters, $content, $bbCode), $text, $offset);
     }
 
+    /**
+     * @param string $text
+     *
+     * @psalm-return array<string,string|null>
+     */
     private function parseParameters($text)
     {
         preg_match_all($this->parametersRegex, $text, $argsMatches);
@@ -66,6 +81,7 @@ final class RegexParser implements ParserInterface
         // loop because PHP 5.3 can't handle $this properly and I want separate methods
         $return = array();
         foreach ($argsMatches[1] as $item) {
+            /** @psalm-var array{0:string,1:string} $parts */
             $parts = explode($this->syntax->getParameterValueSeparator(), $item, 2);
             $return[trim($parts[0])] = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
         }
@@ -73,11 +89,21 @@ final class RegexParser implements ParserInterface
         return $return;
     }
 
+    /**
+     * @param string|null $value
+     *
+     * @return string|null
+     */
     private function parseValue($value)
     {
         return null === $value ? null : $this->extractValue(trim($value));
     }
 
+    /**
+     * @param string $value
+     *
+     * @return string
+     */
     private function extractValue($value)
     {
         $length = strlen($this->syntax->getParameterValueDelimiter());
@@ -85,6 +111,11 @@ final class RegexParser implements ParserInterface
         return $this->isDelimitedValue($value) ? substr($value, $length, -1 * $length) : $value;
     }
 
+    /**
+     * @param string $value
+     *
+     * @return bool
+     */
     private function isDelimitedValue($value)
     {
         return preg_match('/^'.$this->syntax->getParameterValueDelimiter().'/us', $value)

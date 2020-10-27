@@ -6,26 +6,31 @@ namespace Thunder\Shortcode\Syntax;
  */
 final class CommonSyntax implements SyntaxInterface
 {
+    /** @return string */
     public function getOpeningTag()
     {
         return '[';
     }
 
+    /** @return string */
     public function getClosingTag()
     {
         return ']';
     }
 
+    /** @return string */
     public function getClosingTagMarker()
     {
         return '/';
     }
 
+    /** @return string */
     public function getParameterValueSeparator()
     {
         return '=';
     }
 
+    /** @return string */
     public function getParameterValueDelimiter()
     {
         return '"';

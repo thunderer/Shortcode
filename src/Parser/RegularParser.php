@@ -12,14 +12,20 @@ use Thunder\Shortcode\Utility\RegexBuilderUtility;
  */
 final class RegularParser implements ParserInterface
 {
+    /** @var string */
     private $lexerRegex;
+    /** @var string */
     private $nameRegex;
-    private $tokens;
-    private $tokensCount;
-    private $position;
+    /** @psalm-var list<array{0:int,1:string,2:int}> */
+    private $tokens = array();
+    /** @var int */
+    private $tokensCount = 0;
+    /** @var int */
+    private $position = 0;
     /** @var int[] */
-    private $backtracks;
-    private $lastBacktrack;
+    private $backtracks = array();
+    /** @var int */
+    private $lastBacktrack = 0;
 
     const TOKEN_OPEN = 1;
     const TOKEN_CLOSE = 2;
@@ -42,7 +48,7 @@ final class RegularParser implements ParserInterface
      */
     public function parse($text)
     {
-        $nestingLevel = ini_set('xdebug.max_nesting_level', -1);
+        $nestingLevel = ini_set('xdebug.max_nesting_level', '-1');
         $this->tokens = $this->tokenize($text);
         $this->backtracks = array();
         $this->lastBacktrack = 0;
@@ -73,6 +79,16 @@ final class RegularParser implements ParserInterface
         return $shortcodes;
     }
 
+    /**
+     * @param string $name
+     * @psalm-param array<string,string|null> $parameters
+     * @param string|null $bbCode
+     * @param int $offset
+     * @param string|null $content
+     * @param string $text
+     *
+     * @return ParsedShortcode
+     */
     private function getObject($name, $parameters, $bbCode, $offset, $content, $text)
     {
         return new ParsedShortcode(new Shortcode($name, $parameters, $content, $bbCode), $text, $offset);
@@ -80,6 +96,14 @@ final class RegularParser implements ParserInterface
 
     /* --- RULES ----------------------------------------------------------- */
 
+    /**
+     * @param string[] $names
+     * @psalm-param list<string> $names
+     * FIXME: investigate the reason Psalm complains about references
+     * @psalm-suppress ReferenceConstraintViolation
+     *
+     * @return ParsedShortcode[]|string|false
+     */
     private function shortcode(array &$names)
     {
         if(!$this->match(self::TOKEN_OPEN, false)) { return false; }
@@ -118,6 +142,7 @@ final class RegularParser implements ParserInterface
             }
 
             $this->beginBacktrack();
+            /** @psalm-suppress MixedArgumentTypeCoercion */
             $contentMatchedShortcodes = $this->shortcode($names);
             if(\is_string($contentMatchedShortcodes)) {
                 $closingName = $contentMatchedShortcodes;
@@ -133,7 +158,6 @@ final class RegularParser implements ParserInterface
 
             $this->beginBacktrack();
             if(false !== ($closingName = $this->close($names))) {
-                if(null === $content) { $content = ''; }
                 $this->backtrack();
                 $shortcodes = array();
                 break;
@@ -167,6 +191,11 @@ final class RegularParser implements ParserInterface
         return array($this->getObject($name, $parameters, $bbCode, $offset, $content, $this->getBacktrack()));
     }
 
+    /**
+     * @param string[] $names
+     *
+     * @return string|false
+     */
     private function close(array &$names)
     {
         if(!$this->match(self::TOKEN_OPEN, true)) { return false; }
@@ -177,6 +206,7 @@ final class RegularParser implements ParserInterface
         return \in_array($closingName, $names, true) ? $closingName : false;
     }
 
+    /** @psalm-return array<string,string|null>|false */
     private function parameters()
     {
         $parameters = array();
@@ -195,6 +225,7 @@ final class RegularParser implements ParserInterface
         return $parameters;
     }
 
+    /** @return false|string */
     private function value()
     {
         $value = '';
@@ -221,12 +252,14 @@ final class RegularParser implements ParserInterface
 
     /* --- PARSER ---------------------------------------------------------- */
 
+    /** @return void */
     private function beginBacktrack()
     {
         $this->backtracks[] = $this->position;
         $this->lastBacktrack = $this->position;
     }
 
+    /** @return string */
     private function getBacktrack()
     {
         $position = array_pop($this->backtracks);
@@ -238,6 +271,11 @@ final class RegularParser implements ParserInterface
         return $backtrack;
     }
 
+    /**
+     * @param bool $modifyPosition
+     *
+     * @return string
+     */
     private function backtrack($modifyPosition = true)
     {
         $position = array_pop($this->backtracks);
@@ -254,11 +292,22 @@ final class RegularParser implements ParserInterface
         return $backtrack;
     }
 
+    /**
+     * @param int $type
+     *
+     * @return bool
+     */
     private function lookahead($type)
     {
         return $this->position < $this->tokensCount && $this->tokens[$this->position][0] === $type;
     }
 
+    /**
+     * @param int|null $type
+     * @param bool $ws
+     *
+     * @return string
+     */
     private function match($type, $ws)
     {
         if($this->position >= $this->tokensCount) {
@@ -280,6 +329,11 @@ final class RegularParser implements ParserInterface
 
     /* --- LEXER ----------------------------------------------------------- */
 
+    /**
+     * @param string $text
+     *
+     * @psalm-return list<array{0:int,1:string,2:int}>
+     */
     private function tokenize($text)
     {
         $count = preg_match_all($this->lexerRegex, $text, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
@@ -308,13 +362,17 @@ final class RegularParser implements ParserInterface
         return $tokens;
     }
 
+    /** @return string */
     private function prepareLexer(SyntaxInterface $syntax)
     {
+        // FIXME: for some reason Psalm does not understand the `@psalm-var callable() $var` annotation
+        /** @psalm-suppress MissingClosureParamType, MissingClosureReturnType */
         $group = function($text, $group) {
-            return '(?<'.$group.'>'.preg_replace('/(.)/us', '\\\\$0', $text).')';
+            return '(?<'.(string)$group.'>'.preg_replace('/(.)/us', '\\\\$0', (string)$text).')';
         };
+        /** @psalm-suppress MissingClosureParamType, MissingClosureReturnType */
         $quote = function($text) {
-            return preg_replace('/(.)/us', '\\\\$0', $text);
+            return preg_replace('/(.)/us', '\\\\$0', (string)$text);
         };
 
         $rules = array(

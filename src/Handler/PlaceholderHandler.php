@@ -8,8 +8,10 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
  */
 final class PlaceholderHandler
 {
+    /** @var string */
     private $delimiter;
 
+    /** @param string $delimiter */
     public function __construct($delimiter = '%')
     {
         $this->delimiter = $delimiter;
@@ -27,8 +29,9 @@ final class PlaceholderHandler
         $args = $shortcode->getParameters();
         $delimiter = $this->delimiter;
         $keys = array_map(function($key) use($delimiter) { return $delimiter.$key.$delimiter; }, array_keys($args));
+        /** @var string[] $values */
         $values = array_values($args);
 
-        return str_replace($keys, $values, $shortcode->getContent());
+        return str_replace($keys, $values, (string)$shortcode->getContent());
     }
 }

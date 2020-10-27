@@ -6,9 +6,15 @@ namespace Thunder\Shortcode\Shortcode;
  */
 final class ParsedShortcode extends AbstractShortcode implements ParsedShortcodeInterface
 {
+    /** @var string */
     private $text;
+    /** @var int */
     private $offset;
 
+    /**
+     * @param string $text
+     * @param int $offset
+     */
     public function __construct(ShortcodeInterface $shortcode, $text, $offset)
     {
         $this->name = $shortcode->getName();
@@ -27,11 +33,13 @@ final class ParsedShortcode extends AbstractShortcode implements ParsedShortcode
         return $self;
     }
 
+    /** @return string */
     public function getText()
     {
         return $this->text;
     }
 
+    /** @return int */
     public function getOffset()
     {
         return $this->offset;

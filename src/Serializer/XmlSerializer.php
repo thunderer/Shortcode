@@ -50,6 +50,13 @@ final class XmlSerializer implements SerializerInterface
         return $doc->saveXML();
     }
 
+    /**
+     * @param \DOMDocument $doc
+     * @param string $name
+     * @param string|null $content
+     *
+     * @return \DOMElement
+     */
     private function createCDataNode(\DOMDocument $doc, $name, $content)
     {
         $node = $doc->createElement($name);
@@ -70,7 +77,7 @@ final class XmlSerializer implements SerializerInterface
     {
         $xml = new \DOMDocument();
         $internalErrors = libxml_use_internal_errors(true);
-        if(!$text || ($text && !$xml->loadXML($text))) {
+        if(!$text || !$xml->loadXML($text)) {
             libxml_use_internal_errors($internalErrors);
             throw new \InvalidArgumentException('Failed to parse provided XML!');
         }
@@ -97,6 +104,11 @@ final class XmlSerializer implements SerializerInterface
         return new Shortcode($name, $parameters, $content, $bbCode);
     }
 
+    /**
+     * @param \DOMNodeList $node
+     *
+     * @return string|null
+     */
     private function getValue(\DOMNodeList $node)
     {
         return $node->length === 1 && $node->item(0)->hasChildNodes()
@@ -104,11 +116,23 @@ final class XmlSerializer implements SerializerInterface
             : null;
     }
 
+    /**
+     * @param \DOMNode $node
+     * @param string $name
+     * @psalm-suppress UnusedParam
+     *
+     * @return string
+     */
     private function getAttribute(\DOMNode $node, $name)
     {
+        /**
+         * @var \DOMNode $attribute
+         * @psalm-suppress NullReference
+         */
         $attribute = $node->attributes->getNamedItem($name);
 
-        if(!$attribute || ($attribute && !$attribute->nodeValue)) {
+        /** @psalm-suppress DocblockTypeContradiction */
+        if(!$attribute || !$attribute->nodeValue) {
             throw new \InvalidArgumentException('Invalid shortcode XML!');
         }
 
