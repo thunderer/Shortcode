@@ -72,7 +72,7 @@ final class WordpressParser implements ParserInterface
     public function parse($text)
     {
         $names = $this->names
-            ? implode('|', array_map('preg_quote', $this->names))
+            ? implode('|', array_map(function($name) { return preg_quote($name, '/'); }, $this->names))
             : RegexBuilderUtility::buildNameRegex();
         $regex = str_replace('<NAMES>', $names, static::$shortcodeRegex);
         preg_match_all($regex, $text, $matches, PREG_OFFSET_CAPTURE);
