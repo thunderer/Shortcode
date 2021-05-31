@@ -264,7 +264,7 @@ final class Processor implements ProcessorInterface
         }
 
         $self = clone $this;
-        $self->autoProcessContent = (bool)$flag;
+        $self->autoProcessContent = $flag;
 
         return $self;
     }

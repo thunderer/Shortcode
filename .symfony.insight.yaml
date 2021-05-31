@@ -1,4 +1,0 @@
-rules:
-  # RegularParser::parse() disables xdebug.max_nesting_level to avoid errors when XDebug is enabled
-  php.dynamically_change_configuration:
-    enabled: false
