@@ -3,6 +3,7 @@ namespace Thunder\Shortcode\Processor;
 
 use Thunder\Shortcode\Event\ReplaceShortcodesEvent;
 use Thunder\Shortcode\Event\FilterShortcodesEvent;
+use Thunder\Shortcode\Event\RewriteReplacementsEvent;
 use Thunder\Shortcode\EventContainer\EventContainerInterface;
 use Thunder\Shortcode\Events;
 use Thunder\Shortcode\HandlerContainer\HandlerContainerInterface as Handlers;
@@ -122,6 +123,9 @@ final class Processor implements ProcessorInterface
             $replaces[] = new ReplacedShortcode($shortcode, $replace);
         }
 
+        $rewriteEvent = new RewriteReplacementsEvent($replaces);
+        $this->dispatchEvent(Events::REWRITE_REPLACEMENTS, $rewriteEvent);
+        $replaces = $rewriteEvent->getRewritten();
         $applyEvent = new ReplaceShortcodesEvent($text, $replaces, $parent);
         $this->dispatchEvent(Events::REPLACE_SHORTCODES, $applyEvent);
 
