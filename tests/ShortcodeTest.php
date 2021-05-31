@@ -84,7 +84,7 @@ final class ShortcodeTest extends AbstractTestCase
         static::assertSame('[code]', $processed->getShortcodeText());
         static::assertSame(1, $processed->getIterationNumber());
         static::assertSame(0, $processed->getRecursionLevel());
-        static::assertSame(null, $processed->getParent());
+        static::assertNull($processed->getParent());
         static::assertSame($processor, $processed->getProcessor());
     }
 
