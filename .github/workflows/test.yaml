@@ -1,0 +1,41 @@
+name: Test
+
+on:
+  push:
+    branches: ['master']
+  pull_request: ~
+
+jobs:
+  test:
+    runs-on: '${{ matrix.os }}'
+    strategy:
+      matrix:
+        php: ['5.3', '5.4', '5.5', '5.6', '7.0', '7.1', '7.2', '7.3', '7.4', '8.0']
+        os: ['ubuntu-latest']
+        failure: [false]
+        include:
+          - { php: '8.1', os: 'ubuntu-latest', failure: true } # '8.1' means 'nightly'
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@v2'
+      - name: 'Install PHP'
+        uses: 'shivammathur/setup-php@v2'
+        with:
+          php-version: '${{ matrix.php }}'
+          tools: 'composer:v2'
+          coverage: 'xdebug'
+      - name: 'PHP'
+        run: 'php -v'
+
+      - name: 'Composer'
+        run: 'composer install'
+        continue-on-error: '${{ matrix.failure }}'
+      - name: 'PHPUnit'
+        run: 'php vendor/bin/phpunit --coverage-text'
+        continue-on-error: '${{ matrix.failure }}'
+      - name: 'Psalm'
+        run: |
+          composer require --dev vimeo/psalm
+          php vendor/bin/psalm --shepherd
+        if: '${{ matrix.php >= 7.1 }}'
+        continue-on-error: '${{ matrix.failure }}'
