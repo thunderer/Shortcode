@@ -39,3 +39,9 @@ jobs:
           php vendor/bin/psalm --shepherd
         if: '${{ matrix.php >= 7.1 }}'
         continue-on-error: '${{ matrix.failure }}'
+      - name: 'Infection'
+        run: |
+          composer require --dev --with-all-dependencies infection/infection
+          php vendor/bin/infection
+        if: '${{ matrix.php >= 7.1 }}'
+        continue-on-error: '${{ matrix.failure }}'
