@@ -1,12 +1,12 @@
-ARG PHP_VERSION=7.4
+ARG PHP_VERSION=8.0
 FROM php:$PHP_VERSION
+
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+ && php -r "if (hash_file('sha384', 'composer-setup.php') === '906a84df04cea2aa72f40b5f787e49f22d4c2f19492ac310e8cba5b96ac8b64115ac402c8cd292b8a03482574915d1a8') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" \
+ && php composer-setup.php \
+ && php -r "unlink('composer-setup.php');" \
+ && mv composer.phar /usr/local/bin/composer
 
 RUN apt update && apt install -y libonig-dev libzip-dev
 RUN docker-php-ext-install mbstring zip
 RUN pecl install xdebug && docker-php-ext-enable xdebug
-
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
- && php -r "if (hash_file('sha384', 'composer-setup.php') === 'c31c1e292ad7be5f49291169c0ac8f683499edddcfd4e42232982d0fd193004208a58ff6f353fde0012d35fdd72bc394') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" \
- && php composer-setup.php \
- && php -r "unlink('composer-setup.php');" \
- && mv composer.phar /usr/local/bin/composer

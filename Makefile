@@ -1,5 +1,10 @@
-PHP_VERSION ?= 7.4
+PHP_VERSION ?= 8.0
 PHP := docker-compose run --rm php-${PHP_VERSION}
+
+php-version:
+	${PHP} php -v
+cache-clear:
+	sudo rm -rfv coverage .phpunit.result.cache infection.log
 
 docker-build:
 	docker-compose build
@@ -25,7 +30,7 @@ test-phpunit-local:
 	php vendor/bin/psalm --no-cache
 	php vendor/bin/infection
 test-infection:
-	${PHP} php vendor/bin/infection -j2
+	${PHP} php vendor/bin/infection -j2 --min-msi=80
 
 travis:
 	# PHP_VERSION=5.3 make travis-job
