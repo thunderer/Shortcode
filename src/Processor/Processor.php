@@ -162,6 +162,7 @@ final class Processor implements ProcessorInterface
         }
 
         $state = $parsed->getText();
+        /** @psalm-suppress RedundantCast */
         $length = (int)mb_strlen($processed->getTextContent(), 'utf-8');
         $offset = (int)mb_strrpos($state, $processed->getTextContent(), 0, 'utf-8');
 
