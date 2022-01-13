@@ -36,7 +36,7 @@ jobs:
       - name: 'Psalm'
         run: |
           composer require --dev vimeo/psalm
-          php vendor/bin/psalm --shepherd
+          php vendor/bin/psalm --shepherd --php-version=${{ matrix.php }}
         if: '${{ matrix.php >= 7.1 }}'
         continue-on-error: '${{ matrix.failure }}'
       - name: 'Infection'
