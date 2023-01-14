@@ -11,11 +11,11 @@ jobs:
     runs-on: '${{ matrix.os }}'
     strategy:
       matrix:
-        php: ['7.4', '8.0', '8.1']
+        php: ['7.4', '8.0', '8.1', '8.2']
         os: ['ubuntu-latest']
         failure: [false]
         include:
-          - { php: '8.2', os: 'ubuntu-latest', failure: true } # '8.2' means 'nightly'
+          - { php: '8.3', os: 'ubuntu-latest', failure: true } # '8.3' means 'nightly'
     steps:
       - name: 'Checkout'
         uses: 'actions/checkout@v2'

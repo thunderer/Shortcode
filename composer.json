@@ -30,5 +30,10 @@
         "symfony/yaml": "if you want to use YAML serializer",
         "ext-dom": "if you want to use XML serializer",
         "ext-json": "if you want to use JSON serializer"
+    },
+    "config": {
+        "allow-plugins": {
+            "infection/extension-installer": true
+        }
     }
 }
