@@ -88,6 +88,7 @@ final class XmlSerializer implements SerializerInterface
         if($shortcode->length !== 1) {
             throw new \InvalidArgumentException('Invalid shortcode XML!');
         }
+        /** @psalm-suppress PossiblyNullArgument */
         $name = $this->getAttribute($shortcode->item(0), 'name');
 
         $bbCode = $this->getValue($xpath->query('/shortcode/bbCode'));
@@ -98,6 +99,7 @@ final class XmlSerializer implements SerializerInterface
         for($i = 0; $i < $elements->length; $i++) {
             $node = $elements->item($i);
 
+            /** @psalm-suppress PossiblyNullReference */
             $parameters[$this->getAttribute($node, 'name')] = $node->hasChildNodes() ? $node->nodeValue : null;
         }
 
@@ -111,6 +113,7 @@ final class XmlSerializer implements SerializerInterface
      */
     private function getValue(\DOMNodeList $node)
     {
+        /** @psalm-suppress PossiblyNullReference,PossiblyNullPropertyFetch */
         return $node->length === 1 && $node->item(0)->hasChildNodes()
             ? $node->item(0)->nodeValue
             : null;
@@ -119,7 +122,6 @@ final class XmlSerializer implements SerializerInterface
     /**
      * @param \DOMNode $node
      * @param string $name
-     * @psalm-suppress UnusedParam
      *
      * @return string
      */

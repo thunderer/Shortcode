@@ -142,7 +142,6 @@ final class RegularParser implements ParserInterface
             }
 
             $this->beginBacktrack();
-            /** @psalm-suppress MixedArgumentTypeCoercion */
             $contentMatchedShortcodes = $this->shortcode($names);
             if(\is_string($contentMatchedShortcodes)) {
                 $closingName = $contentMatchedShortcodes;
