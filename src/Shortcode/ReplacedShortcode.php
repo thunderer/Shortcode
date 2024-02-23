@@ -26,6 +26,19 @@ final class ReplacedShortcode extends AbstractShortcode
         $this->replacement = $replacement;
     }
 
+    /**
+     * @param string $replacement
+     *
+     * @return self
+     */
+    public function withReplacement($replacement)
+    {
+        $base = new Shortcode($this->name, $this->parameters, $this->content, $this->bbCode);
+        $parsed = new ParsedShortcode($base, $this->text, $this->offset);
+
+        return new self($parsed, $replacement);
+    }
+
     /** @return string */
     public function getReplacement()
     {
