@@ -342,7 +342,7 @@ final class RegularParser implements ParserInterface
      */
     private function tokenize($text)
     {
-        $count = preg_match_all($this->lexerRegex, $text, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+        $count = preg_match_all($this->lexerRegex, $text, $matches, PREG_SET_ORDER);
         if(false === $count || preg_last_error() !== PREG_NO_ERROR) {
             throw new \RuntimeException(sprintf('PCRE failure `%s`.', preg_last_error()));
         }
@@ -352,13 +352,13 @@ final class RegularParser implements ParserInterface
 
         foreach($matches as $match) {
             switch(true) {
-                case -1 !== $match['string'][1]: { $token = $match['string'][0]; $type = self::TOKEN_STRING; break; }
-                case -1 !== $match['ws'][1]: { $token = $match['ws'][0]; $type = self::TOKEN_WS; break; }
-                case -1 !== $match['marker'][1]: { $token = $match['marker'][0]; $type = self::TOKEN_MARKER; break; }
-                case -1 !== $match['delimiter'][1]: { $token = $match['delimiter'][0]; $type = self::TOKEN_DELIMITER; break; }
-                case -1 !== $match['separator'][1]: { $token = $match['separator'][0]; $type = self::TOKEN_SEPARATOR; break; }
-                case -1 !== $match['open'][1]: { $token = $match['open'][0]; $type = self::TOKEN_OPEN; break; }
-                case -1 !== $match['close'][1]: { $token = $match['close'][0]; $type = self::TOKEN_CLOSE; break; }
+                case array_key_exists('close', $match): { $token = $match['close']; $type = self::TOKEN_CLOSE; break; }
+                case array_key_exists('open', $match): { $token = $match['open']; $type = self::TOKEN_OPEN; break; }
+                case array_key_exists('separator', $match): { $token = $match['separator']; $type = self::TOKEN_SEPARATOR; break; }
+                case array_key_exists('delimiter', $match): { $token = $match['delimiter']; $type = self::TOKEN_DELIMITER; break; }
+                case array_key_exists('marker', $match): { $token = $match['marker']; $type = self::TOKEN_MARKER; break; }
+                case array_key_exists('ws', $match): { $token = $match['ws']; $type = self::TOKEN_WS; break; }
+                case array_key_exists('string', $match): { $token = $match['string']; $type = self::TOKEN_STRING; break; }
                 default: { throw new \RuntimeException('Invalid token.'); }
             }
             $tokens[] = array($type, $token, $position);
