@@ -25,9 +25,14 @@ class ReplaceShortcodesEvent
     /**
      * @param string $text
      * @param ReplacedShortcode[] $replacements
+     * @param ShortcodeInterface|null $shortcode
      */
-    public function __construct($text, array $replacements, ShortcodeInterface $shortcode = null)
+    public function __construct($text, array $replacements, $shortcode = null)
     {
+        if(null !== $shortcode && false === $shortcode instanceof ShortcodeInterface) {
+            throw new \LogicException('Parameter $shortcode must be an instance of ShortcodeInterface.');
+        }
+
         $this->shortcode = $shortcode;
         $this->text = $text;
 

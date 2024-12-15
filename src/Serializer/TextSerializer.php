@@ -15,8 +15,13 @@ final class TextSerializer implements SerializerInterface
     /** @var SyntaxInterface */
     private $syntax;
 
-    public function __construct(SyntaxInterface $syntax = null)
+    /** @param SyntaxInterface|null $syntax */
+    public function __construct($syntax = null)
     {
+        if(null !== $syntax && false === $syntax instanceof SyntaxInterface) {
+            throw new \LogicException('Parameter $syntax must be an instance of SyntaxInterface.');
+        }
+
         $this->syntax = $syntax ?: new Syntax();
     }
 

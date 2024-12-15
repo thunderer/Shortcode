@@ -35,8 +35,13 @@ final class RegularParser implements ParserInterface
     const TOKEN_STRING = 6;
     const TOKEN_WS = 7;
 
-    public function __construct(SyntaxInterface $syntax = null)
+    /** @param SyntaxInterface|null $syntax */
+    public function __construct($syntax = null)
     {
+        if(null !== $syntax && false === $syntax instanceof SyntaxInterface) {
+            throw new \LogicException('Parameter $syntax must be an instance of SyntaxInterface.');
+        }
+
         $this->lexerRegex = $this->prepareLexer($syntax ?: new CommonSyntax());
         $this->nameRegex = '~^'.RegexBuilderUtility::buildNameRegex().'$~us';
     }
