@@ -8,25 +8,25 @@ use Thunder\Shortcode\Syntax\SyntaxInterface;
  */
 final class RegexBuilderUtility
 {
-    /** @return string */
+    /** @return non-empty-string */
     public static function buildNameRegex()
     {
         return '[a-zA-Z0-9-_\\*]+';
     }
 
-    /** @return string */
+    /** @return non-empty-string */
     public static function buildShortcodeRegex(SyntaxInterface $syntax)
     {
         return '~('.self::createShortcodeRegexContent($syntax).')~us';
     }
 
-    /** @return string */
+    /** @return non-empty-string */
     public static function buildSingleShortcodeRegex(SyntaxInterface $syntax)
     {
         return '~(\A'.self::createShortcodeRegexContent($syntax).'\Z)~us';
     }
 
-    /** @return string */
+    /** @return non-empty-string */
     public static function buildParametersRegex(SyntaxInterface $syntax)
     {
         $equals = self::quote($syntax->getParameterValueSeparator());
@@ -43,7 +43,7 @@ final class RegexBuilderUtility
         return '~(?:\s*(\w+(?:'.$complex.'|'.$simple.'|'.$empty.')))~us';
     }
 
-    /** @return string */
+    /** @return non-empty-string */
     private static function createShortcodeRegexContent(SyntaxInterface $syntax)
     {
         $open = self::quote($syntax->getOpeningTag());
@@ -84,12 +84,15 @@ final class RegexBuilderUtility
     }
 
     /**
-     * @param string $text
+     * @param non-empty-string $text
      *
-     * @return string
+     * @return non-empty-string
      */
     private static function quote($text)
     {
-        return preg_replace('/(.)/us', '\\\\$0', $text);
+        /** @var non-empty-string $quoted */
+        $quoted = preg_replace('/(.)/us', '\\\\$0', $text);
+
+        return $quoted;
     }
 }

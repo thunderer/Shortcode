@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <phpunit
-    backupGlobals = "false"
-    backupStaticAttributes = "false"
     colors = "true"
-    convertErrorsToExceptions = "true"
-    convertNoticesToExceptions = "true"
-    convertWarningsToExceptions = "true"
+    backupGlobals = "false"
     processIsolation = "false"
     stopOnFailure = "false"
     bootstrap = "vendor/autoload.php"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.3/phpunit.xsd">
+
+    <source>
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
 
     <testsuites>
         <testsuite name="Shortcode">
@@ -19,9 +21,6 @@
     </testsuites>
 
     <coverage>
-        <include>
-            <directory>src</directory>
-        </include>
         <report>
             <html outputDirectory="coverage/html" lowUpperBound="50" highLowerBound="90" />
         </report>

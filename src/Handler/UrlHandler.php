@@ -19,7 +19,7 @@ final class UrlHandler
      */
     public function __invoke(ShortcodeInterface $shortcode)
     {
-        $url = $shortcode->getBbCode() ?: $shortcode->getContent();
+        $url = null !== $shortcode->getBbCode() ? $shortcode->getBbCode() : $shortcode->getContent();
 
         return '<a href="'.(string)$url.'">'.(string)$shortcode->getContent().'</a>';
     }

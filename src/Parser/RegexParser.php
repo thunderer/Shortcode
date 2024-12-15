@@ -14,11 +14,11 @@ final class RegexParser implements ParserInterface
 {
     /** @var SyntaxInterface */
     private $syntax;
-    /** @var string */
+    /** @var non-empty-string */
     private $shortcodeRegex;
-    /** @var string */
+    /** @var non-empty-string */
     private $singleShortcodeRegex;
-    /** @var string */
+    /** @var non-empty-string */
     private $parametersRegex;
 
     public function __construct(SyntaxInterface $syntax = null)

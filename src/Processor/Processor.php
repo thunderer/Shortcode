@@ -157,7 +157,7 @@ final class Processor implements ProcessorInterface
         $content = $this->processRecursion($processed, $context);
         $processed = $processed->withContent($content);
 
-        if($handler) {
+        if(null !== $handler) {
             return $handler($processed);
         }
 

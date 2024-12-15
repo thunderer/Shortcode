@@ -133,7 +133,7 @@ final class XmlSerializer implements SerializerInterface
          */
         $attribute = $node->attributes->getNamedItem($name);
 
-        /** @psalm-suppress DocblockTypeContradiction */
+        /** @psalm-suppress DocblockTypeContradiction,RiskyTruthyFalsyComparison */
         if(!$attribute || !$attribute->nodeValue) {
             throw new \InvalidArgumentException('Invalid shortcode XML!');
         }

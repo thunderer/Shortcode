@@ -11,14 +11,15 @@ jobs:
     runs-on: '${{ matrix.os }}'
     strategy:
       matrix:
-        php: ['7.4', '8.0', '8.1', '8.2']
+        php: ['7.4', '8.0', '8.1', '8.2', '8.3']
         os: ['ubuntu-latest']
         failure: [false]
         include:
-          - { php: '8.3', os: 'ubuntu-latest', failure: true } # '8.3' means 'nightly'
+          - { php: '8.4', os: 'ubuntu-latest', failure: true } # Psalm does not support PHP 8.4 yet
+          - { php: '8.5', os: 'ubuntu-latest', failure: true } # '8.5' means 'nightly'
     steps:
       - name: 'Checkout'
-        uses: 'actions/checkout@v2'
+        uses: 'actions/checkout@v4'
       - name: 'Install PHP'
         uses: 'shivammathur/setup-php@v2'
         with:
@@ -36,11 +37,13 @@ jobs:
         continue-on-error: '${{ matrix.failure }}'
       - name: 'Psalm'
         run: |
-          composer require --dev vimeo/psalm
+          composer remove --dev -W 'phpunit/phpunit'
+          composer require --dev -W 'vimeo/psalm=^5.0' 'nikic/php-parser=^4.0'
           php vendor/bin/psalm --shepherd --php-version=${{ matrix.php }}
         continue-on-error: '${{ matrix.failure }}'
       - name: 'Infection'
         run: |
-          composer require --dev --with-all-dependencies infection/infection
+          composer remove --dev -W 'vimeo/psalm'
+          composer require --dev -W phpunit/phpunit infection/infection
           php vendor/bin/infection
         continue-on-error: '${{ matrix.failure }}'

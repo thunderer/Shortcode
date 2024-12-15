@@ -6,15 +6,15 @@ namespace Thunder\Shortcode\Syntax;
  */
 final class SyntaxBuilder
 {
-    /** @var string|null */
+    /** @var non-empty-string|null */
     private $openingTag;
-    /** @var string|null */
+    /** @var non-empty-string|null */
     private $closingTag;
-    /** @var string|null */
+    /** @var non-empty-string|null */
     private $closingTagMarker;
-    /** @var string|null */
+    /** @var non-empty-string|null */
     private $parameterValueSeparator;
-    /** @var string|null */
+    /** @var non-empty-string|null */
     private $parameterValueDelimiter;
 
     public function __construct()
@@ -34,7 +34,7 @@ final class SyntaxBuilder
     }
 
     /**
-     * @param string $tag
+     * @param non-empty-string $tag
      *
      * @return $this
      */
@@ -46,7 +46,7 @@ final class SyntaxBuilder
     }
 
     /**
-     * @param string $tag
+     * @param non-empty-string $tag
      *
      * @return $this
      */
@@ -58,7 +58,7 @@ final class SyntaxBuilder
     }
 
     /**
-     * @param string $marker
+     * @param non-empty-string $marker
      *
      * @return $this
      */
@@ -70,7 +70,7 @@ final class SyntaxBuilder
     }
 
     /**
-     * @param string $separator
+     * @param non-empty-string $separator
      *
      * @return $this
      */
@@ -82,7 +82,7 @@ final class SyntaxBuilder
     }
 
     /**
-     * @param string $delimiter
+     * @param non-empty-string $delimiter
      *
      * @return $this
      */

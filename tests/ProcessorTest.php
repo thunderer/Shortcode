@@ -69,7 +69,7 @@ final class ProcessorTest extends AbstractTestCase
         static::assertSame($result, $processor->process($text));
     }
 
-    public function provideTexts()
+    public static function provideTexts()
     {
         return array(
             array('[name]', 'name'),
@@ -185,7 +185,7 @@ final class ProcessorTest extends AbstractTestCase
         static::assertSame($result, $processor->process($text));
     }
 
-    public function provideBuiltInTests()
+    public static function provideBuiltInTests()
     {
         return array(
             array('[declare date]%year%.%month%.%day%[/declare][date year=2015 month=08 day=26]', '2015.08.26'),

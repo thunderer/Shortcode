@@ -31,7 +31,7 @@ Each part is described in the dedicated section in this document.
 
 ## Installation
 
-There are no required dependencies and all PHP versions from 5.3 up to latest 8.1 [are tested](https://github.com/thunderer/Shortcode/actions/workflows/test.yaml) and supported. This library is available on Composer/Packagist as `thunderer/shortcode`, to install it execute:
+There are no required dependencies and all PHP versions from 5.3 up to latest 8.x [are tested](https://github.com/thunderer/Shortcode/actions/workflows/test.yaml) and supported. This library is available on Composer/Packagist as `thunderer/shortcode`, to install it execute:
 
 ```
 composer require thunderer/shortcode=^0.7

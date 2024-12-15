@@ -6,18 +6,18 @@ namespace Thunder\Shortcode\Syntax;
  */
 interface SyntaxInterface
 {
-    /** @return string */
+    /** @return non-empty-string */
     public function getOpeningTag();
 
-    /** @return string */
+    /** @return non-empty-string */
     public function getClosingTag();
 
-    /** @return string */
+    /** @return non-empty-string */
     public function getClosingTagMarker();
 
-    /** @return string */
+    /** @return non-empty-string */
     public function getParameterValueSeparator();
 
-    /** @return string */
+    /** @return non-empty-string */
     public function getParameterValueDelimiter();
 }

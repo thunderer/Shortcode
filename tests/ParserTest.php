@@ -42,7 +42,7 @@ final class ParserTest extends AbstractTestCase
         }
     }
 
-    public function provideShortcodes()
+    public static function provideShortcodes()
     {
         $s = new CommonSyntax();
 

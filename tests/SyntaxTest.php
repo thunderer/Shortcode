@@ -23,7 +23,7 @@ final class SyntaxTest extends AbstractTestCase
         static::assertSame($value, $syntax->getParameterValueDelimiter());
     }
 
-    public function provideSyntaxes()
+    public static function provideSyntaxes()
     {
         return array(
             array(new Syntax(), '[', ']', '/', '=', '"'),
