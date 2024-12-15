@@ -18,9 +18,16 @@ class FilterShortcodesEvent
     /** @var ParsedShortcodeInterface[] */
     private $shortcodes = array();
 
-    /** @param ParsedShortcodeInterface[] $shortcodes */
-    public function __construct(array $shortcodes, ProcessedShortcode $parent = null)
+    /**
+     * @param ParsedShortcodeInterface[] $shortcodes
+     * @param ProcessedShortcode|null $parent
+     */
+    public function __construct(array $shortcodes, $parent = null)
     {
+        if(null !== $parent && false === $parent instanceof ProcessedShortcode) {
+            throw new \LogicException('Parameter $parent must be an instance of ProcessedShortcode.');
+        }
+
         $this->parent = $parent;
         $this->setShortcodes($shortcodes);
     }

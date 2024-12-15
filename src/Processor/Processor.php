@@ -86,11 +86,15 @@ final class Processor implements ProcessorInterface
 
     /**
      * @param string $text
+     * @param ProcessedShortcode|null $parent
      *
      * @return string
      */
-    private function processIteration($text, ProcessorContext $context, ProcessedShortcode $parent = null)
+    private function processIteration($text, ProcessorContext $context, $parent = null)
     {
+        if(null !== $parent && false === $parent instanceof ProcessedShortcode) {
+            throw new \LogicException('Parameter $parent must be an instance of ProcessedShortcode.');
+        }
         if (null !== $this->recursionDepth && $context->recursionLevel > $this->recursionDepth) {
             return $text;
         }

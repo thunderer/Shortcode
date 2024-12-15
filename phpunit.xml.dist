@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <phpunit
-    colors = "true"
-    backupGlobals = "false"
-    processIsolation = "false"
-    stopOnFailure = "false"
-    bootstrap = "vendor/autoload.php"
+    colors="true"
+    failOnNotice="true"
+    failOnWarning="true"
+    failOnDeprecation="true"
+    bootstrap="vendor/autoload.php"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.3/phpunit.xsd">
 
