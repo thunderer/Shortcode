@@ -29,7 +29,7 @@ final class SerializerTest extends AbstractTestCase
         static::assertSame($test->getBbCode(), $tested->getBbCode(), 'bbCode: '.$result);
     }
 
-    public function provideShortcodes()
+    public static function provideShortcodes()
     {
         $shortcodes = array(
             new Shortcode('x', array(), null),
@@ -71,7 +71,7 @@ final class SerializerTest extends AbstractTestCase
         static::assertSame($test->getBbCode(), $tested->getBbCode(), 'bbCode: '.$text);
     }
 
-    public function provideUnserialized()
+    public static function provideUnserialized()
     {
         return array(
             array(new JsonSerializer(), new Shortcode('x', array(), null), '{"name":"x"}'),
@@ -95,7 +95,7 @@ final class SerializerTest extends AbstractTestCase
         $serializer->unserialize($value);
     }
 
-    public function provideExceptions()
+    public static function provideExceptions()
     {
         $xml = new XmlSerializer();
         $yaml = new YamlSerializer();

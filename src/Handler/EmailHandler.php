@@ -19,7 +19,7 @@ final class EmailHandler
      */
     public function __invoke(ShortcodeInterface $shortcode)
     {
-        $email = $shortcode->getBbCode() ?: $shortcode->getContent();
+        $email = null !== $shortcode->getBbCode() ? $shortcode->getBbCode() : $shortcode->getContent();
         $content = $shortcode->getContent() === null ? $email : $shortcode->getContent();
 
         return '<a href="mailto:'.(string)$email.'">'.(string)$content.'</a>';

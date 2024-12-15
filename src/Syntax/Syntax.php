@@ -6,23 +6,23 @@ namespace Thunder\Shortcode\Syntax;
  */
 final class Syntax implements SyntaxInterface
 {
-    /** @var string|null */
+    /** @var non-empty-string|null */
     private $openingTag;
-    /** @var string|null */
+    /** @var non-empty-string|null */
     private $closingTag;
-    /** @var string|null */
+    /** @var non-empty-string|null */
     private $closingTagMarker;
-    /** @var string|null */
+    /** @var non-empty-string|null */
     private $parameterValueSeparator;
-    /** @var string|null */
+    /** @var non-empty-string|null */
     private $parameterValueDelimiter;
 
     /**
-     * @param string|null $openingTag
-     * @param string|null $closingTag
-     * @param string|null $closingTagMarker
-     * @param string|null $parameterValueSeparator
-     * @param string|null $parameterValueDelimiter
+     * @param non-empty-string|null $openingTag
+     * @param non-empty-string|null $closingTag
+     * @param non-empty-string|null $closingTagMarker
+     * @param non-empty-string|null $parameterValueSeparator
+     * @param non-empty-string|null $parameterValueDelimiter
      */
     public function __construct(
         $openingTag = null,
@@ -38,33 +38,33 @@ final class Syntax implements SyntaxInterface
         $this->parameterValueDelimiter = $parameterValueDelimiter;
     }
 
-    /** @return string */
+    /** @return non-empty-string */
     public function getOpeningTag()
     {
-        return $this->openingTag ?: '[';
+        return null !== $this->openingTag ? $this->openingTag : '[';
     }
 
-    /** @return string */
+    /** @return non-empty-string */
     public function getClosingTag()
     {
-        return $this->closingTag ?: ']';
+        return null !== $this->closingTag ? $this->closingTag : ']';
     }
 
-    /** @return string */
+    /** @return non-empty-string */
     public function getClosingTagMarker()
     {
-        return $this->closingTagMarker ?: '/';
+        return null !== $this->closingTagMarker ? $this->closingTagMarker : '/';
     }
 
-    /** @return string */
+    /** @return non-empty-string */
     public function getParameterValueSeparator()
     {
-        return $this->parameterValueSeparator ?: '=';
+        return null !== $this->parameterValueSeparator ? $this->parameterValueSeparator : '=';
     }
 
-    /** @return string */
+    /** @return non-empty-string */
     public function getParameterValueDelimiter()
     {
-        return $this->parameterValueDelimiter ?: '"';
+        return null !== $this->parameterValueDelimiter ? $this->parameterValueDelimiter : '"';
     }
 }

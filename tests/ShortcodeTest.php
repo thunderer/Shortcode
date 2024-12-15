@@ -31,7 +31,7 @@ final class ShortcodeTest extends AbstractTestCase
         static::assertTrue($s->hasParameters());
     }
 
-    public function provideShortcodes()
+    public static function provideShortcodes()
     {
         return array(
             array('[x arg=val /]', 'x', array('arg' => 'val'), null),
