@@ -349,19 +349,9 @@ final class RegularParser implements ParserInterface
 
         $tokens = array();
         $position = 0;
-
         foreach($matches as $match) {
-            switch(true) {
-                case array_key_exists('close', $match): { $token = $match['close']; $type = self::TOKEN_CLOSE; break; }
-                case array_key_exists('open', $match): { $token = $match['open']; $type = self::TOKEN_OPEN; break; }
-                case array_key_exists('separator', $match): { $token = $match['separator']; $type = self::TOKEN_SEPARATOR; break; }
-                case array_key_exists('delimiter', $match): { $token = $match['delimiter']; $type = self::TOKEN_DELIMITER; break; }
-                case array_key_exists('marker', $match): { $token = $match['marker']; $type = self::TOKEN_MARKER; break; }
-                case array_key_exists('ws', $match): { $token = $match['ws']; $type = self::TOKEN_WS; break; }
-                case array_key_exists('string', $match): { $token = $match['string']; $type = self::TOKEN_STRING; break; }
-                default: { throw new \RuntimeException('Invalid token.'); }
-            }
-            $tokens[] = array($type, $token, $position);
+            $token = $match[0];
+            $tokens[] = array((int)$match['MARK'], $token, $position);
             $position += mb_strlen($token, 'utf-8');
         }
 
@@ -373,8 +363,8 @@ final class RegularParser implements ParserInterface
     {
         // FIXME: for some reason Psalm does not understand the `@psalm-var callable() $var` annotation
         /** @psalm-suppress MissingClosureParamType, MissingClosureReturnType */
-        $group = function($text, $group) {
-            return '(?<'.(string)$group.'>'.preg_replace('/(.)/us', '\\\\$0', (string)$text).')';
+        $group = function($text) {
+            return preg_replace('/(.)/us', '\\\\$0', (string)$text);
         };
         /** @psalm-suppress MissingClosureParamType, MissingClosureReturnType */
         $quote = function($text) {
@@ -382,22 +372,22 @@ final class RegularParser implements ParserInterface
         };
 
         $rules = array(
-            '(?<string>\\\\.|(?:(?!'.implode('|', array(
+            '\\\\.(*:'.self::TOKEN_STRING.')|(?:(?!'.implode('|', array(
                 $quote($syntax->getOpeningTag()),
                 $quote($syntax->getClosingTag()),
                 $quote($syntax->getClosingTagMarker()),
                 $quote($syntax->getParameterValueSeparator()),
                 $quote($syntax->getParameterValueDelimiter()),
                 '\s+',
-            )).').)+)',
-            '(?<ws>\s+)',
-            $group($syntax->getClosingTagMarker(), 'marker'),
-            $group($syntax->getParameterValueDelimiter(), 'delimiter'),
-            $group($syntax->getParameterValueSeparator(), 'separator'),
-            $group($syntax->getOpeningTag(), 'open'),
-            $group($syntax->getClosingTag(), 'close'),
+            )).').)+(*:'.self::TOKEN_STRING.')',
+            '\s+(*:'.self::TOKEN_WS.')',
+            $group($syntax->getClosingTagMarker()).'(*:'.self::TOKEN_MARKER.')',
+            $group($syntax->getParameterValueDelimiter()).'(*:'.self::TOKEN_DELIMITER.')',
+            $group($syntax->getParameterValueSeparator()).'(*:'.self::TOKEN_SEPARATOR.')',
+            $group($syntax->getOpeningTag()).'(*:'.self::TOKEN_OPEN.')',
+            $group($syntax->getClosingTag()).'(*:'.self::TOKEN_CLOSE.')',
         );
 
-        return '~('.implode('|', $rules).')~us';
+        return '~(?|'.implode('|', $rules).')~us';
     }
 }
