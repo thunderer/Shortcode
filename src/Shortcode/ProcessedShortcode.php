@@ -78,6 +78,19 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
     }
 
     /**
+     * @param array $parameters
+     *
+     * @return self
+     */
+    public function withParameters(array $parameters)
+    {
+        $clone = clone $this;
+        $clone->parameters = $parameters;
+
+        return $clone;
+    }
+
+    /**
      * @param string $name
      *
      * @return bool

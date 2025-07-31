@@ -161,6 +161,14 @@ final class Processor implements ProcessorInterface
         $content = $this->processRecursion($processed, $context);
         $processed = $processed->withContent($content);
 
+        $parameters = $processed->getParameters();
+        foreach ($parameters as $key => $value) {
+            if (is_string($value)) {
+                $parameters[$key] = $this->process($value);
+            }
+        }
+        $processed = $processed->withParameters($parameters);
+
         if(null !== $handler) {
             return $handler($processed);
         }

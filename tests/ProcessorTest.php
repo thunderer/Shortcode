@@ -89,7 +89,8 @@ final class ProcessorTest extends AbstractTestCase
             array('x [i /][i]i[/i][i /][i]i[/i][i /] z', 'x [i /][i]i[/i][i /][i]i[/i][i /] z'),
             array('x [url url="http://giggle.com/search" /] z', 'x <a href="http://giggle.com/search">http://giggle.com/search</a> z'),
             array('x [url="http://giggle.com/search"] z', 'x <a href="http://giggle.com/search">http://giggle.com/search</a> z'),
-            );
+            array('x [url url="http://giggle.com/[content]random[/content]"] z', 'x <a href="http://giggle.com/random">http://giggle.com/random</a> z'),
+        );
     }
 
     public function testProcessorParentContext()
