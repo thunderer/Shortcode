@@ -22,6 +22,8 @@ use Thunder\Shortcode\Utility\RegexBuilderUtility;
  * @see https://core.trac.wordpress.org/browser/tags/4.3.1/src/wp-includes/shortcodes.php#L239
  * @see https://core.trac.wordpress.org/browser/tags/4.3.1/src/wp-includes/shortcodes.php#L448
  * @psalm-suppress RiskyTruthyFalsyComparison
+ * @psalm-suppress PossiblyNullArgument
+ * @psalm-suppress PossiblyFalseArgument
  *
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */

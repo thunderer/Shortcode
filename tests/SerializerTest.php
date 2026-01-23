@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Thunder\Shortcode\Serializer\JsonSerializer;
 use Thunder\Shortcode\Serializer\SerializerInterface;
 use Thunder\Shortcode\Serializer\TextSerializer;
@@ -18,6 +19,7 @@ final class SerializerTest extends AbstractTestCase
     /**
      * @dataProvider provideShortcodes
      */
+    #[DataProvider('provideShortcodes')]
     public function testSerializer(SerializerInterface $serializer, ShortcodeInterface $test)
     {
         $result = $serializer->serialize($test);
@@ -61,6 +63,7 @@ final class SerializerTest extends AbstractTestCase
     /**
      * @dataProvider provideUnserialized
      */
+    #[DataProvider('provideUnserialized')]
     public function testUnserialize(SerializerInterface $serializer, ShortcodeInterface $test, $text)
     {
         $tested = $serializer->unserialize($text);
@@ -89,6 +92,7 @@ final class SerializerTest extends AbstractTestCase
     /**
      * @dataProvider provideExceptions
      */
+    #[DataProvider('provideExceptions')]
     public function testSerializerExceptions(SerializerInterface $serializer, $value, $exceptionClass)
     {
         $this->willThrowException($exceptionClass);

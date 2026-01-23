@@ -16,4 +16,9 @@
         </ignoreFiles>
     </projectFiles>
 
+    <issueHandlers>
+        <MissingOverrideAttribute errorLevel="suppress" />
+        <UnusedPsalmSuppress errorLevel="suppress" />
+    </issueHandlers>
+
 </psalm>
