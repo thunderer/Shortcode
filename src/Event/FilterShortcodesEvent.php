@@ -10,6 +10,7 @@ use Thunder\Shortcode\Shortcode\ProcessedShortcode;
  * is used directly in processor.
  *
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
+ * @psalm-suppress ClassMustBeFinal
  */
 class FilterShortcodesEvent
 {

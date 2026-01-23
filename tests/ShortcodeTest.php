@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegexParser;
 use Thunder\Shortcode\Processor\Processor;
@@ -18,6 +19,7 @@ final class ShortcodeTest extends AbstractTestCase
     /**
      * @dataProvider provideShortcodes
      */
+    #[DataProvider('provideShortcodes')]
     public function testShortcode($expected, $name, array $args, $content)
     {
         $s = new Shortcode($name, $args, $content);

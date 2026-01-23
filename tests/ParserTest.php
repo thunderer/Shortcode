@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegularParser;
 use Thunder\Shortcode\Parser\ParserInterface;
@@ -23,6 +24,7 @@ final class ParserTest extends AbstractTestCase
      *
      * @dataProvider provideShortcodes
      */
+    #[DataProvider('provideShortcodes')]
     public function testParser(ParserInterface $parser, $code, array $expected)
     {
         $this->assertShortcodes($parser->parse($code), $expected);
@@ -273,6 +275,26 @@ final class ParserTest extends AbstractTestCase
 
         $this->assertShortcodes($parser->parse('[a k="v][x][/x]'), array(
             new ParsedShortcode(new Shortcode('x', array(), '', null), '[x][/x]', 8),
+        ));
+    }
+
+    public function testIssue119()
+    {
+        $cases = array(
+            '[a k="\"y"]inner[/a]' => new ParsedShortcode(new Shortcode('a', array('k' => '\"y'), 'inner', null), '[a k="\"y"]inner[/a]', 0),
+            '[a k=" \"y"]inner[/a]' => new ParsedShortcode(new Shortcode('a', array('k' => ' \"y'), 'inner', null), '[a k=" \"y"]inner[/a]', 0),
+            '[a k=" x\"y"]inner[/a]' => new ParsedShortcode(new Shortcode('a', array('k' => ' x\"y'), 'inner', null), '[a k=" x\"y"]inner[/a]', 0),
+            '[a k="x\"y"]inner[/a]' => new ParsedShortcode(new Shortcode('a', array('k' => 'x\"y'), 'inner', null), '[a k="x\"y"]inner[/a]', 0),
+            '[mention id=1 name="foo\"ff\""][/mention]' => new ParsedShortcode(new Shortcode('mention', array('id' => '1', 'name' => 'foo\"ff\"'), '', null), '[mention id=1 name="foo\"ff\""][/mention]', 0),
+        );
+        $parser = new RegularParser();
+        foreach($cases as $input => $expected) {
+            $this->assertShortcodes($parser->parse($input), array($expected));
+        }
+
+        $this->assertShortcodes($parser->parse('[a k="x\"y"]inner[/a] [mention id=1 name="foo\"ff\""][/mention]'), array(
+            new ParsedShortcode(new Shortcode('a', array('k' => 'x\"y'), 'inner', null), '[a k="x\"y"]inner[/a]', 0),
+            new ParsedShortcode(new Shortcode('mention', array('id' => '1', 'name' => 'foo\"ff\"'), '', null), '[mention id=1 name="foo\"ff\""][/mention]', 22),
         ));
     }
 

@@ -9,6 +9,8 @@ use Thunder\Shortcode\Utility\RegexBuilderUtility;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
+ * @psalm-suppress PossiblyUndefinedArrayOffset
+ * @psalm-suppress PossiblyUndefinedVariable
  */
 final class RegularParser implements ParserInterface
 {
@@ -79,6 +81,7 @@ final class RegularParser implements ParserInterface
                 }
             }
         }
+        /** @psalm-suppress PossiblyFalseArgument */
         ini_set('xdebug.max_nesting_level', $nestingLevel);
 
         return $shortcodes;
@@ -269,7 +272,9 @@ final class RegularParser implements ParserInterface
     {
         $position = array_pop($this->backtracks);
         $backtrack = '';
+        /** @psalm-suppress PossiblyNullOperand */
         for($i = $position; $i < $this->position; $i++) {
+            /** @psalm-suppress PossiblyNullArrayOffset */
             $backtrack .= $this->tokens[$i][1];
         }
 
@@ -285,13 +290,17 @@ final class RegularParser implements ParserInterface
     {
         $position = array_pop($this->backtracks);
         if($modifyPosition) {
+            /** @psalm-suppress PossiblyNullPropertyAssignmentValue */
             $this->position = $position;
         }
 
         $backtrack = '';
+        /** @psalm-suppress PossiblyNullOperand */
         for($i = $position; $i < $this->lastBacktrack; $i++) {
+            /** @psalm-suppress PossiblyNullArrayOffset */
             $backtrack .= $this->tokens[$i][1];
         }
+        /** @psalm-suppress PossiblyNullPropertyAssignmentValue */
         $this->lastBacktrack = $position;
 
         return $backtrack;
@@ -339,6 +348,7 @@ final class RegularParser implements ParserInterface
      * @param string $text
      *
      * @psalm-return list<array{0:int,1:string,2:int}>
+     * @psalm-suppress MixedReturnTypeCoercion
      */
     private function tokenize($text)
     {
@@ -362,9 +372,11 @@ final class RegularParser implements ParserInterface
                 default: { throw new \RuntimeException('Invalid token.'); }
             }
             $tokens[] = array($type, $token, $position);
+            /** @psalm-suppress MixedArgument */
             $position += mb_strlen($token, 'utf-8');
         }
 
+        /** @psalm-suppress MixedReturnTypeCoercion */
         return $tokens;
     }
 
@@ -372,11 +384,11 @@ final class RegularParser implements ParserInterface
     private function prepareLexer(SyntaxInterface $syntax)
     {
         // FIXME: for some reason Psalm does not understand the `@psalm-var callable() $var` annotation
-        /** @psalm-suppress MissingClosureParamType, MissingClosureReturnType */
+        /** @psalm-suppress MissingClosureParamType,MissingClosureReturnType,PossiblyNullOperand */
         $group = function($text, $group) {
             return '(?<'.(string)$group.'>'.preg_replace('/(.)/us', '\\\\$0', (string)$text).')';
         };
-        /** @psalm-suppress MissingClosureParamType, MissingClosureReturnType */
+        /** @psalm-suppress MissingClosureParamType,MissingClosureReturnType */
         $quote = function($text) {
             return preg_replace('/(.)/us', '\\\\$0', (string)$text);
         };
@@ -388,6 +400,7 @@ final class RegularParser implements ParserInterface
                 $quote($syntax->getClosingTagMarker()),
                 $quote($syntax->getParameterValueSeparator()),
                 $quote($syntax->getParameterValueDelimiter()),
+                '\\\\',
                 '\s+',
             )).').)+)',
             '(?<ws>\s+)',

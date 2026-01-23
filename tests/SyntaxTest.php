@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Thunder\Shortcode\Syntax\Syntax;
 use Thunder\Shortcode\Syntax\CommonSyntax;
 use Thunder\Shortcode\Syntax\SyntaxBuilder;
@@ -14,6 +15,7 @@ final class SyntaxTest extends AbstractTestCase
     /**
      * @dataProvider provideSyntaxes
      */
+    #[DataProvider('provideSyntaxes')]
     public function testSyntax(SyntaxInterface $syntax, $open, $close, $slash, $parameter, $value)
     {
         static::assertSame($open, $syntax->getOpeningTag());

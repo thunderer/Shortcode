@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Thunder\Shortcode\Handler\ContentHandler;
 use Thunder\Shortcode\Handler\DeclareHandler;
 use Thunder\Shortcode\Handler\EmailHandler;
@@ -62,6 +63,7 @@ final class ProcessorTest extends AbstractTestCase
      *
      * @dataProvider provideTexts
      */
+    #[DataProvider('provideTexts')]
     public function testProcessorProcess($text, $result)
     {
         $processor = new Processor(new RegexParser(), $this->getHandlers());
@@ -164,6 +166,7 @@ final class ProcessorTest extends AbstractTestCase
     /**
      * @dataProvider provideBuiltInTests
      */
+    #[DataProvider('provideBuiltInTests')]
     public function testBuiltInHandlers($text, $result)
     {
         $handlers = new HandlerContainer();

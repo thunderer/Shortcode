@@ -11,12 +11,11 @@ jobs:
     runs-on: '${{ matrix.os }}'
     strategy:
       matrix:
-        php: ['7.4', '8.0', '8.1', '8.2', '8.3']
+        php: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
         os: ['ubuntu-latest']
         failure: [false]
         include:
-          - { php: '8.4', os: 'ubuntu-latest', failure: true } # Psalm does not support PHP 8.4 yet
-          - { php: '8.5', os: 'ubuntu-latest', failure: true } # '8.5' means 'nightly'
+          - { php: '8.6', os: 'ubuntu-latest', failure: true } # '8.6' means 'nightly'
     steps:
       - name: 'Checkout'
         uses: 'actions/checkout@v4'
@@ -38,7 +37,7 @@ jobs:
       - name: 'Psalm'
         run: |
           composer remove --dev -W 'phpunit/phpunit'
-          composer require --dev -W 'vimeo/psalm=^5.0' 'nikic/php-parser=^4.0'
+          composer require --dev -W 'vimeo/psalm=>=5.0' 'nikic/php-parser=>=4.0'
           php vendor/bin/psalm --shepherd --php-version=${{ matrix.php }}
         continue-on-error: '${{ matrix.failure }}'
       - name: 'Infection'

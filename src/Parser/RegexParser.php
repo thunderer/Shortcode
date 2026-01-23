@@ -46,6 +46,7 @@ final class RegexParser implements ParserInterface
         // loop instead of array_map to pass the arguments explicitly
         $shortcodes = array();
         foreach($matches[0] as $match) {
+            /** @psalm-suppress PossiblyFalseArgument */
             $offset = mb_strlen(substr($text, 0, $match[1]), 'utf-8');
             $shortcodes[] = $this->parseSingle($match[0], $offset);
         }
@@ -108,11 +109,13 @@ final class RegexParser implements ParserInterface
      * @param string $value
      *
      * @return string
+     * @psalm-suppress InvalidFalsableReturnType
      */
     private function extractValue($value)
     {
         $length = strlen($this->syntax->getParameterValueDelimiter());
 
+        /** @psalm-suppress FalsableReturnStatement */
         return $this->isDelimitedValue($value) ? substr($value, $length, -1 * $length) : $value;
     }
 

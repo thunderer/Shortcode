@@ -18,3 +18,8 @@ services:
   php-7.3: { <<: *php, build: { context: docker/php,     args: { PHP_VERSION: 7.3   } } }
   php-7.4: { <<: *php, build: { context: docker/php,     args: { PHP_VERSION: 7.4   } } }
   php-8.0: { <<: *php, build: { context: docker/php,     args: { PHP_VERSION: 8.0   } } }
+  php-8.1: { <<: *php, build: { context: docker/php,     args: { PHP_VERSION: 8.1   } } }
+  php-8.2: { <<: *php, build: { context: docker/php,     args: { PHP_VERSION: 8.2   } } }
+  php-8.3: { <<: *php, build: { context: docker/php,     args: { PHP_VERSION: 8.3   } } }
+  php-8.4: { <<: *php, build: { context: docker/php,     args: { PHP_VERSION: 8.4   } } }
+  php-8.5: { <<: *php, build: { context: docker/php,     args: { PHP_VERSION: 8.5   } } }

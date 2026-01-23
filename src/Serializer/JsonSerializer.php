@@ -6,6 +6,8 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
+ * @psalm-suppress FalsableReturnStatement
+ * @psalm-suppress InvalidFalsableReturnType
  */
 final class JsonSerializer implements SerializerInterface
 {

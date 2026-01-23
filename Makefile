@@ -1,4 +1,4 @@
-PHP_VERSION ?= 8.0
+PHP_VERSION ?= 8.5
 PHP := docker-compose run --rm php-${PHP_VERSION}
 
 php-version:
