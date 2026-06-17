@@ -91,7 +91,7 @@ final class RegexBuilderUtility
     private static function quote($text)
     {
         /** @var non-empty-string $quoted */
-        $quoted = preg_replace('/(.)/us', '\\\\$0', $text);
+        $quoted = preg_quote($text, '~');
 
         return $quoted;
     }
