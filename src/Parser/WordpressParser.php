@@ -83,12 +83,19 @@ final class WordpressParser implements ParserInterface
 
         $shortcodes = array();
         $count = count($matches[0]);
+        $lastByteOffset = 0;
+        $lastCharacterOffset = 0;
         for($i = 0; $i < $count; $i++) {
             $name = $matches[2][$i][0];
             $parameters = static::parseParameters($matches[3][$i][0]);
             $content = $matches[5][$i][1] !== -1 ? $matches[5][$i][0] : null;
             $match = $matches[0][$i][0];
-            $offset = mb_strlen(substr($text, 0, $matches[0][$i][1]), 'utf-8');
+            $byteOffset = $matches[0][$i][1];
+            if($byteOffset > $lastByteOffset) {
+                $lastCharacterOffset += mb_strlen(substr($text, $lastByteOffset, $byteOffset - $lastByteOffset), 'utf-8');
+                $lastByteOffset = $byteOffset;
+            }
+            $offset = $lastCharacterOffset;
 
             $shortcode = new Shortcode($name, $parameters, $content, null);
             $shortcodes[] = new ParsedShortcode($shortcode, $match, $offset);

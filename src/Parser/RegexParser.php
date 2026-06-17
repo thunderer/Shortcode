@@ -20,6 +20,12 @@ final class RegexParser implements ParserInterface
     private $singleShortcodeRegex;
     /** @var non-empty-string */
     private $parametersRegex;
+    /** @var non-empty-string */
+    private $parameterValueSeparator;
+    /** @var non-empty-string */
+    private $parameterValueDelimiter;
+    /** @var int */
+    private $parameterValueDelimiterLength;
 
     /** @param SyntaxInterface|null $syntax */
     public function __construct($syntax = null)
@@ -32,6 +38,9 @@ final class RegexParser implements ParserInterface
         $this->shortcodeRegex = RegexBuilderUtility::buildShortcodeRegex($this->syntax);
         $this->singleShortcodeRegex = RegexBuilderUtility::buildSingleShortcodeRegex($this->syntax);
         $this->parametersRegex = RegexBuilderUtility::buildParametersRegex($this->syntax);
+        $this->parameterValueSeparator = $this->syntax->getParameterValueSeparator();
+        $this->parameterValueDelimiter = $this->syntax->getParameterValueDelimiter();
+        $this->parameterValueDelimiterLength = strlen($this->parameterValueDelimiter);
     }
 
     /**
@@ -45,13 +54,19 @@ final class RegexParser implements ParserInterface
 
         // loop instead of array_map to pass the arguments explicitly
         $shortcodes = array();
+        $lastByteOffset = 0;
+        $lastCharacterOffset = 0;
         foreach($matches[0] as $match) {
             /** @psalm-suppress PossiblyFalseArgument */
-            $offset = mb_strlen(substr($text, 0, $match[1]), 'utf-8');
+            if($match[1] > $lastByteOffset) {
+                $lastCharacterOffset += mb_strlen(substr($text, $lastByteOffset, $match[1] - $lastByteOffset), 'utf-8');
+                $lastByteOffset = $match[1];
+            }
+            $offset = $lastCharacterOffset;
             $shortcodes[] = $this->parseSingle($match[0], $offset);
         }
 
-        return array_filter($shortcodes);
+        return $shortcodes;
     }
 
     /**
@@ -88,7 +103,7 @@ final class RegexParser implements ParserInterface
         $return = array();
         foreach ($argsMatches[1] as $item) {
             /** @psalm-var array{0:string,1:string} $parts */
-            $parts = explode($this->syntax->getParameterValueSeparator(), $item, 2);
+            $parts = explode($this->parameterValueSeparator, $item, 2);
             $return[trim($parts[0])] = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
         }
 
@@ -113,10 +128,8 @@ final class RegexParser implements ParserInterface
      */
     private function extractValue($value)
     {
-        $length = strlen($this->syntax->getParameterValueDelimiter());
-
         /** @psalm-suppress FalsableReturnStatement */
-        return $this->isDelimitedValue($value) ? substr($value, $length, -1 * $length) : $value;
+        return $this->isDelimitedValue($value) ? substr($value, $this->parameterValueDelimiterLength, -1 * $this->parameterValueDelimiterLength) : $value;
     }
 
     /**
@@ -126,7 +139,8 @@ final class RegexParser implements ParserInterface
      */
     private function isDelimitedValue($value)
     {
-        return preg_match('/^'.$this->syntax->getParameterValueDelimiter().'/us', $value)
-            && preg_match('/'.$this->syntax->getParameterValueDelimiter().'$/us', $value);
+        return strlen($value) >= 2 * $this->parameterValueDelimiterLength
+            && 0 === strncmp($value, $this->parameterValueDelimiter, $this->parameterValueDelimiterLength)
+            && substr($value, -1 * $this->parameterValueDelimiterLength) === $this->parameterValueDelimiter;
     }
 }

@@ -140,7 +140,8 @@ final class Processor implements ProcessorInterface
      */
     private function applyReplaces($text, array $replaces)
     {
-        foreach(array_reverse($replaces) as $s) {
+        for($i = count($replaces) - 1; $i >= 0; $i--) {
+            $s = $replaces[$i];
             $offset = $s->getOffset();
             $length = mb_strlen($s->getText(), 'utf-8');
             $textLength = mb_strlen($text, 'utf-8');
@@ -170,7 +171,9 @@ final class Processor implements ProcessorInterface
         $length = (int)mb_strlen($processed->getTextContent(), 'utf-8');
         $offset = (int)mb_strrpos($state, $processed->getTextContent(), 0, 'utf-8');
 
-        return mb_substr($state, 0, $offset, 'utf-8').(string)$processed->getContent().mb_substr($state, $offset + $length, mb_strlen($state, 'utf-8'), 'utf-8');
+        $stateLength = mb_strlen($state, 'utf-8');
+
+        return mb_substr($state, 0, $offset, 'utf-8').(string)$processed->getContent().mb_substr($state, $offset + $length, $stateLength, 'utf-8');
     }
 
     /** @return string|null */

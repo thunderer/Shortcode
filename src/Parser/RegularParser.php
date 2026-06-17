@@ -386,11 +386,11 @@ final class RegularParser implements ParserInterface
         // FIXME: for some reason Psalm does not understand the `@psalm-var callable() $var` annotation
         /** @psalm-suppress MissingClosureParamType,MissingClosureReturnType,PossiblyNullOperand */
         $group = function($text, $group) {
-            return '(?<'.(string)$group.'>'.preg_replace('/(.)/us', '\\\\$0', (string)$text).')';
+            return '(?<'.(string)$group.'>'.preg_quote((string)$text, '~').')';
         };
         /** @psalm-suppress MissingClosureParamType,MissingClosureReturnType */
         $quote = function($text) {
-            return preg_replace('/(.)/us', '\\\\$0', (string)$text);
+            return preg_quote((string)$text, '~');
         };
 
         $rules = array(
