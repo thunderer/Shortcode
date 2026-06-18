@@ -139,6 +139,7 @@ final class RegexParser implements ParserInterface
      */
     private function isDelimitedValue($value)
     {
+        /** @psalm-suppress ArgumentTypeCoercion */
         return strlen($value) >= 2 * $this->parameterValueDelimiterLength
             && 0 === strncmp($value, $this->parameterValueDelimiter, $this->parameterValueDelimiterLength)
             && substr($value, -1 * $this->parameterValueDelimiterLength) === $this->parameterValueDelimiter;
