@@ -1,6 +1,7 @@
 <?php
 namespace Thunder\Shortcode\Tests;
 
+use Composer\InstalledVersions;
 use Thunder\Shortcode\EventHandler\FilterRawEventHandler;
 use Thunder\Shortcode\Events;
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
@@ -66,7 +67,15 @@ content: null
 bbCode: null
 
 EOF;
-        $this->assertSame($yaml, $facade->serialize($s, 'yaml'));
+        $yaml8 = <<<EOF
+name: c
+parameters: {}
+content: null
+bbCode: null
+
+EOF;
+        $symfonyYamlVersion = InstalledVersions::getVersion('symfony/yaml');
+        $this->assertSame(preg_match('~\A8~', $symfonyYamlVersion) ? $yaml8 : $yaml, $facade->serialize($s, 'yaml'));
         $this->assertSame('c', $facade->unserialize($yaml, 'yaml')->getName());
 
         $xml = <<<EOF
