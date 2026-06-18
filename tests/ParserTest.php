@@ -4,6 +4,7 @@ namespace Thunder\Shortcode\Tests;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegularParser;
+use Thunder\Shortcode\Parser\TarsParser;
 use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Parser\RegexParser;
 use Thunder\Shortcode\Parser\WordpressParser;
@@ -254,6 +255,7 @@ final class ParserTest extends AbstractTestCase
             $syntax = array_shift($test);
 
             $result[] = array_merge(array(new RegexParser($syntax)), $test);
+            $result[] = array_merge(array(new TarsParser($syntax)), $test);
             $result[] = array_merge(array(new RegularParser($syntax)), $test);
             if(!in_array($key, $wordpressSkip, true)) {
                 $result[] = array_merge(array(new WordpressParser()), $test);
@@ -265,17 +267,18 @@ final class ParserTest extends AbstractTestCase
 
     public function testIssue77()
     {
-        $parser = new RegularParser();
+        // TarsParser must reproduce RegularParser's backtracking behaviour exactly
+        foreach(array(new RegularParser(), new TarsParser()) as $parser) {
+            $this->assertShortcodes($parser->parse('[a][x][/x][x k="v][/x][y]x[/y]'), array(
+                new ParsedShortcode(new Shortcode('a', array(), null, null), '[a]', 0),
+                new ParsedShortcode(new Shortcode('x', array(), '', null), '[x][/x]', 3),
+                new ParsedShortcode(new Shortcode('y', array(), 'x', null), '[y]x[/y]', 22),
+            ));
 
-        $this->assertShortcodes($parser->parse('[a][x][/x][x k="v][/x][y]x[/y]'), array(
-            new ParsedShortcode(new Shortcode('a', array(), null, null), '[a]', 0),
-            new ParsedShortcode(new Shortcode('x', array(), '', null), '[x][/x]', 3),
-            new ParsedShortcode(new Shortcode('y', array(), 'x', null), '[y]x[/y]', 22),
-        ));
-
-        $this->assertShortcodes($parser->parse('[a k="v][x][/x]'), array(
-            new ParsedShortcode(new Shortcode('x', array(), '', null), '[x][/x]', 8),
-        ));
+            $this->assertShortcodes($parser->parse('[a k="v][x][/x]'), array(
+                new ParsedShortcode(new Shortcode('x', array(), '', null), '[x][/x]', 8),
+            ));
+        }
     }
 
     public function testIssue119()
@@ -287,15 +290,16 @@ final class ParserTest extends AbstractTestCase
             '[a k="x\"y"]inner[/a]' => new ParsedShortcode(new Shortcode('a', array('k' => 'x\"y'), 'inner', null), '[a k="x\"y"]inner[/a]', 0),
             '[mention id=1 name="foo\"ff\""][/mention]' => new ParsedShortcode(new Shortcode('mention', array('id' => '1', 'name' => 'foo\"ff\"'), '', null), '[mention id=1 name="foo\"ff\""][/mention]', 0),
         );
-        $parser = new RegularParser();
-        foreach($cases as $input => $expected) {
-            $this->assertShortcodes($parser->parse($input), array($expected));
-        }
+        foreach(array(new RegularParser(), new TarsParser()) as $parser) {
+            foreach($cases as $input => $expected) {
+                $this->assertShortcodes($parser->parse($input), array($expected));
+            }
 
-        $this->assertShortcodes($parser->parse('[a k="x\"y"]inner[/a] [mention id=1 name="foo\"ff\""][/mention]'), array(
-            new ParsedShortcode(new Shortcode('a', array('k' => 'x\"y'), 'inner', null), '[a k="x\"y"]inner[/a]', 0),
-            new ParsedShortcode(new Shortcode('mention', array('id' => '1', 'name' => 'foo\"ff\"'), '', null), '[mention id=1 name="foo\"ff\""][/mention]', 22),
-        ));
+            $this->assertShortcodes($parser->parse('[a k="x\"y"]inner[/a] [mention id=1 name="foo\"ff\""][/mention]'), array(
+                new ParsedShortcode(new Shortcode('a', array('k' => 'x\"y'), 'inner', null), '[a k="x\"y"]inner[/a]', 0),
+                new ParsedShortcode(new Shortcode('mention', array('id' => '1', 'name' => 'foo\"ff\"'), '', null), '[mention id=1 name="foo\"ff\""][/mention]', 22),
+            ));
+        }
     }
 
     public function testWordPress()
@@ -338,6 +342,7 @@ final class ParserTest extends AbstractTestCase
     public function testInstances()
     {
         static::assertInstanceOf('Thunder\Shortcode\Parser\WordPressParser', new WordpressParser());
+        static::assertInstanceOf('Thunder\Shortcode\Parser\TarsParser', new TarsParser());
         static::assertInstanceOf('Thunder\Shortcode\Parser\RegularParser', new RegularParser());
     }
 }
