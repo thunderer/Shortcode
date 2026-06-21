@@ -5,6 +5,7 @@ use Thunder\Shortcode\Event\ReplaceShortcodesEvent;
 use Thunder\Shortcode\EventContainer\EventContainer;
 use Thunder\Shortcode\EventHandler\FilterRawEventHandler;
 use Thunder\Shortcode\EventHandler\ReplaceJoinEventHandler;
+use Thunder\Shortcode\EventHandler\RewriteWrapEventHandler;
 use Thunder\Shortcode\Events;
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegularParser;
@@ -74,6 +75,22 @@ final class EventsTest extends AbstractTestCase
         $processor = $processor->withEventContainer($events);
 
         $this->assertSame('a root[x name c name  y] b', $processor->process('a [root]x [name] c[content] [name /] [/content] y[/root] b'));
+    }
+
+    public function testRewriteReplacements()
+    {
+        $handlers = new HandlerContainer();
+        $handlers->add('name', function(ShortcodeInterface $s) { return $s->getName(); });
+        $handlers->add('content', function(ShortcodeInterface $s) { return $s->getContent(); });
+        $handlers->add('root', function(ProcessedShortcode $s) { return 'root['.$s->getContent().']'; });
+
+        $events = new EventContainer();
+        $events->addListener(Events::REWRITE_REPLACEMENTS, new RewriteWrapEventHandler('>', '<'));
+
+        $processor = new Processor(new RegularParser(), $handlers);
+        $processor = $processor->withEventContainer($events);
+
+        $this->assertSame('a >root[x >name< c> >name< < y]< b', $processor->process('a [root]x [name] c[content] [name /] [/content] y[/root] b'));
     }
 
     public function testExceptionOnHandlerForUnknownEvent()
