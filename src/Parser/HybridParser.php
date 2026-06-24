@@ -7,7 +7,7 @@ use Thunder\Shortcode\Syntax\CommonSyntax;
 use Thunder\Shortcode\Syntax\SyntaxInterface;
 
 /**
- * TarsParser - a fast, robust shortcode parser.
+ * HybridParser - a fast, robust shortcode parser.
  *
  * Strategy: a single PCRE pass lexes every individual shortcode tag (both
  * opening and closing) in C, then a linear stack-based pass resolves nesting
@@ -19,12 +19,12 @@ use Thunder\Shortcode\Syntax\SyntaxInterface;
  *
  * @author Andy Miller
  *
- * @psalm-type TarsNode = array{
+ * @psalm-type HybridNode = array{
  *     0: string, 1: string, 2: string|null, 3: int, 4: int, 5: int,
  *     6: int|null, 7: bool, 8: int|null, 9: int|null, 10: bool
  * }
  */
-final class TarsParser implements ParserInterface
+final class HybridParser implements ParserInterface
 {
     /** @var non-empty-string */
     private $tagRegex;
@@ -99,7 +99,7 @@ final class TarsParser implements ParserInterface
         $lastByte = 0;
         $lastChar = 0;
 
-        /** @psalm-var list<TarsNode> $nodes */
+        /** @psalm-var list<HybridNode> $nodes */
         $nodes = array();
         /** @psalm-var list<int> $stack */
         $stack = array();
@@ -176,7 +176,7 @@ final class TarsParser implements ParserInterface
     }
 
     /**
-     * @psalm-param array<int, TarsNode> $nodes
+     * @psalm-param array<int, HybridNode> $nodes
      * @param string $text
      *
      * @return ParsedShortcode[]
