@@ -113,6 +113,19 @@ class ShortcodeFacade
     }
 
     /**
+     * @param callable $handler
+     * @psalm-param callable(ShortcodeInterface):string $handler
+     *
+     * @return $this
+     */
+    public function setDefaultHandler($handler)
+    {
+        $this->handlers->setDefault($handler);
+
+        return $this;
+    }
+
+    /**
      * @param string $name
      * @psalm-param callable(ShortcodeInterface):string $handler
      *
