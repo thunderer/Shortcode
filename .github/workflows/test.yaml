@@ -42,7 +42,7 @@ jobs:
       - name: 'Psalm'
         run: |
           composer remove --dev -W 'phpunit/phpunit'
-          composer require --dev -W 'vimeo/psalm=>=5.0' 'nikic/php-parser=>=4.0'
+          composer require --dev -W 'vimeo/psalm=>=5.0 <7.0' 'nikic/php-parser=>=4.0'
           php vendor/bin/psalm --shepherd --php-version=${{ matrix.php }}
         continue-on-error: '${{ matrix.failure }}'
 

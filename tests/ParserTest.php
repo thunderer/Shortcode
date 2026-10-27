@@ -101,6 +101,16 @@ final class ParserTest extends AbstractTestCase
         $this->assertShortcodes($parser->parse($code), $expected);
     }
 
+    public function testParsersEndValuesAtSyntaxSeparator()
+    {
+        $syntax = new Syntax('@', '#', '!', '&', '~');
+        foreach(array(new RegexParser($syntax), new RegularParser($syntax), new StackParser($syntax), new HybridParser($syntax)) as $parser) {
+            $this->assertShortcodes($parser->parse('@a&c=d b&e=f#x@!a# @b x&y&z#'), array(
+                new ParsedShortcode(new Shortcode('a', array('b' => 'e=f'), 'x', 'c=d'), '@a&c=d b&e=f#x@!a#', 0),
+            ));
+        }
+    }
+
     private function assertShortcodes(array $actual, array $expected)
     {
         $count = count($actual);
