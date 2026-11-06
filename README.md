@@ -31,7 +31,7 @@ Each part is described in the dedicated section in this document.
 
 ## Installation
 
-There are no required dependencies and all PHP versions from 5.3 up to latest 8.x [are tested](https://github.com/thunderer/Shortcode/actions/workflows/test.yaml) and supported. This library is available on Composer/Packagist as `thunderer/shortcode`, to install it execute:
+There are no required dependencies and all PHP versions from 5.3 up to latest 8.x are tested ([5.3-7.3](https://github.com/thunderer/Shortcode/actions/workflows/test-old.yaml), [7.4+](https://github.com/thunderer/Shortcode/actions/workflows/test.yaml)) and supported. This library is available on Composer/Packagist as `thunderer/shortcode`, to install it execute:
 
 ```
 composer require thunderer/shortcode=^0.7
@@ -119,8 +119,8 @@ Both result in:
 
 `Processor` has several configuration options available as `with*()` methods which return the new, changed instance to keep the object immutable.
 
-- `withRecursionDepth($depth)` controls the nesting level - how many levels of shortcodes are actually processed. If this limit is reached, all shortcodes deeper than level are ignored. If the `$depth` value is null (default value), nesting level is not checked, if it's zero then nesting is disabled (only topmost shortcodes are processed). Any integer greater than zero sets the nesting level limit,
-- `withMaxIterations($iterations)` controls the number of iterations that the source text is processed in. This means that source text is processed internally that number of times until the limit was reached or there are no shortcodes left. If the `$iterations` parameter value is null, there is no iterations limit, any integer greater than zero sets the limit. Defaults to one iteration,
+- `withRecursionDepth($depth)` controls the nesting level - how many levels of shortcodes are actually processed. If this limit is reached, all shortcodes deeper than that level are ignored. If the `$depth` value is null (default value), nesting level is not checked, if it's zero then nesting is disabled (only topmost shortcodes are processed). Any integer greater than zero sets the nesting level limit,
+- `withMaxIterations($iterations)` controls the number of iterations that the source text is processed in. This means that source text is processed internally that number of times until the limit is reached or there are no shortcodes left. If the `$iterations` parameter value is null, there is no iterations limit, any integer greater than zero sets the limit. Defaults to one iteration,
 - `withAutoProcessContent($flag)` controls automatic processing of shortcode's content before calling its handler. If the `$flag` parameter is `true` then handler receives shortcode with already processed content, if `false` then handler must process nested shortcodes itself (or leave them for the remaining iterations). This is turned on by default,
 - `withEventContainer($events)` registers event container which provides handlers for all the events fired at various stages of processing text. Read more about events in the section dedicated to them.
 
@@ -133,8 +133,8 @@ If processor was configured with events container there are several possibilitie
 
 There are several ready to use event handlers in the `Thunder\Shortcode\EventHandler` namespace:
 
-- `FilterRawEventHandler` implements `FilterShortcodesEvent` and allows to implement any number of "raw" shortcodes whose content is not processed,
-- `ReplaceJoinEventHandler` implements `ReplaceShortcodesEvent` and provides the mechanism to apply shortcode replacements by discarding text and returning just replacements.
+- `FilterRawEventHandler` handles `FilterShortcodesEvent` and allows to implement any number of "raw" shortcodes whose content is not processed,
+- `ReplaceJoinEventHandler` handles `ReplaceShortcodesEvent` and provides the mechanism to apply shortcode replacements by discarding text and returning just replacements.
 
 The example below shows how to manually implement a `[raw]` shortcode that returns its verbatim content without calling any handler for nested shortcodes:
 
@@ -195,7 +195,7 @@ assert('n true  [n /] ' === $facade->process('[n /] [c]true[/c] [raw] [n /] [/ra
 
 This section discusses available shortcode parsers. Regardless of the parser that you will choose, remember that:
 
-- shortcode names can be only aplhanumeric characters and dash `-`, basically must conform to the `[a-zA-Z0-9-]+` regular expression,
+- shortcode names can be only alphanumeric characters, underscore `_`, asterisk `*` and dash `-`, basically must conform to the `[a-zA-Z0-9_*-]+` regular expression,
 - unsupported shortcodes (no registered handler or default handler) will be ignored and left as they are,
 - mismatching closing shortcode (`[code]content[/codex]`) will be ignored, opening tag will be interpreted as self-closing shortcode, eg. `[code /]`,
 - overlapping shortcodes (`[code]content[inner][/code]content[/inner]`) will be interpreted as self-closing, eg. `[code]content[inner /][/code]`, second closing tag will be ignored,
@@ -271,7 +271,7 @@ assert('a STRING z' === $differentRegular->process('a @up#string@!up# z'));
 
 ## Serialization
 
-This library supports several (un)serialization formats - XML, YAML, JSON and Text. Examples below shows how to both serialize and unserialize the same shortcode in each format:
+This library supports several (un)serialization formats - XML, YAML, JSON and Text. Examples below show how to both serialize and unserialize the same shortcode in each format:
 
 ```php
 use Thunder\Shortcode\Serializer\JsonSerializer;
@@ -376,13 +376,13 @@ There are several builtin shortcode handlers available in `Thunder\Shortcode\Han
 - `ContentHandler` always returns shortcode's content. It discards its opening and closing tag. `[xyz]code[/xyz]` becomes `code`,
 - `RawHandler` returns unprocessed shortcode content. Its behavior is different than `FilterRawEventHandler` because if content auto processing is turned on, then nested shortcodes handlers were called, just their result was discarded,
 - `NullHandler` completely removes shortcode with all nested shortcodes,
-- `DeclareHandler` allows to dynamically create shortcode handler with name as first parameter that will also replace all placeholders in text passed as arguments. Example: `[declare xyz]Your age is %age%.[/declare]` created handler for shortcode `xyz` and when used like `[xyz age=18]` the result is `Your age is 18.`,
+- `DeclareHandler` allows to dynamically create shortcode handler with name as first parameter that will also replace all placeholders in text passed as arguments. Example: `[declare xyz]Your age is %age%.[/declare]` creates handler for shortcode `xyz` and when used like `[xyz age=18]` the result is `Your age is 18.`,
 - `EmailHandler` replaces the email address or shortcode content as clickable `mailto:` link:
-  - `[xyz="email@example.com" /]` becomes `<a href="email@example.com">email@example.com</a>`,
-  - `[xyz]email@example.com[/xyz]` becomes `<a href="email@example.com">email@example.com</a>`,
-  - `[xyz="email@example.com"]Contact me![/xyz]` becomes `<a href="email@example.com">Contact me!</a>`,
+  - `[xyz="email@example.com" /]` becomes `<a href="mailto:email@example.com">email@example.com</a>`,
+  - `[xyz]email@example.com[/xyz]` becomes `<a href="mailto:email@example.com">email@example.com</a>`,
+  - `[xyz="email@example.com"]Contact me![/xyz]` becomes `<a href="mailto:email@example.com">Contact me!</a>`,
 - `PlaceholderHandler` replaces all placeholders in shortcode's content with values of passed arguments. `[xyz year=1970]News from year %year%.[/xyz]` becomes `News from year 1970.`,
-- `SerializerHandler` replaces shortcode with its serialized value using serializer passed as an argument in class' constructor. If configured with `JsonSerializer`, `[xyz /]` becomes `{"name":"json", "arguments": [], "content": null, "bbCode": null}`. This could be useful for debugging your shortcodes,
+- `SerializerHandler` replaces shortcode with its serialized value using serializer passed as an argument in class' constructor. If configured with `JsonSerializer`, `[xyz /]` becomes `{"name":"xyz","parameters":[],"content":null,"bbCode":null}`. This could be useful for debugging your shortcodes,
 - `UrlHandler` replaces its content with a clickable link:
   - `[xyz]http://example.com[/xyz]` becomes `<a href="http://example.com">http://example.com</a>`,
   - `[xyz="http://example.com"]Visit my site![/xyz]` becomes `<a href="http://example.com">Visit my site!</a>`,
@@ -390,7 +390,7 @@ There are several builtin shortcode handlers available in `Thunder\Shortcode\Han
 
 ## Contributing
 
-Want to contribute? Perfect! Submit an issue or Pull Request and explain what would you like to see in this library.
+Want to contribute? Perfect! Submit an issue or Pull Request and explain what you would like to see in this library.
 
 ## License
 
