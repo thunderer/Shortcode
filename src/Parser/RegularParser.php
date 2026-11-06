@@ -402,7 +402,7 @@ final class RegularParser implements ParserInterface
                 $quote($syntax->getParameterValueDelimiter()),
                 '\\\\',
                 '\s+',
-            )).').)+)',
+            )).').)++)',
             '(?<ws>\s+)',
             $group($syntax->getClosingTagMarker(), 'marker'),
             $group($syntax->getParameterValueDelimiter(), 'delimiter'),

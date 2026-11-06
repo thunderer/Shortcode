@@ -333,6 +333,17 @@ final class ParserTest extends AbstractTestCase
         ));
     }
 
+    public function testParsersHandleLongUnbrokenText()
+    {
+        $text = '[a]x[/a] '.str_repeat('Q', 50000).' [b /]';
+        foreach(array(new RegularParser(), new HybridParser(), new RegexParser(), new WordpressParser()) as $parser) {
+            $this->assertShortcodes($parser->parse($text), array(
+                new ParsedShortcode(new Shortcode('a', array(), 'x', null), '[a]x[/a]', 0),
+                new ParsedShortcode(new Shortcode('b', array(), null, null), '[b /]', 50010),
+            ));
+        }
+    }
+
     public function testWordpressInvalidNamesException()
     {
         $this->willThrowException('InvalidArgumentException');
