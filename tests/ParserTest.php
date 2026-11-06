@@ -45,6 +45,18 @@ final class ParserTest extends AbstractTestCase
         }
     }
 
+    public function testParsersHandleLongRunsOfEscapes()
+    {
+        $value = str_repeat('a\\x', 9000);
+        $text = '[a k='.$value.']x[/a] [b /]';
+        foreach(array(new RegularParser(), new HybridParser()) as $parser) {
+            $this->assertShortcodes($parser->parse($text), array(
+                new ParsedShortcode(new Shortcode('a', array('k' => $value), 'x', null), '[a k='.$value.']x[/a]', 0),
+                new ParsedShortcode(new Shortcode('b', array(), null, null), '[b /]', 27012),
+            ));
+        }
+    }
+
     public static function provideShortcodes()
     {
         $s = new CommonSyntax();

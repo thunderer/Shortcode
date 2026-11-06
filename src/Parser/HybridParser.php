@@ -60,7 +60,7 @@ final class HybridParser implements ParserInterface
         $stringToken = '(?:\\\\.|(?:'.$notSpecial.'[^\s\\\\])++)';
         // a value globs consecutive string tokens; atomic so the lexer commits like
         // RegularParser instead of backtracking into a different tokenization
-        $stringRun = '(?>'.$stringToken.'+)';
+        $stringRun = '(?>'.$stringToken.'++)';
         // a delimited value; the body is possessive so an escape sequence is never
         // given back to let the value re-close at an earlier (escaped) delimiter
         $quoted = $delimiter.'(?:\\\\.|(?!'.$delimiter.').)*+'.$delimiter;
