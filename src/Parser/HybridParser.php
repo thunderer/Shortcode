@@ -108,6 +108,7 @@ final class HybridParser implements ParserInterface
         /** @psalm-var list<int> $stack */
         $stack = array();
         $depth = 0;
+        $openNames = array();
         // @mago-expect analysis:mismatched-array-index
         $closeNames = $matches['cname'];
         // @mago-expect analysis:mismatched-array-index
@@ -134,12 +135,17 @@ final class HybridParser implements ParserInterface
                     continue;
                 }
                 for($stackIndex = $depth - 1; $stackIndex >= 0; $stackIndex--) {
+                    if(!isset($openNames[$closeName]) || 0 === $openNames[$closeName]) {
+                        break;
+                    }
                     $nodeIndex = $stack[$stackIndex];
                     if($nodes[$nodeIndex][0] === $closeName) {
                         $nodes[$nodeIndex][7] = true;        // closed
                         $nodes[$nodeIndex][8] = $byteStart;  // closeStart
                         $nodes[$nodeIndex][9] = $byteEnd;     // closeEnd
-                        $stack = array_slice($stack, 0, $stackIndex);
+                        for($pop = $stackIndex; $pop < $depth; $pop++) {
+                            $openNames[$nodes[$stack[$pop]][0]]--;
+                        }
                         $depth = $stackIndex;
                         break;
                     }
@@ -185,6 +191,8 @@ final class HybridParser implements ParserInterface
 
             if(false === $selfClosing) {
                 $stack[$depth++] = count($nodes) - 1;
+                $openName = $names[$index][0];
+                $openNames[$openName] = isset($openNames[$openName]) ? $openNames[$openName] + 1 : 1;
             }
         }
 

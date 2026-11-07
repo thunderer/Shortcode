@@ -277,6 +277,29 @@ final class ParserTest extends AbstractTestCase
         return $result;
     }
 
+    public function testHybridParserMatchesRegularParserOnUnbalancedTags()
+    {
+        $inputs = array(
+            '[/x][a][/b]x[/a][/a][/c]',
+            '[a][b][c][d]x[/a][/d][/c][/b]',
+            '[a][b][c][/a][b][c][/c][/b][/a]',
+            '[a][b][/b][c][/a][c][/c][b][/b]',
+            '[a][a][a][/a][/a][/a][/a]',
+            '[a][b][a][b][/a][/b][/a][/b]',
+            '[0][0][/0][1][/0][/1][/0]',
+            '[a][a /][/a][a /][/a]',
+            str_repeat('[a][b]', 100).str_repeat('[/c][/a]', 100),
+            str_repeat('[a][b][c]', 50).str_repeat('[/b][c]', 50).str_repeat('[/c][/a]', 50),
+            str_repeat('[x][y][/x]', 100).str_repeat('[/y]', 100),
+        );
+
+        $regular = new RegularParser();
+        $hybrid = new HybridParser();
+        foreach($inputs as $input) {
+            $this->assertShortcodes($hybrid->parse($input), $regular->parse($input));
+        }
+    }
+
     public function testIssue77()
     {
         // HybridParser must reproduce RegularParser's backtracking behaviour exactly
