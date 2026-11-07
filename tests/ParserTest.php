@@ -397,4 +397,15 @@ final class ParserTest extends AbstractTestCase
         static::assertInstanceOf('Thunder\Shortcode\Parser\HybridParser', new HybridParser());
         static::assertInstanceOf('Thunder\Shortcode\Parser\RegularParser', new RegularParser());
     }
+
+    public function testParsersEndNamesAtSyntaxTokens()
+    {
+        $syntax = new Syntax('(', ')', '*', '=', '"');
+        foreach(array(new RegularParser($syntax), new HybridParser($syntax)) as $parser) {
+            $this->assertShortcodes($parser->parse('(a*) (b)x(*b) (c*d)'), array(
+                new ParsedShortcode(new Shortcode('a', array(), null, null), '(a*)', 0),
+                new ParsedShortcode(new Shortcode('b', array(), 'x', null), '(b)x(*b)', 5),
+            ));
+        }
+    }
 }
