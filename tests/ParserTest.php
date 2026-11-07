@@ -293,6 +293,19 @@ final class ParserTest extends AbstractTestCase
         }
     }
 
+    public function testHybridParserSkipsEscapedTags()
+    {
+        foreach(array(new RegularParser(), new HybridParser()) as $parser) {
+            $this->assertShortcodes($parser->parse('\\[a] [b]'), array(
+                new ParsedShortcode(new Shortcode('b', array(), null, null), '[b]', 5),
+            ));
+
+            $this->assertShortcodes($parser->parse('[a]\\[/a][/a]'), array(
+                new ParsedShortcode(new Shortcode('a', array(), '\\[/a]', null), '[a]\\[/a][/a]', 0),
+            ));
+        }
+    }
+
     public function testIssue119()
     {
         $cases = array(

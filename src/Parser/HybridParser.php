@@ -78,7 +78,7 @@ final class HybridParser implements ParserInterface
         $closingTagRule = $openTag.$space.$marker.$space.'(?<cname>'.$name.')'.$space.$closeTag;
         $openingTagRule = $openTag.$space.'(?<name>'.$name.')'.$boundary.$space.$bbCode.$parameters.$space.'(?<self>'.$marker.')?'.$space.$closeTag;
 
-        $this->tagRegex = '~(?:'.$closingTagRule.'|'.$openingTagRule.')~us';
+        $this->tagRegex = '~\\\\.(*SKIP)(*FAIL)|(?:'.$closingTagRule.'|'.$openingTagRule.')~us';
         $this->paramRegex = '~'.$space.'(?<pn>'.$stringToken.')(?:'.$space.$separator.$space.'(?<pv>'.$value.'))?~us';
     }
 
