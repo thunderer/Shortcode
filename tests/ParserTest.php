@@ -314,6 +314,22 @@ final class ParserTest extends AbstractTestCase
         }
     }
 
+    public function testRegularParserRestoresXdebugNestingLevelOnException()
+    {
+        $level = ini_get('xdebug.max_nesting_level');
+        $parser = new RegularParser();
+        $exception = null;
+
+        try {
+            $parser->parse("[a]\xff[/a]");
+        } catch(\RuntimeException $e) {
+            $exception = $e;
+        }
+
+        $this->assertInstanceOf('RuntimeException', $exception);
+        $this->assertSame($level, ini_get('xdebug.max_nesting_level'));
+    }
+
     public function testWordPress()
     {
         $parser = new WordpressParser();
