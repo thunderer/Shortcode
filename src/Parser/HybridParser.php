@@ -69,7 +69,7 @@ final class HybridParser implements ParserInterface
         $quoted = $delimiter.'(?:\\\\.|(?!'.$delimiter.').)*+'.$delimiter;
         $value = '(?>'.$quoted.'|'.$stringRun.')';
         // shortcode name; must end on a token boundary so `[foo.bar]` is rejected wholesale
-        $name = '[a-zA-Z0-9_*-]+';
+        $name = '(?:'.$notSpecial.'[a-zA-Z0-9_*-])++';
         $boundary = '(?=\s|'.$special.'|$)';
         // a parameter name is a single string token, not a glued run
         $parameters = '(?<params>(?:'.$space.$stringToken.'(?:'.$space.$separator.$space.$value.')?)*+)';
