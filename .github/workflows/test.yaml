@@ -19,8 +19,6 @@ jobs:
     steps:
       - name: 'Checkout'
         uses: 'actions/checkout@v4'
-        with:
-          fetch-depth: 0
       - name: 'Install PHP'
         uses: 'shivammathur/setup-php@v2'
         with:
@@ -47,18 +45,26 @@ jobs:
           composer require --dev -W 'vimeo/psalm=>=5.0' 'nikic/php-parser=>=4.0'
           php vendor/bin/psalm --shepherd --php-version=${{ matrix.php }}
         continue-on-error: '${{ matrix.failure }}'
+
+  infection:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@v4'
+        with:
+          fetch-depth: 0
+      - name: 'Install PHP'
+        uses: 'shivammathur/setup-php@v2'
+        with:
+          php-version: '8.5'
+          tools: 'composer:v2'
+          coverage: 'xdebug'
       - name: 'Infection'
         run: |
-          composer remove --dev -W 'vimeo/psalm'
-          composer require --dev -W phpunit/phpunit infection/infection
+          composer require --dev -W infection/infection
           DIFF="${BASE_REF:+--git-diff-lines --git-diff-base=origin/$BASE_REF}"
-          if php -r 'exit((int)(version_compare(PHP_VERSION, "8.3", ">=") === false));'; then
-            docker create --name mago ghcr.io/carthage-software/mago:1.59.0
-            docker cp mago:/usr/local/bin/mago vendor/bin/mago
-            php vendor/bin/infection --static-analysis-tool=mago $DIFF
-          else
-            php vendor/bin/infection $DIFF
-          fi
+          docker create --name mago ghcr.io/carthage-software/mago:1.59.0
+          docker cp mago:/usr/local/bin/mago vendor/bin/mago
+          php vendor/bin/infection --static-analysis-tool=mago $DIFF
         env:
           BASE_REF: '${{ github.base_ref }}'
-        continue-on-error: '${{ matrix.failure }}'
