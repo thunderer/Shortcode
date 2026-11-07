@@ -1,0 +1,52 @@
+php-version = "8.0"
+
+[source]
+paths = ["src"]
+includes = ["vendor"]
+
+[linter]
+minimum-fail-level = "note"
+
+[linter.rules]
+array-style = { style = "long" }
+cyclomatic-complexity = { exclude = ["src/Parser/HybridParser.php", "src/Parser/RegexParser.php", "src/Parser/RegularParser.php", "src/Parser/WordpressParser.php", "src/Processor/Processor.php"] }
+halstead = { exclude = ["src/Parser/HybridParser.php", "src/Parser/RegularParser.php", "src/Processor/Processor.php", "src/Utility/RegexBuilderUtility.php"] }
+literal-named-argument = { enabled = false }
+no-else-clause = { exclude = ["src/Parser/HybridParser.php", "src/Parser/WordpressParser.php"] }
+no-empty = { exclude = ["src/Handler/DeclareHandler.php", "src/HandlerContainer/HandlerContainer.php", "src/Parser/RegularParser.php", "src/Parser/WordpressParser.php", "src/Serializer/TextSerializer.php"] }
+no-isset = { exclude = ["src/Parser/HybridParser.php", "src/Parser/RegexParser.php", "src/Parser/WordpressParser.php"] }
+no-redundant-block = { exclude = ["src/Parser/RegularParser.php"] }
+no-shorthand-ternary = { exclude = ["src/Parser/HybridParser.php", "src/Parser/RegexParser.php", "src/Parser/RegularParser.php", "src/Parser/WordpressParser.php", "src/Serializer/TextSerializer.php"] }
+prefer-arrow-function = { enabled = false }
+prefer-static-closure = { enabled = false }
+str-contains = { enabled = false }
+strict-behavior = { enabled = false }
+strict-types = { enabled = false }
+too-many-methods = { exclude = ["src/Parser/RegularParser.php", "src/Processor/Processor.php", "src/ShortcodeFacade.php"] }
+
+[analyzer]
+minimum-fail-level = "note"
+ignore = [
+    { code = "falsable-return-statement", in = ["src/Serializer/JsonSerializer.php", "src/Serializer/XmlSerializer.php"] },
+    { code = "impossible-condition", in = ["src/Event/FilterShortcodesEvent.php", "src/Event/ReplaceShortcodesEvent.php", "src/Parser/HybridParser.php", "src/Parser/RegexParser.php", "src/Parser/RegularParser.php", "src/Parser/WordpressParser.php", "src/Processor/Processor.php", "src/Serializer/JsonSerializer.php", "src/Serializer/TextSerializer.php", "src/Serializer/YamlSerializer.php", "src/Shortcode/Shortcode.php"] },
+    { code = "invalid-method-access", in = ["src/Serializer/XmlSerializer.php"] },
+    { code = "invalid-operand", in = ["src/Parser/HybridParser.php", "src/Parser/RegexParser.php", "src/Parser/WordpressParser.php", "src/Processor/Processor.php"] },
+    { code = "invalid-property-assignment-value", in = ["src/Parser/HybridParser.php", "src/Parser/RegularParser.php"] },
+    { code = "invalid-return-statement", in = ["src/Serializer/JsonSerializer.php", "src/Serializer/XmlSerializer.php"] },
+    { code = "mismatched-array-index", in = ["src/Parser/HybridParser.php"] },
+    { code = "mixed-argument", in = ["src/Parser/HybridParser.php", "src/Parser/RegexParser.php", "src/Parser/WordpressParser.php", "src/Serializer/XmlSerializer.php"] },
+    { code = "mixed-assignment", in = ["src/EventHandler/FilterRawEventHandler.php", "src/EventHandler/ReplaceJoinEventHandler.php", "src/Parser/HybridParser.php", "src/Serializer/XmlSerializer.php"] },
+    { code = "mixed-method-access", in = ["src/Serializer/XmlSerializer.php"] },
+    { code = "mixed-property-access", in = ["src/Serializer/XmlSerializer.php"] },
+    { code = "possibly-false-argument", in = ["src/Serializer/XmlSerializer.php"] },
+    { code = "possibly-invalid-argument", in = ["src/Parser/HybridParser.php", "src/Parser/RegexParser.php", "src/Parser/RegularParser.php", "src/Parser/WordpressParser.php"] },
+    { code = "possibly-invalid-operand", in = ["src/Parser/HybridParser.php", "src/Parser/RegexParser.php", "src/Parser/WordpressParser.php"] },
+    { code = "possibly-null-argument", in = ["src/HandlerContainer/HandlerContainer.php", "src/Parser/WordpressParser.php"] },
+    { code = "possibly-null-operand", in = ["src/Parser/HybridParser.php", "src/Parser/RegularParser.php"] },
+    { code = "redundant-comparison", in = ["src/Event/FilterShortcodesEvent.php", "src/Event/ReplaceShortcodesEvent.php", "src/Parser/HybridParser.php", "src/Parser/RegexParser.php", "src/Parser/RegularParser.php", "src/Parser/WordpressParser.php", "src/Processor/Processor.php", "src/Serializer/TextSerializer.php", "src/Shortcode/Shortcode.php"] },
+    { code = "redundant-condition", in = ["src/Parser/RegexParser.php", "src/Parser/WordpressParser.php", "src/Serializer/XmlSerializer.php"] },
+    { code = "redundant-logical-operation", in = ["src/Event/FilterShortcodesEvent.php", "src/Event/ReplaceShortcodesEvent.php", "src/Parser/HybridParser.php", "src/Parser/RegexParser.php", "src/Parser/RegularParser.php", "src/Processor/Processor.php", "src/Serializer/TextSerializer.php", "src/Serializer/XmlSerializer.php", "src/Shortcode/Shortcode.php"] },
+    { code = "redundant-type-comparison", in = ["src/HandlerContainer/HandlerContainer.php", "src/Parser/WordpressParser.php", "src/Processor/Processor.php", "src/Serializer/JsonSerializer.php", "src/Serializer/YamlSerializer.php", "src/Shortcode/Shortcode.php"] },
+    { code = "reference-constraint-violation", in = ["src/Parser/RegularParser.php"] },
+    { code = "reference-to-undefined-variable", in = ["src/Parser/HybridParser.php", "src/Parser/RegexParser.php", "src/Parser/RegularParser.php", "src/Parser/WordpressParser.php"] },
+]

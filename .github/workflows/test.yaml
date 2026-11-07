@@ -34,6 +34,11 @@ jobs:
       - name: 'PHPUnit'
         run: 'php vendor/bin/phpunit --coverage-text'
         continue-on-error: '${{ matrix.failure }}'
+      - name: 'Mago'
+        run: |
+          docker run --rm -v "$PWD:/app" -w /app ghcr.io/carthage-software/mago:1.59.0 lint
+          docker run --rm -v "$PWD:/app" -w /app ghcr.io/carthage-software/mago:1.59.0 analyze
+        continue-on-error: '${{ matrix.failure }}'
       - name: 'Psalm'
         run: |
           composer remove --dev -W 'phpunit/phpunit'

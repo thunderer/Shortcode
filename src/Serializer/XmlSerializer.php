@@ -96,6 +96,7 @@ final class XmlSerializer implements SerializerInterface
 
         $parameters = array();
         $elements = $xpath->query('/shortcode/parameters/parameter');
+        // @mago-expect analysis:mixed-operand
         for($i = 0; $i < $elements->length; $i++) {
             $node = $elements->item($i);
 
@@ -103,6 +104,7 @@ final class XmlSerializer implements SerializerInterface
             $parameters[$this->getAttribute($node, 'name')] = $node->hasChildNodes() ? $node->nodeValue : null;
         }
 
+        // @mago-expect analysis:less-specific-nested-argument-type
         return new Shortcode($name, $parameters, $content, $bbCode);
     }
 
@@ -114,7 +116,9 @@ final class XmlSerializer implements SerializerInterface
     private function getValue(\DOMNodeList $node)
     {
         /** @psalm-suppress PossiblyNullReference,PossiblyNullPropertyFetch */
+        // @mago-expect analysis:possible-method-access-on-null, analysis:non-existent-method
         return $node->length === 1 && $node->item(0)->hasChildNodes()
+            // @mago-expect analysis:possibly-null-property-access
             ? $node->item(0)->nodeValue
             : null;
     }
@@ -131,6 +135,7 @@ final class XmlSerializer implements SerializerInterface
          * @var \DOMNode $attribute
          * @psalm-suppress NullReference
          */
+        // @mago-expect analysis:possible-method-access-on-null
         $attribute = $node->attributes->getNamedItem($name);
 
         /** @psalm-suppress DocblockTypeContradiction,RiskyTruthyFalsyComparison */

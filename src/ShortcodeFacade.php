@@ -69,6 +69,7 @@ class ShortcodeFacade
         $self = new self();
 
         /** @psalm-suppress PropertyTypeCoercion */
+        // @mago-expect analysis:property-type-coercion
         $self->handlers = $handlers;
         $self->syntax = $syntax;
         $self->rebuildProcessor();

@@ -58,3 +58,6 @@ qa-psalm:
 	${PHP} php vendor/bin/psalm --no-cache
 qa-psalm-suppressed:
 	grep -rn psalm-suppress src
+qa-mago:
+	docker run --rm -v "$(CURDIR):/app" -w /app ghcr.io/carthage-software/mago:1.59.0 lint
+	docker run --rm -v "$(CURDIR):/app" -w /app ghcr.io/carthage-software/mago:1.59.0 analyze

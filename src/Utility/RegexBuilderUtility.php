@@ -90,7 +90,9 @@ final class RegexBuilderUtility
      */
     private static function quote($text)
     {
+        // @mago-expect analysis:redundant-docblock-type
         /** @var non-empty-string $quoted */
+        // @mago-expect lint:inline-variable-return
         $quoted = preg_quote($text, '~');
 
         return $quoted;

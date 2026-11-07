@@ -12,6 +12,7 @@ use Thunder\Shortcode\Utility\RegexBuilderUtility;
  * @psalm-suppress PossiblyUndefinedArrayOffset
  * @psalm-suppress PossiblyUndefinedVariable
  */
+// @mago-expect lint:kan-defect
 final class RegularParser implements ParserInterface
 {
     /** @var non-empty-string */
@@ -55,6 +56,7 @@ final class RegularParser implements ParserInterface
      */
     public function parse($text)
     {
+        // @mago-expect lint:no-ini-set
         $nestingLevel = ini_set('xdebug.max_nesting_level', '-1');
         $this->tokens = $this->tokenize($text);
         $this->backtracks = array();
@@ -82,6 +84,7 @@ final class RegularParser implements ParserInterface
             }
         }
         /** @psalm-suppress PossiblyFalseArgument */
+        // @mago-expect lint:no-ini-set
         ini_set('xdebug.max_nesting_level', $nestingLevel);
 
         return $shortcodes;
@@ -97,6 +100,7 @@ final class RegularParser implements ParserInterface
      *
      * @return ParsedShortcode
      */
+    // @mago-expect lint:excessive-parameter-list
     private function getObject($name, $parameters, $bbCode, $offset, $content, $text)
     {
         return new ParsedShortcode(new Shortcode($name, $parameters, $content, $bbCode), $text, $offset);
@@ -104,6 +108,7 @@ final class RegularParser implements ParserInterface
 
     /* --- RULES ----------------------------------------------------------- */
 
+    // @mago-expect lint:tagged-fixme
     /**
      * @param string[] $names
      * @psalm-param list<string> $names
@@ -164,6 +169,7 @@ final class RegularParser implements ParserInterface
             $this->backtrack();
 
             $this->beginBacktrack();
+            // @mago-expect analysis:conflicting-reference-constraint
             if(false !== ($closingName = $this->close($names))) {
                 $this->backtrack();
                 $shortcodes = array();
@@ -275,6 +281,7 @@ final class RegularParser implements ParserInterface
         /** @psalm-suppress PossiblyNullOperand */
         for($i = $position; $i < $this->position; $i++) {
             /** @psalm-suppress PossiblyNullArrayOffset */
+            // @mago-expect analysis:possibly-null-array-index
             $backtrack .= $this->tokens[$i][1];
         }
 
@@ -298,6 +305,7 @@ final class RegularParser implements ParserInterface
         /** @psalm-suppress PossiblyNullOperand */
         for($i = $position; $i < $this->lastBacktrack; $i++) {
             /** @psalm-suppress PossiblyNullArrayOffset */
+            // @mago-expect analysis:possibly-null-array-index
             $backtrack .= $this->tokens[$i][1];
         }
         /** @psalm-suppress PossiblyNullPropertyAssignmentValue */
@@ -383,6 +391,7 @@ final class RegularParser implements ParserInterface
     /** @return non-empty-string */
     private function prepareLexer(SyntaxInterface $syntax)
     {
+        // @mago-expect lint:tagged-fixme
         // FIXME: for some reason Psalm does not understand the `@psalm-var callable() $var` annotation
         /** @psalm-suppress MissingClosureParamType,MissingClosureReturnType,PossiblyNullOperand */
         $group = function($text, $group) {
