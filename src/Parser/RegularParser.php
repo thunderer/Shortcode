@@ -57,9 +57,9 @@ final class RegularParser implements ParserInterface
      */
     public function parse($text)
     {
+        $this->tokens = $this->tokenize($text);
         // @mago-expect lint:no-ini-set
         $nestingLevel = ini_set('xdebug.max_nesting_level', '-1');
-        $this->tokens = $this->tokenize($text);
         $this->backtracks = array();
         $this->lastBacktrack = 0;
         $this->position = 0;
