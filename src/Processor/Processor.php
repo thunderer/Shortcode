@@ -92,6 +92,7 @@ final class Processor implements ProcessorInterface
      */
     private function processIteration($text, ProcessorContext $context, $parent = null)
     {
+        // @mago-expect analysis:redundant-comparison, analysis:redundant-logical-operation, analysis:impossible-condition
         if(null !== $parent && false === $parent instanceof ProcessedShortcode) {
             throw new \LogicException('Parameter $parent must be an instance of ProcessedShortcode.');
         }
@@ -105,6 +106,7 @@ final class Processor implements ProcessorInterface
         $this->dispatchEvent(Events::FILTER_SHORTCODES, $filterEvent);
         $shortcodes = $filterEvent->getShortcodes();
         $replaces = array();
+        // @mago-expect analysis:invalid-operand
         $baseOffset = $parent && $shortcodes
             ? (int)mb_strpos($parent->getShortcodeText(), $shortcodes[0]->getText(), 0, 'utf-8') - $shortcodes[0]->getOffset() + $parent->getOffset()
             : 0;
@@ -219,6 +221,7 @@ final class Processor implements ProcessorInterface
     public function withRecursionDepth($depth)
     {
         /** @psalm-suppress DocblockTypeContradiction */
+        // @mago-expect analysis:redundant-type-comparison, analysis:redundant-logical-operation
         if (null !== $depth && !(is_int($depth) && $depth >= 0)) {
             $msg = 'Recursion depth must be null (infinite) or integer >= 0!';
             throw new \InvalidArgumentException($msg);
@@ -243,6 +246,7 @@ final class Processor implements ProcessorInterface
     public function withMaxIterations($iterations)
     {
         /** @psalm-suppress DocblockTypeContradiction */
+        // @mago-expect analysis:redundant-type-comparison, analysis:redundant-logical-operation
         if (null !== $iterations && !(is_int($iterations) && $iterations > 0)) {
             $msg = 'Maximum number of iterations must be null (infinite) or integer > 0!';
             throw new \InvalidArgumentException($msg);
@@ -266,6 +270,7 @@ final class Processor implements ProcessorInterface
     public function withAutoProcessContent($flag)
     {
         /** @psalm-suppress DocblockTypeContradiction */
+        // @mago-expect analysis:redundant-type-comparison, analysis:impossible-condition
         if (!is_bool($flag)) {
             $msg = 'Auto processing flag must be a boolean value!';
             throw new \InvalidArgumentException($msg);

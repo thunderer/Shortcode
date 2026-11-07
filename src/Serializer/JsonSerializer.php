@@ -13,6 +13,7 @@ final class JsonSerializer implements SerializerInterface
 {
     public function serialize(ShortcodeInterface $shortcode)
     {
+        // @mago-expect analysis:falsable-return-statement, analysis:invalid-return-statement
         return json_encode(array(
             'name' => $shortcode->getName(),
             'parameters' => $shortcode->getParameters(),
@@ -45,6 +46,7 @@ final class JsonSerializer implements SerializerInterface
         $bbCode = array_key_exists('bbCode', $data) ? $data['bbCode'] : null;
 
         /** @psalm-suppress DocblockTypeContradiction */
+        // @mago-expect analysis:redundant-type-comparison, analysis:impossible-condition
         if(!is_array($parameters)) {
             throw new \InvalidArgumentException('Parameters must be an array!');
         }

@@ -16,12 +16,14 @@ final class Shortcode extends AbstractShortcode implements ShortcodeInterface
     public function __construct($name, array $parameters, $content, $bbCode = null)
     {
         /** @psalm-suppress RedundantConditionGivenDocblockType, DocblockTypeContradiction */
+        // @mago-expect analysis:redundant-type-comparison, analysis:redundant-comparison, analysis:redundant-logical-operation
         if(false === is_string($name) || '' === $name) {
             throw new \InvalidArgumentException('Shortcode name must be a non-empty string!');
         }
 
         foreach($parameters as $value) {
             /** @psalm-suppress DocblockTypeContradiction, RedundantConditionGivenDocblockType */
+            // @mago-expect analysis:redundant-comparison, analysis:redundant-logical-operation, analysis:impossible-condition
             if(false === is_string($value) && null !== $value) {
                 throw new \InvalidArgumentException('Parameter values must be either string or empty (null)!');
             }

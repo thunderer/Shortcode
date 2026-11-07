@@ -25,6 +25,7 @@ class FilterShortcodesEvent
      */
     public function __construct(array $shortcodes, $parent = null)
     {
+        // @mago-expect analysis:redundant-comparison, analysis:redundant-logical-operation, analysis:impossible-condition
         if(null !== $parent && false === $parent instanceof ProcessedShortcode) {
             throw new \LogicException('Parameter $parent must be an instance of ProcessedShortcode.');
         }

@@ -49,5 +49,11 @@ jobs:
         run: |
           composer remove --dev -W 'vimeo/psalm'
           composer require --dev -W phpunit/phpunit infection/infection
-          php vendor/bin/infection
+          if php -r 'exit((int)(version_compare(PHP_VERSION, "8.3", ">=") === false));'; then
+            docker create --name mago ghcr.io/carthage-software/mago:1.59.0
+            docker cp mago:/usr/local/bin/mago vendor/bin/mago
+            php vendor/bin/infection --static-analysis-tool=mago
+          else
+            php vendor/bin/infection
+          fi
         continue-on-error: '${{ matrix.failure }}'
