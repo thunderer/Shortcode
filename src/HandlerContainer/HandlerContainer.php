@@ -48,6 +48,7 @@ final class HandlerContainer implements HandlerContainerInterface
         }
 
         /** @psalm-suppress PossiblyNullArgument */
+        // @mago-expect analysis:possibly-null-argument
         return $this->add($alias, $this->get($name));
     }
 
@@ -115,6 +116,7 @@ final class HandlerContainer implements HandlerContainerInterface
      */
     private function guardHandler($handler)
     {
+        // @mago-expect analysis:redundant-type-comparison
         if (!is_callable($handler)) {
             throw new \RuntimeException('Shortcode handler must be callable!');
         }

@@ -56,6 +56,7 @@ final class WordpressParser implements ParserInterface
     {
         foreach($names as $name) {
             /** @psalm-suppress DocblockTypeContradiction, RedundantConditionGivenDocblockType */
+            // @mago-expect analysis:redundant-type-comparison, analysis:redundant-comparison, analysis:impossible-condition
             if(false === is_string($name)) {
                 throw new \InvalidArgumentException('Shortcode name must be a string!');
             }
@@ -79,6 +80,7 @@ final class WordpressParser implements ParserInterface
             : RegexBuilderUtility::buildNameRegex();
         /** @var non-empty-string $regex */
         $regex = str_replace('<NAMES>', $names, static::$shortcodeRegex);
+        // @mago-expect analysis:reference-to-undefined-variable
         preg_match_all($regex, $text, $matches, PREG_OFFSET_CAPTURE);
 
         $shortcodes = array();
@@ -88,10 +90,12 @@ final class WordpressParser implements ParserInterface
         for($i = 0; $i < $count; $i++) {
             $name = $matches[2][$i][0];
             $parameters = static::parseParameters($matches[3][$i][0]);
+            // @mago-expect analysis:redundant-comparison, analysis:redundant-condition
             $content = $matches[5][$i][1] !== -1 ? $matches[5][$i][0] : null;
             $match = $matches[0][$i][0];
             $byteOffset = $matches[0][$i][1];
             if($byteOffset > $lastByteOffset) {
+                // @mago-expect analysis:invalid-operand, analysis:possibly-invalid-operand, analysis:possibly-invalid-argument, analysis:mixed-argument
                 $lastCharacterOffset += mb_strlen(substr($text, $lastByteOffset, $byteOffset - $lastByteOffset), 'utf-8');
                 $lastByteOffset = $byteOffset;
             }
@@ -113,7 +117,10 @@ final class WordpressParser implements ParserInterface
     {
         $text = preg_replace('/[\x{00a0}\x{200b}]+/u', ' ', $text);
 
+        // @mago-expect analysis:reference-to-undefined-variable, analysis:possibly-null-argument
         if(!preg_match_all(static::$argumentsRegex, $text, $matches, PREG_SET_ORDER)) {
+            // @mago-expect analysis:possibly-null-argument
+            // @mago-expect analysis:possibly-null-argument
             return ltrim($text) ? array(ltrim($text) => null) : array();
         }
 

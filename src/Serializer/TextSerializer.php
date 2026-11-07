@@ -18,6 +18,7 @@ final class TextSerializer implements SerializerInterface
     /** @param SyntaxInterface|null $syntax */
     public function __construct($syntax = null)
     {
+        // @mago-expect analysis:redundant-comparison, analysis:redundant-logical-operation, analysis:impossible-condition
         if(null !== $syntax && false === $syntax instanceof SyntaxInterface) {
             throw new \LogicException('Parameter $syntax must be an instance of SyntaxInterface.');
         }

@@ -30,6 +30,7 @@ class ReplaceShortcodesEvent
      */
     public function __construct($text, array $replacements, $shortcode = null)
     {
+        // @mago-expect analysis:redundant-comparison, analysis:redundant-logical-operation, analysis:impossible-condition
         if(null !== $shortcode && false === $shortcode instanceof ShortcodeInterface) {
             throw new \LogicException('Parameter $shortcode must be an instance of ShortcodeInterface.');
         }

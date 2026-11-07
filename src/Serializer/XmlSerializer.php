@@ -30,23 +30,32 @@ final class XmlSerializer implements SerializerInterface
         $doc->formatOutput = true;
 
         $code = $doc->createElement('shortcode');
+        // @mago-expect analysis:invalid-method-access
         $code->setAttribute('name', $shortcode->getName());
+        // @mago-expect analysis:possibly-false-argument
         $xml = $doc->appendChild($code);
+        // @mago-expect analysis:invalid-method-access
         $xml->appendChild($this->createCDataNode($doc, 'bbCode', $shortcode->getBbCode()));
 
+        // @mago-expect analysis:invalid-method-access, analysis:possibly-false-argument
         $parameters = $xml->appendChild($doc->createElement('parameters'));
         foreach($shortcode->getParameters() as $key => $value) {
             $parameter = $doc->createElement('parameter');
+            // @mago-expect analysis:invalid-method-access
             $parameter->setAttribute('name', $key);
             if(null !== $value) {
+                // @mago-expect analysis:invalid-method-access, analysis:possibly-false-argument
                 $parameter->appendChild($doc->createCDATASection($value));
             }
 
+            // @mago-expect analysis:invalid-method-access, analysis:possibly-false-argument
             $parameters->appendChild($parameter);
         }
 
+        // @mago-expect analysis:invalid-method-access
         $xml->appendChild($this->createCDataNode($doc, 'content', $shortcode->getContent()));
 
+        // @mago-expect analysis:falsable-return-statement, analysis:invalid-return-statement
         return $doc->saveXML();
     }
 
@@ -62,9 +71,11 @@ final class XmlSerializer implements SerializerInterface
         $node = $doc->createElement($name);
 
         if(null !== $content) {
+            // @mago-expect analysis:invalid-method-access, analysis:possibly-false-argument
             $node->appendChild($doc->createCDATASection($content));
         }
 
+        // @mago-expect analysis:falsable-return-statement, analysis:invalid-return-statement
         return $node;
     }
 
@@ -84,23 +95,32 @@ final class XmlSerializer implements SerializerInterface
         libxml_use_internal_errors($internalErrors);
 
         $xpath = new \DOMXPath($xml);
+        // @mago-expect analysis:mixed-assignment
         $shortcode = $xpath->query('/shortcode');
+        // @mago-expect analysis:mixed-property-access
         if($shortcode->length !== 1) {
             throw new \InvalidArgumentException('Invalid shortcode XML!');
         }
         /** @psalm-suppress PossiblyNullArgument */
+        // @mago-expect analysis:mixed-method-access, analysis:mixed-argument
         $name = $this->getAttribute($shortcode->item(0), 'name');
 
+        // @mago-expect analysis:mixed-argument
         $bbCode = $this->getValue($xpath->query('/shortcode/bbCode'));
+        // @mago-expect analysis:mixed-argument
         $content = $this->getValue($xpath->query('/shortcode/content'));
 
         $parameters = array();
+        // @mago-expect analysis:mixed-assignment
         $elements = $xpath->query('/shortcode/parameters/parameter');
         // @mago-expect analysis:mixed-operand
+        // @mago-expect analysis:mixed-property-access
         for($i = 0; $i < $elements->length; $i++) {
+            // @mago-expect analysis:mixed-method-access, analysis:mixed-assignment
             $node = $elements->item($i);
 
             /** @psalm-suppress PossiblyNullReference */
+            // @mago-expect analysis:mixed-method-access, analysis:mixed-property-access, analysis:mixed-argument
             $parameters[$this->getAttribute($node, 'name')] = $node->hasChildNodes() ? $node->nodeValue : null;
         }
 
@@ -139,6 +159,7 @@ final class XmlSerializer implements SerializerInterface
         $attribute = $node->attributes->getNamedItem($name);
 
         /** @psalm-suppress DocblockTypeContradiction,RiskyTruthyFalsyComparison */
+        // @mago-expect analysis:redundant-condition, analysis:redundant-logical-operation
         if(!$attribute || !$attribute->nodeValue) {
             throw new \InvalidArgumentException('Invalid shortcode XML!');
         }

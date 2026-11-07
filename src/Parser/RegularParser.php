@@ -41,6 +41,7 @@ final class RegularParser implements ParserInterface
     /** @param SyntaxInterface|null $syntax */
     public function __construct($syntax = null)
     {
+        // @mago-expect analysis:redundant-comparison, analysis:redundant-logical-operation, analysis:impossible-condition
         if(null !== $syntax && false === $syntax instanceof SyntaxInterface) {
             throw new \LogicException('Parameter $syntax must be an instance of SyntaxInterface.');
         }
@@ -124,6 +125,7 @@ final class RegularParser implements ParserInterface
         $this->match(self::TOKEN_WS, false);
         if('' === $name = $this->match(self::TOKEN_STRING, false)) { return false; }
         if($this->lookahead(self::TOKEN_STRING)) { return false; }
+        // @mago-expect analysis:reference-to-undefined-variable
         if(1 !== preg_match($this->nameRegex, $name, $matches)) { return false; }
         $this->match(self::TOKEN_WS, false);
         // bbCode
@@ -155,6 +157,7 @@ final class RegularParser implements ParserInterface
             }
 
             $this->beginBacktrack();
+            // @mago-expect analysis:possibly-invalid-argument
             $contentMatchedShortcodes = $this->shortcode($names);
             if(\is_string($contentMatchedShortcodes)) {
                 $closingName = $contentMatchedShortcodes;
@@ -170,6 +173,7 @@ final class RegularParser implements ParserInterface
 
             $this->beginBacktrack();
             // @mago-expect analysis:conflicting-reference-constraint
+            // @mago-expect analysis:reference-constraint-violation
             if(false !== ($closingName = $this->close($names))) {
                 $this->backtrack();
                 $shortcodes = array();
@@ -184,6 +188,7 @@ final class RegularParser implements ParserInterface
         // end inlined content()
 
         if(null !== $closingName && $closingName !== $name) {
+            // @mago-expect analysis:reference-constraint-violation
             array_pop($names);
             array_pop($this->backtracks);
             array_pop($this->backtracks);
@@ -193,12 +198,14 @@ final class RegularParser implements ParserInterface
         if(false === $content || $closingName !== $name) {
             $this->backtrack(false);
             $text = $this->backtrack(false);
+            // @mago-expect analysis:reference-constraint-violation
             array_pop($names);
 
             return array_merge(array($this->getObject($name, $parameters, $bbCode, $offset, null, $text)), $shortcodes);
         }
         $content = $this->getBacktrack();
         /** @psalm-suppress RiskyTruthyFalsyComparison */
+        // @mago-expect analysis:reference-constraint-violation
         if(!$this->close($names)) { return false; }
         array_pop($names);
 
@@ -279,6 +286,7 @@ final class RegularParser implements ParserInterface
         $position = array_pop($this->backtracks);
         $backtrack = '';
         /** @psalm-suppress PossiblyNullOperand */
+        // @mago-expect analysis:possibly-null-operand
         for($i = $position; $i < $this->position; $i++) {
             /** @psalm-suppress PossiblyNullArrayOffset */
             // @mago-expect analysis:possibly-null-array-index
@@ -298,17 +306,20 @@ final class RegularParser implements ParserInterface
         $position = array_pop($this->backtracks);
         if($modifyPosition) {
             /** @psalm-suppress PossiblyNullPropertyAssignmentValue */
+            // @mago-expect analysis:invalid-property-assignment-value
             $this->position = $position;
         }
 
         $backtrack = '';
         /** @psalm-suppress PossiblyNullOperand */
+        // @mago-expect analysis:possibly-null-operand
         for($i = $position; $i < $this->lastBacktrack; $i++) {
             /** @psalm-suppress PossiblyNullArrayOffset */
             // @mago-expect analysis:possibly-null-array-index
             $backtrack .= $this->tokens[$i][1];
         }
         /** @psalm-suppress PossiblyNullPropertyAssignmentValue */
+        // @mago-expect analysis:invalid-property-assignment-value
         $this->lastBacktrack = $position;
 
         return $backtrack;
@@ -360,6 +371,7 @@ final class RegularParser implements ParserInterface
      */
     private function tokenize($text)
     {
+        // @mago-expect analysis:reference-to-undefined-variable
         $count = preg_match_all($this->lexerRegex, $text, $matches, PREG_SET_ORDER);
         if(false === $count || preg_last_error() !== PREG_NO_ERROR) {
             throw new \RuntimeException(sprintf('PCRE failure `%s`.', preg_last_error()));

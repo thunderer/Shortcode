@@ -39,12 +39,14 @@ final class HybridParser implements ParserInterface
     /** @param SyntaxInterface|null $syntax */
     public function __construct($syntax = null)
     {
+        // @mago-expect analysis:redundant-comparison, analysis:redundant-logical-operation, analysis:impossible-condition
         if(null !== $syntax && false === $syntax instanceof SyntaxInterface) {
             throw new \LogicException('Parameter $syntax must be an instance of SyntaxInterface.');
         }
 
         $syntax = $syntax ?: new CommonSyntax();
         $this->delimiter = $syntax->getParameterValueDelimiter();
+        // @mago-expect analysis:invalid-property-assignment-value
         $this->delimiterLength = strlen($this->delimiter);
 
         $openTag = preg_quote($syntax->getOpeningTag(), '~');
@@ -87,6 +89,7 @@ final class HybridParser implements ParserInterface
      */
     public function parse($text)
     {
+        // @mago-expect analysis:reference-to-undefined-variable
         $count = preg_match_all($this->tagRegex, $text, $matches, PREG_OFFSET_CAPTURE);
         if(false === $count || preg_last_error() !== PREG_NO_ERROR) {
             throw new \RuntimeException(sprintf('PCRE failure `%s`.', preg_last_error()));
@@ -105,16 +108,23 @@ final class HybridParser implements ParserInterface
         /** @psalm-var list<int> $stack */
         $stack = array();
         $depth = 0;
+        // @mago-expect analysis:mismatched-array-index
         $closeNames = $matches['cname'];
+        // @mago-expect analysis:mismatched-array-index
         $names = $matches['name'];
+        // @mago-expect analysis:mismatched-array-index
         $selfMarkers = $matches['self'];
+        // @mago-expect analysis:mismatched-array-index
         $bbCodes = $matches['bbCode'];
+        // @mago-expect analysis:mismatched-array-index
         $paramStrings = $matches['params'];
 
         foreach($matches[0] as $index => $whole) {
             $byteStart = $whole[1];
+            // @mago-expect analysis:invalid-operand, analysis:mixed-assignment
             $byteEnd = $byteStart + strlen($whole[0]);
 
+            // @mago-expect analysis:redundant-comparison, analysis:redundant-logical-operation
             if(isset($closeNames[$index][1]) && $closeNames[$index][1] !== -1) {
                 // closing tag: match the innermost open node of the same name.
                 // RegularParser rejects a closing name that is falsy in PHP (`'0'`)
@@ -143,6 +153,7 @@ final class HybridParser implements ParserInterface
             } else {
                 if($byteStart > $lastByte) {
                     /** @psalm-suppress PossiblyFalseArgument */
+                    // @mago-expect analysis:invalid-operand, analysis:possibly-invalid-operand, analysis:possibly-invalid-argument, analysis:mixed-argument
                     $lastChar += mb_strlen(substr($text, $lastByte, $byteStart - $lastByte), 'utf-8');
                     $lastByte = $byteStart;
                 }
@@ -150,6 +161,7 @@ final class HybridParser implements ParserInterface
             }
 
             // @mago-expect analysis:redundant-isset-check
+            // @mago-expect analysis:redundant-comparison, analysis:redundant-logical-operation
             $selfClosing = isset($selfMarkers[$index][1]) && $selfMarkers[$index][1] !== -1;
 
             // node tuple: [0]name [1]paramsRaw [2]bbCodeRaw [3]offset [4]start
@@ -157,7 +169,9 @@ final class HybridParser implements ParserInterface
             // parameter/bbCode parsing is deferred to build() so absorbed nodes never pay for it
             $nodes[] = array(
                 $names[$index][0],
+                // @mago-expect analysis:redundant-comparison, analysis:redundant-logical-operation
                 isset($paramStrings[$index][1]) && $paramStrings[$index][1] !== -1 ? $paramStrings[$index][0] : '',
+                // @mago-expect analysis:redundant-comparison, analysis:redundant-logical-operation
                 isset($bbCodes[$index][1]) && $bbCodes[$index][1] !== -1 ? $bbCodes[$index][0] : null,
                 $offset,
                 $byteStart,
@@ -174,6 +188,7 @@ final class HybridParser implements ParserInterface
             }
         }
 
+        // @mago-expect analysis:possibly-invalid-argument
         return $this->build($nodes, $text);
     }
 
@@ -202,8 +217,10 @@ final class HybridParser implements ParserInterface
             if($node[7]) {
                 // a closed node always has integer close offsets (set on close or self-close)
                 /** @psalm-suppress PossiblyNullOperand */
+                // @mago-expect analysis:possibly-null-operand
                 $content = $node[10] ? null : substr($text, $node[5], $node[8] - $node[5]);
                 /** @psalm-suppress PossiblyNullOperand */
+                // @mago-expect analysis:possibly-null-operand
                 $shortcodeText = substr($text, $node[4], $node[9] - $node[4]);
             } else {
                 $content = null;
@@ -229,6 +246,7 @@ final class HybridParser implements ParserInterface
      */
     private function parseParameters($text)
     {
+        // @mago-expect analysis:reference-to-undefined-variable
         if('' === $text || false === preg_match_all($this->paramRegex, $text, $matches, PREG_SET_ORDER)) {
             return array();
         }

@@ -13,6 +13,7 @@ final class ReplaceJoinEventHandler
 
     public function __construct(array $names)
     {
+        // @mago-expect analysis:mixed-assignment
         foreach($names as $name) {
             if(false === is_string($name)) {
                 throw new \InvalidArgumentException('Expected array of strings!');

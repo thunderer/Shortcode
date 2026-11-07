@@ -30,6 +30,7 @@ final class RegexParser implements ParserInterface
     /** @param SyntaxInterface|null $syntax */
     public function __construct($syntax = null)
     {
+        // @mago-expect analysis:redundant-comparison, analysis:redundant-logical-operation, analysis:impossible-condition
         if(null !== $syntax && false === $syntax instanceof SyntaxInterface) {
             throw new \LogicException('Parameter $syntax must be an instance of SyntaxInterface.');
         }
@@ -50,6 +51,7 @@ final class RegexParser implements ParserInterface
      */
     public function parse($text)
     {
+        // @mago-expect analysis:reference-to-undefined-variable
         preg_match_all($this->shortcodeRegex, $text, $matches, PREG_OFFSET_CAPTURE);
 
         // loop instead of array_map to pass the arguments explicitly
@@ -59,6 +61,7 @@ final class RegexParser implements ParserInterface
         foreach($matches[0] as $match) {
             /** @psalm-suppress PossiblyFalseArgument */
             if($match[1] > $lastByteOffset) {
+                // @mago-expect analysis:invalid-operand, analysis:possibly-invalid-operand, analysis:possibly-invalid-argument, analysis:mixed-argument
                 $lastCharacterOffset += mb_strlen(substr($text, $lastByteOffset, $match[1] - $lastByteOffset), 'utf-8');
                 $lastByteOffset = $match[1];
             }
@@ -77,6 +80,7 @@ final class RegexParser implements ParserInterface
      */
     private function parseSingle($text, $offset)
     {
+        // @mago-expect analysis:reference-to-undefined-variable
         preg_match($this->singleShortcodeRegex, $text, $matches, PREG_OFFSET_CAPTURE);
 
         // @mago-expect analysis:docblock-type-mismatch
@@ -98,6 +102,7 @@ final class RegexParser implements ParserInterface
      */
     private function parseParameters($text)
     {
+        // @mago-expect analysis:reference-to-undefined-variable
         preg_match_all($this->parametersRegex, $text, $argsMatches);
 
         // loop because PHP 5.3 can't handle $this properly and I want separate methods
@@ -105,6 +110,7 @@ final class RegexParser implements ParserInterface
         foreach ($argsMatches[1] as $item) {
             /** @psalm-var array{0:string,1:string} $parts */
             $parts = explode($this->parameterValueSeparator, $item, 2);
+            // @mago-expect analysis:redundant-condition
             $return[trim($parts[0])] = $this->parseValue(isset($parts[1]) ? $parts[1] : null);
         }
 
