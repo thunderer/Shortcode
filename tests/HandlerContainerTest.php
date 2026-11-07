@@ -72,6 +72,19 @@ final class HandlerContainerTest extends AbstractTestCase
         static::assertNotNull($handlers->get('missing'));
     }
 
+    public function testSetDefaultReturnsContainer()
+    {
+        $handlers = new HandlerContainer();
+        static::assertSame($handlers, $handlers->setDefault(function () {}));
+    }
+
+    public function testExceptionOnInvalidDefaultHandler()
+    {
+        $handlers = new HandlerContainer();
+        $this->willThrowException('RuntimeException');
+        $handlers->setDefault('not callable at all');
+    }
+
     public function testExceptionIfAliasingNonExistentHandler()
     {
         $handlers = new HandlerContainer();

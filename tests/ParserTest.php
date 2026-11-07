@@ -18,6 +18,65 @@ use Thunder\Shortcode\Syntax\Syntax;
  */
 final class ParserTest extends AbstractTestCase
 {
+    public function testParsersCountOffsetsInCharacters()
+    {
+        foreach(array(new RegularParser(), new HybridParser()) as $parser) {
+            $this->assertShortcodes($parser->parse('żż[a]x[/a]'), array(
+                new ParsedShortcode(new Shortcode('a', array(), 'x', null), '[a]x[/a]', 2),
+            ));
+        }
+    }
+
+    public function testParsersWithRegexSpecialCharactersInSyntax()
+    {
+        $syntax = new Syntax('[', ']', '.', '*', '|');
+        foreach(array(new RegularParser($syntax), new HybridParser($syntax), new RegexParser($syntax)) as $parser) {
+            $this->assertShortcodes($parser->parse('[a b*|x y|]c[.a]'), array(
+                new ParsedShortcode(new Shortcode('a', array('b' => 'x y'), 'c', null), '[a b*|x y|]c[.a]', 0),
+            ));
+        }
+    }
+
+    public function testWordpressParserLowercasesParameterNames()
+    {
+        $parser = new WordpressParser();
+        $shortcodes = $parser->parse('[a FOO="x" Bar=y]');
+
+        $this->assertSame(array('foo' => 'x', 'bar' => 'y'), $shortcodes[0]->getParameters());
+    }
+
+    public function testWordpressParserQuotesNames()
+    {
+        $parser = WordpressParser::createFromNames(array('a.b'));
+
+        $this->assertCount(1, $parser->parse('[a.b]'));
+        $this->assertCount(0, $parser->parse('[axb]'));
+    }
+
+    public function testExceptionOnInvalidParserSyntax()
+    {
+        $classes = array(
+            'Thunder\Shortcode\Parser\RegularParser',
+            'Thunder\Shortcode\Parser\HybridParser',
+            'Thunder\Shortcode\Parser\RegexParser',
+        );
+        foreach($classes as $class) {
+            try {
+                new $class(new \stdClass());
+                $this->fail('Expected LogicException.');
+            } catch(\LogicException $e) {
+                $this->assertSame('Parameter $syntax must be an instance of SyntaxInterface.', $e->getMessage());
+            }
+        }
+    }
+
+    public function testHybridParserExceptionOnInvalidUtf8()
+    {
+        $parser = new HybridParser();
+        $this->willThrowException('RuntimeException');
+        $parser->parse("[a]\xff[/a]");
+    }
+
     /**
      * @param ParserInterface $parser
      * @param string $code
@@ -430,5 +489,25 @@ final class ParserTest extends AbstractTestCase
                 new ParsedShortcode(new Shortcode('b', array(), 'x', null), '(b)x(*b)', 5),
             ));
         }
+    }
+
+    public function testRegexParserCountsCharacterOffsetsWithCustomSyntax()
+    {
+        $parser = new RegexParser(new Syntax('(', ')', '/', '=', '"'));
+        $this->assertShortcodes($parser->parse('ż (a)'), array(
+            new ParsedShortcode(new Shortcode('a', array(), null, null), '(a)', 2),
+        ));
+    }
+
+    public function testRegexParserParameterValues()
+    {
+        $parser = new RegexParser();
+        $this->assertShortcodes($parser->parse('[a k=a/b]'), array(
+            new ParsedShortcode(new Shortcode('a', array('k' => 'a/b'), null, null), '[a k=a/b]', 0),
+        ));
+        $this->assertShortcodes($parser->parse('[a k="x\"y"] [b k="z"]'), array(
+            new ParsedShortcode(new Shortcode('a', array('k' => 'x\"y'), null, null), '[a k="x\"y"]', 0),
+            new ParsedShortcode(new Shortcode('b', array('k' => 'z'), null, null), '[b k="z"]', 13),
+        ));
     }
 }

@@ -213,6 +213,34 @@ final class ProcessorTest extends AbstractTestCase
         );
     }
 
+    public function testProcessorKeepsMultibyteTextAroundShortcodes()
+    {
+        $parsers = array(
+            new RegularParser(),
+            new \Thunder\Shortcode\Parser\HybridParser(),
+            new RegexParser(),
+            new \Thunder\Shortcode\Parser\WordpressParser(),
+        );
+        foreach($parsers as $parser) {
+            $processor = new Processor($parser, $this->getHandlers());
+
+            static::assertSame("\xF0\x9F\x98\x80name", $processor->process("\xF0\x9F\x98\x80[name]"), get_class($parser));
+            static::assertSame('name ab name', $processor->process('[name x="ż"] ab [name]'), get_class($parser));
+            static::assertSame('[u x="ż"]ó name ż[/u]', $processor->process('[u x="ż"]ó [name /] ż[/u]'), get_class($parser));
+        }
+    }
+
+    public function testBaseOffsetCountsCharacters()
+    {
+        $handlers = $this->getHandlers();
+        $handlers->add('offset', function (ProcessedShortcode $s) { return (string)$s->getBaseOffset(); });
+
+        foreach(array(new RegularParser(), new \Thunder\Shortcode\Parser\HybridParser()) as $parser) {
+            $processor = new Processor($parser, $handlers);
+            static::assertSame('9', $processor->process('[c x="ż"][offset /][/c]'), get_class($parser));
+        }
+    }
+
     public function testProcessorDeclare()
     {
         $handlers = new HandlerContainer();
@@ -286,6 +314,35 @@ final class ProcessorTest extends AbstractTestCase
         $processor = new Processor(new RegularParser(), new HandlerContainer());
         $this->willThrowException('InvalidArgumentException');
         $processor->withAutoProcessContent(new \stdClass());
+    }
+
+    public function testExceptionOnZeroMaxIterations()
+    {
+        $processor = new Processor(new RegularParser(), new HandlerContainer());
+        $this->willThrowException('InvalidArgumentException');
+        $processor->withMaxIterations(0);
+    }
+
+    public function testProcessorWithersReturnNewInstance()
+    {
+        $processor = new Processor(new RegularParser(), new HandlerContainer());
+
+        static::assertNotSame($processor, $processor->withMaxIterations(2));
+        static::assertNotSame($processor, $processor->withRecursionDepth(1));
+        static::assertNotSame($processor, $processor->withAutoProcessContent(false));
+        static::assertNotSame($processor, $processor->withEventContainer(new \Thunder\Shortcode\EventContainer\EventContainer()));
+    }
+
+    public function testIterationsStopWhenTextDoesNotChange()
+    {
+        $calls = 0;
+        $handlers = new HandlerContainer();
+        $handlers->add('same', function () use (&$calls) { $calls++; return '[same]'; });
+        $processor = new Processor(new RegularParser(), $handlers);
+        $processor = $processor->withMaxIterations(5);
+
+        static::assertSame('[same]', $processor->process('[same]'));
+        static::assertSame(1, $calls);
     }
 
     public function testDefaultHandler()
@@ -366,5 +423,14 @@ final class ProcessorTest extends AbstractTestCase
         $handlers->remove('name');
         static::assertSame('n', $processor->process('[n]'));
         static::assertSame('[name]', $processor->process('[name]'));
+    }
+
+    public function testProcessorStartsIterationNumberAtOne()
+    {
+        $handlers = new HandlerContainer();
+        $handlers->add('n', function(ShortcodeInterface $s) { return (string)$s->getIterationNumber(); });
+        $processor = new Processor(new RegularParser(), $handlers);
+
+        static::assertSame('1', $processor->process('[n]'));
     }
 }
