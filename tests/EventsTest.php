@@ -37,6 +37,27 @@ final class EventsTest extends AbstractTestCase
         $this->assertEquals(2, $times);
     }
 
+    public function testEventContainerKeepsAllListeners()
+    {
+        $events = new EventContainer();
+        $events->addListener(Events::FILTER_SHORTCODES, function() {});
+        $events->addListener(Events::FILTER_SHORTCODES, function() {});
+
+        $this->assertCount(2, $events->getListeners(Events::FILTER_SHORTCODES));
+    }
+
+    public function testExceptionOnInvalidFilterShortcodesParent()
+    {
+        $this->willThrowException('LogicException');
+        new \Thunder\Shortcode\Event\FilterShortcodesEvent(array(), new \stdClass());
+    }
+
+    public function testExceptionOnInvalidReplaceShortcodesShortcode()
+    {
+        $this->willThrowException('LogicException');
+        new ReplaceShortcodesEvent('text', array(), new \stdClass());
+    }
+
     public function testStripContentOutsideShortcodes()
     {
         $handlers = new HandlerContainer();

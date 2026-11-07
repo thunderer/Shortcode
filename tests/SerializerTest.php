@@ -125,4 +125,74 @@ final class SerializerTest extends AbstractTestCase
             array($xml, '', 'InvalidArgumentException'),
         );
     }
+
+    public function testTextSerializerParametersAndBbCode()
+    {
+        $serializer = new TextSerializer();
+
+        $this->assertSame('[n=bb a=1 b=2 /]', $serializer->serialize(new Shortcode('n', array('a' => '1', 'b' => '2'), null, 'bb')));
+        $this->assertSame('[n a=żółć /]', $serializer->serialize(new Shortcode('n', array('a' => 'żółć'), null)));
+    }
+
+    public function testExceptionOnInvalidTextSerializerSyntax()
+    {
+        $this->willThrowException('LogicException');
+        new TextSerializer(new \stdClass());
+    }
+
+    public function testXmlSerializerRestoresLibxmlErrorMode()
+    {
+        $serializer = new XmlSerializer();
+        $previous = libxml_use_internal_errors();
+
+        foreach(array(true, false) as $mode) {
+            libxml_use_internal_errors($mode);
+            try {
+                $serializer->unserialize('<shortcode');
+            } catch(\InvalidArgumentException $e) {
+            }
+            $this->assertSame($mode, libxml_use_internal_errors());
+
+            $serializer->unserialize('<shortcode name="a"><parameters/><content/></shortcode>');
+            $this->assertSame($mode, libxml_use_internal_errors());
+        }
+
+        libxml_use_internal_errors($previous);
+    }
+
+    public function testYamlSerializerMalformedException()
+    {
+        $serializer = new YamlSerializer();
+
+        try {
+            $serializer->unserialize("foo: bar\n");
+            $this->fail('Expected InvalidArgumentException.');
+        } catch(\InvalidArgumentException $e) {
+            $this->assertSame('Malformed shortcode YAML, expected name, parameters, and content!', $e->getMessage());
+        }
+    }
+
+    public function testJsonSerializerMalformedException()
+    {
+        $serializer = new JsonSerializer();
+
+        try {
+            $serializer->unserialize('{}');
+            $this->fail('Expected InvalidArgumentException.');
+        } catch(\InvalidArgumentException $e) {
+            $this->assertSame('Malformed Shortcode JSON, expected name, parameters, and content!', $e->getMessage());
+        }
+    }
+
+    public function testXmlSerializerInvalidXmlException()
+    {
+        $serializer = new XmlSerializer();
+
+        try {
+            $serializer->unserialize('<invalid');
+            $this->fail('Expected InvalidArgumentException.');
+        } catch(\InvalidArgumentException $e) {
+            $this->assertSame('Failed to parse provided XML!', $e->getMessage());
+        }
+    }
 }
