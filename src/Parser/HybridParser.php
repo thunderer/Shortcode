@@ -24,6 +24,7 @@ use Thunder\Shortcode\Syntax\SyntaxInterface;
  *     6: int|null, 7: bool, 8: int|null, 9: int|null, 10: bool
  * }
  */
+// @mago-expect lint:kan-defect
 final class HybridParser implements ParserInterface
 {
     /** @var non-empty-string */
@@ -148,6 +149,7 @@ final class HybridParser implements ParserInterface
                 $offset = $lastChar;
             }
 
+            // @mago-expect analysis:redundant-isset-check
             $selfClosing = isset($selfMarkers[$index][1]) && $selfMarkers[$index][1] !== -1;
 
             // node tuple: [0]name [1]paramsRaw [2]bbCodeRaw [3]offset [4]start

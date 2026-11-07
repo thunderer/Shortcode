@@ -7,6 +7,7 @@ use Thunder\Shortcode\Processor\ProcessorInterface;
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
  */
+// @mago-expect lint:too-many-properties
 final class ProcessedShortcode extends AbstractShortcode implements ParsedShortcodeInterface
 {
     /** @var ProcessedShortcode|null */
@@ -86,6 +87,7 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
     {
         $self = $this;
 
+        // @mago-expect lint:no-assign-in-condition
         while($self = $self->getParent()) {
             if($self->getName() === $name) {
                 return true;

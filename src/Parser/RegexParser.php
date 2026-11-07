@@ -79,6 +79,7 @@ final class RegexParser implements ParserInterface
     {
         preg_match($this->singleShortcodeRegex, $text, $matches, PREG_OFFSET_CAPTURE);
 
+        // @mago-expect analysis:docblock-type-mismatch
         /** @psalm-var array<string,array{0:string,1:int}> $matches */
         $name = $matches['name'][0];
         $parameters = isset($matches['parameters'][0]) ? $this->parseParameters($matches['parameters'][0]) : array();
@@ -129,6 +130,7 @@ final class RegexParser implements ParserInterface
     private function extractValue($value)
     {
         /** @psalm-suppress FalsableReturnStatement */
+        // @mago-expect lint:no-redundant-math
         return $this->isDelimitedValue($value) ? substr($value, $this->parameterValueDelimiterLength, -1 * $this->parameterValueDelimiterLength) : $value;
     }
 
@@ -142,6 +144,7 @@ final class RegexParser implements ParserInterface
         /** @psalm-suppress ArgumentTypeCoercion */
         return strlen($value) >= 2 * $this->parameterValueDelimiterLength
             && 0 === strncmp($value, $this->parameterValueDelimiter, $this->parameterValueDelimiterLength)
+            // @mago-expect lint:no-redundant-math
             && substr($value, -1 * $this->parameterValueDelimiterLength) === $this->parameterValueDelimiter;
     }
 }
