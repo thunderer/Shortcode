@@ -6,6 +6,7 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
+ * @internal
  */
 // @mago-expect lint:too-many-properties
 final class ProcessorContext

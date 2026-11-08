@@ -59,7 +59,10 @@ final class ProcessedShortcode extends AbstractShortcode implements ParsedShortc
         $this->baseOffset = $context->baseOffset;
     }
 
-    /** @return self */
+    /**
+     * @internal
+     * @return self
+     */
     public static function createFromContext(ProcessorContext $context)
     {
         return new self($context);

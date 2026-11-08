@@ -10,9 +10,8 @@ use Thunder\Shortcode\Shortcode\ShortcodeInterface;
  * results in the source text.
  *
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
- * @psalm-suppress ClassMustBeFinal
  */
-class ReplaceShortcodesEvent
+final class ReplaceShortcodesEvent
 {
     /** @var ShortcodeInterface|null */
     private $shortcode;

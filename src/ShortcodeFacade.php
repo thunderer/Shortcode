@@ -20,6 +20,7 @@ use Thunder\Shortcode\Syntax\SyntaxInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
+ * @final
  * @psalm-suppress ClassMustBeFinal
  */
 class ShortcodeFacade
