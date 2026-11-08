@@ -158,6 +158,7 @@ final class RegularParser implements ParserInterface
 
             $this->beginBacktrack();
             // @mago-expect analysis:possibly-invalid-argument
+            /** @psalm-suppress ArgumentTypeCoercion */
             $contentMatchedShortcodes = $this->shortcode($names);
             if(\is_string($contentMatchedShortcodes)) {
                 $closingName = $contentMatchedShortcodes;
@@ -414,6 +415,11 @@ final class RegularParser implements ParserInterface
             return preg_quote((string)$text, '~');
         };
 
+        // a character that starts an opening tag is text when another opening tag starts before it ends,
+        // so in a run like `[[[a]]` for `[[` the opening tag token is the last one, right before the name
+        $length = mb_strlen($syntax->getOpeningTag(), 'utf-8');
+        $overlap = $length > 1 ? '|(?='.$quote($syntax->getOpeningTag()).').(?=.{0,'.($length - 2).'}'.$quote($syntax->getOpeningTag()).')' : '';
+
         $rules = array(
             '(?<string>\\\\.|(?:(?!'.implode('|', array(
                 $quote($syntax->getOpeningTag()),
@@ -423,7 +429,7 @@ final class RegularParser implements ParserInterface
                 $quote($syntax->getParameterValueDelimiter()),
                 '\\\\',
                 '\s+',
-            )).').)++)',
+            )).').'.$overlap.')++)',
             '(?<ws>\s+)',
             $group($syntax->getClosingTagMarker(), 'marker'),
             $group($syntax->getParameterValueDelimiter(), 'delimiter'),
