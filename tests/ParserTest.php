@@ -388,6 +388,56 @@ final class ParserTest extends AbstractTestCase
         }
     }
 
+    /**
+     * @dataProvider provideRunsOfOpeningTags
+     */
+    #[DataProvider('provideRunsOfOpeningTags')]
+    public function testParsersFindTagsInsideRunsOfOpeningTags(ParserInterface $parser, $code, array $expected)
+    {
+        $this->assertShortcodes($parser->parse($code), $expected);
+    }
+
+    public static function provideRunsOfOpeningTags()
+    {
+        $double = new Syntax('[[', ']]', '//', '==', '""');
+        $curly = new Syntax('{{', '}}', '/', '=', '"');
+        $cases = array(
+            array($double, '[[[a]]', array(
+                new ParsedShortcode(new Shortcode('a', array(), null, null), '[[a]]', 1),
+            )),
+            array($double, '[[a]][[[b]]', array(
+                new ParsedShortcode(new Shortcode('a', array(), null, null), '[[a]]', 0),
+                new ParsedShortcode(new Shortcode('b', array(), null, null), '[[b]]', 6),
+            )),
+            array($double, '[[a]]x[[[//a]]', array(
+                new ParsedShortcode(new Shortcode('a', array(), 'x[', null), '[[a]]x[[[//a]]', 0),
+            )),
+            array($double, '[[[[a]]', array(
+                new ParsedShortcode(new Shortcode('a', array(), null, null), '[[a]]', 2),
+            )),
+            array($curly, 'a{{{x}}', array(
+                new ParsedShortcode(new Shortcode('x', array(), null, null), '{{x}}', 2),
+            )),
+            array($curly, '{{x}}{{{/x}}', array(
+                new ParsedShortcode(new Shortcode('x', array(), '{', null), '{{x}}{{{/x}}', 0),
+            )),
+            array($curly, '{{a k="{{"}}', array(
+                new ParsedShortcode(new Shortcode('a', array('k' => '{{'), null, null), '{{a k="{{"}}', 0),
+            )),
+            array(new Syntax('««', '»»', '/', '=', '"'), 'ż«««x»»', array(
+                new ParsedShortcode(new Shortcode('x', array(), null, null), '««x»»', 2),
+            )),
+        );
+
+        $result = array();
+        foreach($cases as $case) {
+            $result[] = array(new RegularParser($case[0]), $case[1], $case[2]);
+            $result[] = array(new HybridParser($case[0]), $case[1], $case[2]);
+        }
+
+        return $result;
+    }
+
     public function testIssue119()
     {
         $cases = array(
