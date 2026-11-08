@@ -68,3 +68,46 @@ jobs:
           php vendor/bin/infection --static-analysis-tool=mago $DIFF
         env:
           BASE_REF: '${{ github.base_ref }}'
+
+  benchmark:
+    if: "github.event_name == 'pull_request'"
+    runs-on: 'ubuntu-latest'
+    permissions:
+      contents: 'read'
+      pull-requests: 'write'
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@v4'
+        with:
+          fetch-depth: 0
+      - name: 'Install PHP'
+        uses: 'shivammathur/setup-php@v2'
+        with:
+          php-version: '8.5'
+          tools: 'composer:v2'
+          coverage: 'none'
+      - name: 'PHPBench'
+        shell: 'bash'
+        run: |
+          composer require --dev -W phpbench/phpbench
+          rm -rf src && git checkout "origin/$BASE_REF" -- src
+          php vendor/bin/phpbench run --tag=base --progress=none --dump-file=benchmark-base.xml
+          rm -rf src && git checkout HEAD -- src
+          php vendor/bin/phpbench run --ref=base --report=aggregate --progress=none --no-ansi --dump-file=benchmark-head.xml | tee benchmark.txt
+          BASE_SHA=$(git rev-parse "origin/$BASE_REF") php .github/workflows/benchmark.php benchmark-base.xml benchmark-head.xml benchmark.txt > benchmark.md
+        env:
+          BASE_REF: '${{ github.base_ref }}'
+          HEAD_REF: '${{ github.head_ref }}'
+          HEAD_SHA: '${{ github.event.pull_request.head.sha }}'
+      - name: 'Benchmark comment'
+        if: "github.event.pull_request.head.repo.full_name == github.repository"
+        run: |
+          ID=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- benchmark -->"))) | .id' | tail -n 1)
+          if [ -n "$ID" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$ID" -F body=@benchmark.md > /dev/null
+          else
+            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file benchmark.md
+          fi
+        env:
+          GH_TOKEN: '${{ github.token }}'
+          PR: '${{ github.event.pull_request.number }}'
