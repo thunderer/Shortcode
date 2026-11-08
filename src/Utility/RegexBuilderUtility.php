@@ -5,6 +5,7 @@ use Thunder\Shortcode\Syntax\SyntaxInterface;
 
 /**
  * @author Tomasz Kowalczyk <tomasz@kowalczyk.cc>
+ * @internal
  */
 final class RegexBuilderUtility
 {
