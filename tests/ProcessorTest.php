@@ -217,6 +217,7 @@ final class ProcessorTest extends AbstractTestCase
     {
         $parsers = array(
             new RegularParser(),
+            new \Thunder\Shortcode\Parser\StackParser(),
             new \Thunder\Shortcode\Parser\HybridParser(),
             new RegexParser(),
             new \Thunder\Shortcode\Parser\WordpressParser(),
@@ -235,7 +236,7 @@ final class ProcessorTest extends AbstractTestCase
         $handlers = $this->getHandlers();
         $handlers->add('offset', function (ProcessedShortcode $s) { return (string)$s->getBaseOffset(); });
 
-        foreach(array(new RegularParser(), new \Thunder\Shortcode\Parser\HybridParser()) as $parser) {
+        foreach(array(new RegularParser(), new \Thunder\Shortcode\Parser\StackParser(), new \Thunder\Shortcode\Parser\HybridParser()) as $parser) {
             $processor = new Processor($parser, $handlers);
             static::assertSame('9', $processor->process('[c x="ż"][offset /][/c]'), get_class($parser));
         }
