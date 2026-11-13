@@ -2,8 +2,11 @@
 namespace Thunder\Shortcode\Tests;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Thunder\Shortcode\HandlerContainer\HandlerContainer;
 use Thunder\Shortcode\Parser\RegularParser;
+use Thunder\Shortcode\Parser\StackParser;
 use Thunder\Shortcode\Parser\HybridParser;
 use Thunder\Shortcode\Parser\ParserInterface;
 use Thunder\Shortcode\Parser\RegexParser;
@@ -20,7 +23,7 @@ final class ParserTest extends AbstractTestCase
 {
     public function testParsersCountOffsetsInCharacters()
     {
-        foreach(array(new RegularParser(), new HybridParser()) as $parser) {
+        foreach(array(new RegularParser(), new StackParser(), new HybridParser()) as $parser) {
             $this->assertShortcodes($parser->parse('żż[a]x[/a]'), array(
                 new ParsedShortcode(new Shortcode('a', array(), 'x', null), '[a]x[/a]', 2),
             ));
@@ -30,7 +33,7 @@ final class ParserTest extends AbstractTestCase
     public function testParsersWithRegexSpecialCharactersInSyntax()
     {
         $syntax = new Syntax('[', ']', '.', '*', '|');
-        foreach(array(new RegularParser($syntax), new HybridParser($syntax), new RegexParser($syntax)) as $parser) {
+        foreach(array(new RegularParser($syntax), new StackParser($syntax), new HybridParser($syntax), new RegexParser($syntax)) as $parser) {
             $this->assertShortcodes($parser->parse('[a b*|x y|]c[.a]'), array(
                 new ParsedShortcode(new Shortcode('a', array('b' => 'x y'), 'c', null), '[a b*|x y|]c[.a]', 0),
             ));
@@ -57,6 +60,7 @@ final class ParserTest extends AbstractTestCase
     {
         $classes = array(
             'Thunder\Shortcode\Parser\RegularParser',
+            'Thunder\Shortcode\Parser\StackParser',
             'Thunder\Shortcode\Parser\HybridParser',
             'Thunder\Shortcode\Parser\RegexParser',
         );
@@ -68,6 +72,13 @@ final class ParserTest extends AbstractTestCase
                 $this->assertSame('Parameter $syntax must be an instance of SyntaxInterface.', $e->getMessage());
             }
         }
+    }
+
+    public function testStackParserExceptionOnInvalidUtf8()
+    {
+        $parser = new StackParser();
+        $this->willThrowException('RuntimeException');
+        $parser->parse("[a]\xff[/a]");
     }
 
     public function testHybridParserExceptionOnInvalidUtf8()
@@ -108,7 +119,7 @@ final class ParserTest extends AbstractTestCase
     {
         $value = str_repeat('a\\x', 9000);
         $text = '[a k='.$value.']x[/a] [b /]';
-        foreach(array(new RegularParser(), new HybridParser()) as $parser) {
+        foreach(array(new RegularParser(), new StackParser(), new HybridParser()) as $parser) {
             $this->assertShortcodes($parser->parse($text), array(
                 new ParsedShortcode(new Shortcode('a', array('k' => $value), 'x', null), '[a k='.$value.']x[/a]', 0),
                 new ParsedShortcode(new Shortcode('b', array(), null, null), '[b /]', 27012),
@@ -326,6 +337,7 @@ final class ParserTest extends AbstractTestCase
             $syntax = array_shift($test);
 
             $result[] = array_merge(array(new RegexParser($syntax)), $test);
+            $result[] = array_merge(array(new StackParser($syntax)), $test);
             $result[] = array_merge(array(new HybridParser($syntax)), $test);
             $result[] = array_merge(array(new RegularParser($syntax)), $test);
             if(!in_array($key, $wordpressSkip, true)) {
@@ -336,7 +348,7 @@ final class ParserTest extends AbstractTestCase
         return $result;
     }
 
-    public function testHybridParserMatchesRegularParserOnUnbalancedTags()
+    public function testStackParserMatchesRegularParserOnUnbalancedTags()
     {
         $inputs = array(
             '[/x][a][/b]x[/a][/a][/c]',
@@ -353,16 +365,18 @@ final class ParserTest extends AbstractTestCase
         );
 
         $regular = new RegularParser();
+        $stack = new StackParser();
         $hybrid = new HybridParser();
         foreach($inputs as $input) {
+            $this->assertShortcodes($stack->parse($input), $regular->parse($input));
             $this->assertShortcodes($hybrid->parse($input), $regular->parse($input));
         }
     }
 
     public function testIssue77()
     {
-        // HybridParser must reproduce RegularParser's backtracking behaviour exactly
-        foreach(array(new RegularParser(), new HybridParser()) as $parser) {
+        // StackParser must reproduce RegularParser's backtracking behaviour exactly
+        foreach(array(new RegularParser(), new StackParser(), new HybridParser()) as $parser) {
             $this->assertShortcodes($parser->parse('[a][x][/x][x k="v][/x][y]x[/y]'), array(
                 new ParsedShortcode(new Shortcode('a', array(), null, null), '[a]', 0),
                 new ParsedShortcode(new Shortcode('x', array(), '', null), '[x][/x]', 3),
@@ -375,9 +389,9 @@ final class ParserTest extends AbstractTestCase
         }
     }
 
-    public function testHybridParserSkipsEscapedTags()
+    public function testStackParserSkipsEscapedTags()
     {
-        foreach(array(new RegularParser(), new HybridParser()) as $parser) {
+        foreach(array(new RegularParser(), new StackParser(), new HybridParser()) as $parser) {
             $this->assertShortcodes($parser->parse('\\[a] [b]'), array(
                 new ParsedShortcode(new Shortcode('b', array(), null, null), '[b]', 5),
             ));
@@ -432,6 +446,7 @@ final class ParserTest extends AbstractTestCase
         $result = array();
         foreach($cases as $case) {
             $result[] = array(new RegularParser($case[0]), $case[1], $case[2]);
+            $result[] = array(new StackParser($case[0]), $case[1], $case[2]);
             $result[] = array(new HybridParser($case[0]), $case[1], $case[2]);
         }
 
@@ -447,7 +462,7 @@ final class ParserTest extends AbstractTestCase
             '[a k="x\"y"]inner[/a]' => new ParsedShortcode(new Shortcode('a', array('k' => 'x\"y'), 'inner', null), '[a k="x\"y"]inner[/a]', 0),
             '[mention id=1 name="foo\"ff\""][/mention]' => new ParsedShortcode(new Shortcode('mention', array('id' => '1', 'name' => 'foo\"ff\"'), '', null), '[mention id=1 name="foo\"ff\""][/mention]', 0),
         );
-        foreach(array(new RegularParser(), new HybridParser()) as $parser) {
+        foreach(array(new RegularParser(), new StackParser(), new HybridParser()) as $parser) {
             foreach($cases as $input => $expected) {
                 $this->assertShortcodes($parser->parse($input), array($expected));
             }
@@ -509,7 +524,7 @@ final class ParserTest extends AbstractTestCase
     public function testParsersHandleLongUnbrokenText()
     {
         $text = '[a]x[/a] '.str_repeat('Q', 50000).' [b /]';
-        foreach(array(new RegularParser(), new HybridParser(), new RegexParser(), new WordpressParser()) as $parser) {
+        foreach(array(new RegularParser(), new StackParser(), new HybridParser(), new RegexParser(), new WordpressParser()) as $parser) {
             $this->assertShortcodes($parser->parse($text), array(
                 new ParsedShortcode(new Shortcode('a', array(), 'x', null), '[a]x[/a]', 0),
                 new ParsedShortcode(new Shortcode('b', array(), null, null), '[b /]', 50010),
@@ -526,14 +541,33 @@ final class ParserTest extends AbstractTestCase
     public function testInstances()
     {
         static::assertInstanceOf('Thunder\Shortcode\Parser\WordPressParser', new WordpressParser());
+        static::assertInstanceOf('Thunder\Shortcode\Parser\StackParser', new StackParser());
         static::assertInstanceOf('Thunder\Shortcode\Parser\HybridParser', new HybridParser());
         static::assertInstanceOf('Thunder\Shortcode\Parser\RegularParser', new RegularParser());
+    }
+
+    public function testHybridParserAliasesStackParser()
+    {
+        static::assertSame('Thunder\Shortcode\Parser\StackParser', get_class(new \Thunder\Shortcode\Parser\HybridParser()));
+        static::assertInstanceOf('Thunder\Shortcode\Parser\HybridParser', new StackParser());
+    }
+
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testHybridParserLoadsStackParser()
+    {
+        static::assertFalse(class_exists('Thunder\Shortcode\Parser\StackParser', false));
+        static::assertInstanceOf('Thunder\Shortcode\Parser\StackParser', new \Thunder\Shortcode\Parser\HybridParser());
     }
 
     public function testParsersEndNamesAtSyntaxTokens()
     {
         $syntax = new Syntax('(', ')', '*', '=', '"');
-        foreach(array(new RegularParser($syntax), new HybridParser($syntax)) as $parser) {
+        foreach(array(new RegularParser($syntax), new StackParser($syntax), new HybridParser($syntax)) as $parser) {
             $this->assertShortcodes($parser->parse('(a*) (b)x(*b) (c*d)'), array(
                 new ParsedShortcode(new Shortcode('a', array(), null, null), '(a*)', 0),
                 new ParsedShortcode(new Shortcode('b', array(), 'x', null), '(b)x(*b)', 5),

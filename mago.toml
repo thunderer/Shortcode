@@ -9,14 +9,14 @@ minimum-fail-level = "note"
 
 [linter.rules]
 array-style = { style = "long" }
-cyclomatic-complexity = { exclude = ["src/Parser/HybridParser.php", "src/Parser/RegexParser.php", "src/Parser/RegularParser.php", "src/Parser/WordpressParser.php", "src/Processor/Processor.php"] }
-halstead = { exclude = ["src/Parser/HybridParser.php", "src/Parser/RegularParser.php", "src/Processor/Processor.php", "src/Utility/RegexBuilderUtility.php"] }
+cyclomatic-complexity = { exclude = ["src/Parser/StackParser.php", "src/Parser/RegexParser.php", "src/Parser/RegularParser.php", "src/Parser/WordpressParser.php", "src/Processor/Processor.php"] }
+halstead = { exclude = ["src/Parser/StackParser.php", "src/Parser/RegularParser.php", "src/Processor/Processor.php", "src/Utility/RegexBuilderUtility.php"] }
 literal-named-argument = { enabled = false }
-no-else-clause = { exclude = ["src/Parser/HybridParser.php", "src/Parser/WordpressParser.php"] }
+no-else-clause = { exclude = ["src/Parser/StackParser.php", "src/Parser/WordpressParser.php"] }
 no-empty = { exclude = ["src/Handler/DeclareHandler.php", "src/HandlerContainer/HandlerContainer.php", "src/Parser/RegularParser.php", "src/Parser/WordpressParser.php", "src/Serializer/TextSerializer.php"] }
-no-isset = { exclude = ["src/Parser/HybridParser.php", "src/Parser/RegexParser.php", "src/Parser/WordpressParser.php"] }
+no-isset = { exclude = ["src/Parser/StackParser.php", "src/Parser/RegexParser.php", "src/Parser/WordpressParser.php"] }
 no-redundant-block = { exclude = ["src/Parser/RegularParser.php"] }
-no-shorthand-ternary = { exclude = ["src/Parser/HybridParser.php", "src/Parser/RegexParser.php", "src/Parser/RegularParser.php", "src/Parser/WordpressParser.php", "src/Serializer/TextSerializer.php"] }
+no-shorthand-ternary = { exclude = ["src/Parser/StackParser.php", "src/Parser/RegexParser.php", "src/Parser/RegularParser.php", "src/Parser/WordpressParser.php", "src/Serializer/TextSerializer.php"] }
 prefer-arrow-function = { enabled = false }
 prefer-static-closure = { enabled = false }
 str-contains = { enabled = false }
